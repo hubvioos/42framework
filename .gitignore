@@ -1,0 +1,5 @@
+*~
+42framework/libs/backup/*.php
+app/logs/
+app/cache/
+app/medias/
