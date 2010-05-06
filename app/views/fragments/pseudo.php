@@ -1,0 +1,1 @@
+<div id="pseudo"><?php echo $pseudo; ?></div>
