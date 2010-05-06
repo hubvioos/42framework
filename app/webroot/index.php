@@ -86,7 +86,7 @@ new F\ErrorHandler(F\Registry::get('displayErrors'), F\Registry::get('errorRepor
 
 // on charge le core du framework, on exécute la requête et on affiche le résultat
 F\Core::getInstance()->execute()->display(false);
-
+echo "test";
 // on affiche les statistiques d'exécution, uniquement si le paramètre de la fonction display (ci-dessus) est à false
 echo 'Execution Time : '.$benchmark->elapsedTime().' s<br />';
 
