@@ -1,0 +1,4 @@
+Options +FollowSymLinks
+RewriteEngine on
+RewriteRule    ^$ app/    [L]
+RewriteRule    (.*) app/$1 [L]
