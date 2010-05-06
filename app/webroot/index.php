@@ -87,18 +87,19 @@ new F\ErrorHandler(F\Registry::get('displayErrors'), F\Registry::get('errorRepor
 // on charge le core du framework, on exécute la requête et on affiche le résultat
 F\Core::getInstance()->execute()->display(false);
 echo 'test';
-<<<<<<< HEAD
+/*<<<<<<< HEAD
 echo "test";
 =======
 
->>>>>>> eecdf6241384054eb24094fa53ce4bc01dcf5fd5
+>>>>>>> eecdf6241384054eb24094fa53ce4bc01dcf5fd5*/
 // on affiche les statistiques d'exécution, uniquement si le paramètre de la fonction display (ci-dessus) est à false
 echo 'Execution Time : '.$benchmark->elapsedTime().' s<br />';
 
 echo 'Start Memory : '.$benchmark->memoryUsage('appStartMemoryUsage').'<br />';
 echo 'End Memory : '.$benchmark->memoryUsage().'<br />';
-<<<<<<< HEAD
+/*<<<<<<< HEAD
 ?>
 =======
 ?>
 >>>>>>> eecdf6241384054eb24094fa53ce4bc01dcf5fd5
+*/ ?>
