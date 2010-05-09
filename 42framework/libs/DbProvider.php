@@ -26,10 +26,8 @@ class DbProvider
 	{
 		if(!isset(self::$instance))
 		{
-			$dsn = Registry::get('database.driver').':host='.Registry::get('database.host').';dbname='.Registry::get('database.dbname');
 			self::$instance = new self();
 		}
-		
 		return self::$instance;
 	}
 }
