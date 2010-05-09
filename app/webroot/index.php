@@ -1,28 +1,29 @@
 <?php
-$appStartMemoryUsage = memory_get_usage();
-$appStartTime = microtime();
+// définit le temps de départ de l'exécution de l'application
+if (!defined('APP_START_MICROTIME'))
+	define('APP_START_MICROTIME', microtime());
+	
+// définit la mémoire utilisée au début de l'exécution de l'application
+if (!defined('APP_START_MEMORY_USAGE'))
+	define('APP_START_MEMORY_USAGE', memory_get_usage());
 
-// définie le "séparateur de dossier" selon l'OS
+// définit le "séparateur de dossier" selon l'OS
 if (!defined('DS'))
 	define('DS', DIRECTORY_SEPARATOR);
 
-// définie la racine web de l'application (dossier webroot)
+// définit la racine web de l'application (dossier webroot)
 if (!defined('ROOT'))
 	define('ROOT', dirname(__FILE__));
 
-// définie l'adresse du dossier contenant le code de l'application (dossier app)
+// définit l'adresse du dossier contenant le code de l'application (dossier app)
 if (!defined('APP'))
-	define('APP', dirname(dirname(__FILE__)));
+	define('APP', dirname(ROOT));
 
-// définie l'adresse du dossier contenant le code du framework (dossier 42framework)
+// définit l'adresse du dossier contenant le code du framework (dossier 42framework)
 if (!defined('FRAMEWORK'))
-	define('FRAMEWORK', dirname(dirname(dirname(__FILE__))).DS.'42framework');
+	define('FRAMEWORK', dirname(APP).DS.'42framework');
 
-// définie l'URL du site web
-//if (!defined('APP_BASE_URL'))
-//	define('APP_BASE_URL', 'http://localhost:80/framework/');
-
-// permet d'inclure automatiquement les fichiers contenant les classes appelées dans le code
+// fonction permettant d'inclure automatiquement les fichiers contenant les classes appelées dans le code
 function autoload($class)
 {
     $directories = explode('\\', ltrim($class, '\\'));
@@ -41,47 +42,19 @@ function autoload($class)
     }
     
     require($file);
-}
+} // fin de autoload
 
-// permet de charger automatiquement les classes appelées dans le code
+// permet de charger automatiquement les classes appelées dans le code, en appelant la fonction autoload ci-dessus lorsque nécessaire
 spl_autoload_register ('autoload');
 
+// définit un raccourci pour le namespace du framework
 use \framework\libs as F;
 
+// démarrage de la session
 session_start();
-//session_destroy();
 
-// on charge la classe de benchmark
-$benchmark = new \framework\utils\Benchmark($appStartTime, $appStartMemoryUsage);
-
+// inclusion du fichier de configuration de l'application
 require(APP.DS.'config'.DS.'config.php');
-
-/*// on charge la configuration de l'application
-new F\Registry(array(
-	'defaultModule' => 'globals',
-	'defaultAction' => 'index',
-	'prefixes' => array('admin', 'membre'),
-	'errorReporting' => E_ALL | E_DEPRECATED,
-	'displayErrors' => 1,
-	'logMode' => 'none',
-	'envMode' => 'dev',
-	'defaultCharset' => 'utf-8',
-	'defaultLanguage' => 'fr-fr',
-	'defaultPageTitle' => '42medias.com',
-	'database' => array(
-		'driver' => 'mysql',
-		'host' => 'localhost',
-		'dbname' => 'testdb',
-		'username' => 'root',
-		'password' => 'root',
-		'options' => array()
-		),
-	'routes' => array(
-		'article/:num' => array('module' => 'produit', 'action' => 'view'),
-		'article' => array('module' => 'produit', 'action' => 'index')
-		)
-	)
-);*/
 
 // on charge la classe de gestion des erreurs
 new F\ErrorHandler(F\Registry::get('displayErrors'), F\Registry::get('errorReporting'), F\Registry::get('logMode'));
@@ -90,8 +63,8 @@ new F\ErrorHandler(F\Registry::get('displayErrors'), F\Registry::get('errorRepor
 F\Core::getInstance()->execute()->display(false);
 
 // on affiche les statistiques d'exécution, uniquement si le paramètre de la fonction display (ci-dessus) est à false
-echo 'Execution Time : '.$benchmark->elapsedTime().' s<br />';
+echo 'Execution Time : '.\framework\utils\Benchmark::elapsedTime().' s<br />';
 
-echo 'Start Memory : '.$benchmark->memoryUsage('appStartMemoryUsage').'<br />';
-echo 'End Memory : '.$benchmark->memoryUsage().'<br />';
+echo 'Start Memory : '.\framework\utils\Benchmark::memoryUsage('appStartMemoryUsage').'<br />';
+echo 'End Memory : '.\framework\utils\Benchmark::memoryUsage().'<br />';
 ?>

@@ -1,4 +1,4 @@
 Options +FollowSymLinks
 RewriteEngine on
-RewriteRule    ^$ app/    [L]
+RewriteCond %{REQUEST_URI} !docs/.*$
 RewriteRule    (.*) app/$1 [L]

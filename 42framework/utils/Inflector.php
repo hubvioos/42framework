@@ -1,8 +1,10 @@
 <?php
 namespace framework\utils;
 
+// Inflector permet de formater une chaîne de caractères selon des règles précises
 class Inflector 
 {
+    // transforme une chaîne de caractères avec la notatino camel-case ("une chaine de caracteres" devient "UneChaineDeCaracteres")
     public static function camelize($string)
     {
         return str_replace(' ', '', ucwords(str_replace('_', ' ', $string)));
@@ -31,5 +33,5 @@ class Inflector
     	
     	return trim(strtolower($string), '-');
     }
-}
+} // fin de Inflector
 ?>
