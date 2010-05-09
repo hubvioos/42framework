@@ -1,0 +1,18 @@
+webroot/index.php
+		|
+		|> CORE -> __construct()
+		|				|
+		|				|> REQUEST -> __construct()
+		|								|
+		|								|> ROUTER -> routeToApp()
+		|												|> defines MODULE and ACTION
+		|
+		|> CORE	-> execute()
+		|				|
+		|				|> MODULE -> execute(ACTION)
+		|				|> defines VIEW
+		|				
+		|> MODULE -> display()
+						|> render()
+								|> includes Layout
+								|> includes View
