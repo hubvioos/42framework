@@ -3,30 +3,43 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
------!! SECTION PRINCIPALE !!-----
+-----!! COEUR DU FRAMEWORK !!-----
 
----! SECTION SECONDAIRE !---
+---! Flux d'exécution !---
 
 
-** Titre Element :
-	Commentaires
-	..
-	Blabla
+** Gestion du cache :
+	Vérifier l'existence de la requête en cours dans le cache et, si elle existe,
+	servir la requête directement sans lancer l'exécution du module.
+
+
+---! LIBS !---
+
+
+** ROUTER --> Reverse routing :
+	Permettre de transformer une URL provenant de l'application (module/action/params) 
+	en une URL externe en vérifiant les routes (route/correspondante).
+	Inverse de routeToApp (nom possible : appToRoute).
 	
-** Titre Element 2 :
-	Boo
+** Validation :
+	Mettre en place les mécanismes de validation des données.
+
+** Sécurité :
+	Mettre en place les mécanismes de sécurité --> système de jetons pour les sessions et
+	les formulaires, nettoyage des données entrantes, formatage des données sortantes, 
+	chiffrement/déchiffrement des cookies, outils de chiffrement/déchiffrement et hashage de
+	données...
+
+
+---! UTILS !---
+
+
+** Outil d'authentification :
+	Développer un outil permettant la mise en place simplifié d'un système d'accès sécurisé aux données, tels
+	que espace membre, partie admin, etc...
 
 
 
----! SECTION SECONDAIRE 2 !---
-
-** Titre Element 2.1 :
-	Boo
 
 
-
------!! SECTION PRINCIPALE 2 !!-----
-
-
-
-Etc...
+To be continued...
