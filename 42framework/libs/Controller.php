@@ -4,7 +4,7 @@ namespace framework\libs;
 class Controller
 {
     protected $layout = 'default';
-    protected $view = false;
+    protected $view = null;
     protected $execView = true;
     protected $layout_vars = array();
     
@@ -36,7 +36,7 @@ class Controller
         
         $this->afterExec();
         
-        if($this->view == false)
+        if($this->view == null)
         {
         	$this->view = Registry::get('request.module').DS.Registry::get('request.action');
         }

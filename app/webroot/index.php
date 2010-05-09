@@ -19,8 +19,8 @@ if (!defined('FRAMEWORK'))
 	define('FRAMEWORK', dirname(dirname(dirname(__FILE__))).DS.'42framework');
 
 // définie l'URL du site web
-if (!defined('APP_BASE_URL'))
-	define('APP_BASE_URL', 'http://localhost:80/framework/');
+//if (!defined('APP_BASE_URL'))
+//	define('APP_BASE_URL', 'http://localhost:80/framework/');
 
 // permet d'inclure automatiquement les fichiers contenant les classes appelées dans le code
 function autoload($class)
@@ -52,9 +52,11 @@ session_start();
 //session_destroy();
 
 // on charge la classe de benchmark
-$benchmark = new F\Benchmark($appStartTime, $appStartMemoryUsage);
+$benchmark = new \framework\utils\Benchmark($appStartTime, $appStartMemoryUsage);
 
-// on charge la configuration de l'application
+require(APP.DS.'config'.DS.'config.php');
+
+/*// on charge la configuration de l'application
 new F\Registry(array(
 	'defaultModule' => 'globals',
 	'defaultAction' => 'index',
@@ -79,27 +81,17 @@ new F\Registry(array(
 		'article' => array('module' => 'produit', 'action' => 'index')
 		)
 	)
-);
+);*/
 
 // on charge la classe de gestion des erreurs
 new F\ErrorHandler(F\Registry::get('displayErrors'), F\Registry::get('errorReporting'), F\Registry::get('logMode'));
 
 // on charge le core du framework, on exécute la requête et on affiche le résultat
 F\Core::getInstance()->execute()->display(false);
-echo 'test';
-/*<<<<<<< HEAD
-echo "test";
-=======
 
->>>>>>> eecdf6241384054eb24094fa53ce4bc01dcf5fd5*/
 // on affiche les statistiques d'exécution, uniquement si le paramètre de la fonction display (ci-dessus) est à false
 echo 'Execution Time : '.$benchmark->elapsedTime().' s<br />';
 
 echo 'Start Memory : '.$benchmark->memoryUsage('appStartMemoryUsage').'<br />';
 echo 'End Memory : '.$benchmark->memoryUsage().'<br />';
-/*<<<<<<< HEAD
 ?>
-=======
-?>
->>>>>>> eecdf6241384054eb24094fa53ce4bc01dcf5fd5
-*/ ?>

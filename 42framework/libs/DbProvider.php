@@ -5,7 +5,20 @@ class DbProvider
 {
 	protected static $instance = null;
 	
-	protected function __construct() {}
+	protected function __construct()
+	{
+		$dbType = Registry::get('database.driver');
+		
+		if($dbType == 'mongo')
+		{
+			
+		}
+		else
+		{
+			$dsn = Registry::get('database.driver').':host='.Registry::get('database.host').';dbname='.Registry::get('database.dbname');
+			return new \PDO($dsn, Registry::get('database.username'), Registry::get('database.password'), Registry::get('database.options'));
+		}
+	}
 	
 	protected function __clone() {}
 	
@@ -14,7 +27,7 @@ class DbProvider
 		if(!isset(self::$instance))
 		{
 			$dsn = Registry::get('database.driver').':host='.Registry::get('database.host').';dbname='.Registry::get('database.dbname');
-			self::$instance = new \PDO($dsn, Registry::get('database.username'), Registry::get('database.password'), Registry::get('database.options'));
+			self::$instance = new self();
 		}
 		
 		return self::$instance;
