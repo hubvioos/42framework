@@ -1,115 +1,140 @@
 <?php
 namespace framework\libs;
 
+/*
+	Classe Request (singleton)
+	
+	Représente l'état de la requête :
+		- elle détermine quel module et quelle action appeler
+		- elle gère l'historique
+		- contient les informations du client
+*/
 class Request
 {
-	protected $Response = null;
 	protected $request = null;
 	protected $module = null;
-    protected $action = null;
-    protected $params = array();
-    protected $context = array(
-    	'ipAddress' => null,
-    	'userAgent' => null,
-    	'acceptCharset' => array(),
-    	'acceptLanguage' => array(),
-    	'acceptEncoding' => array(),
-    	'isSecure' => false,
-    	'requestMethod' => null
-    );
-    protected $historySize = 6;
-    protected static $instance = null;
+	protected $action = null;
+	protected $params = array();
+	protected $context = array(
+		'ipAddress' => null,
+		'userAgent' => null,
+		'acceptCharset' => array(),
+		'acceptLanguage' => array(),
+		'acceptEncoding' => array(),
+		'isSecure' => false,
+		'requestMethod' => null
+	);
+	protected $historySize = 6;
+	protected static $instance = null;
 	
+	/*
+		Constructeur de la classe, partie importante pour l'exécution de la page.
+		Cette méthode s'occupe de déterminer le module et l'action à appeler, en faisant appel à l'instance de Router.
+	*/
 	protected function __construct($historySize = 6)
 	{
 		$this->request = $_GET['url'];
-		$routedRequest = Router::routeToApp($this->request, true);
+		$routedRequest = Router::routeToApp($this->request, true); // Récupère le module et l'action en fonction de l'url
 		
 		$class = '\app\modules\\'.$routedRequest['module'];
-    	
-    	if(class_exists($class))
-    	{	
-    		$this->module = new $class();
-    		
-    		if(method_exists($this->module, $routedRequest['action']))
-    		{
-    			if(!empty($routedRequest['params']))
-    			{
-    				$this->params = $routedRequest['params'];
-    			}
-    			else
-    			{
-    				$this->params = array();
-    			}
-    			
-    			$this->action = $routedRequest['action'];
-    			$this->module->checkParams($this->action, $this->params);
-    		}
-    		else
-    		{
-    			if(Registry::get('envMode') === 'dev')
-    			{
-    				throw new Exception('La méthode n\'existe pas !');
-    			}
-    			
-    			$module = '\app\modules\\'.Registry::get('defaultModule');
-    			$this->module = new $module();
-    			$this->action = 'error404';
-    			$this->params = array($routedRequest);
-    		}
-    	}
-    	else
-    	{
-    		if(Registry::get('envMode') === 'dev')
-    		{
-    			throw new Exception('La classe n\'existe pas !');
-    		}
-    		
-    		$module = '\app\modules\\'.Registry::get('defaultModule');
-    		$this->module = new $module();
-    		$this->action = 'error404';
-    		$this->params = array($routedRequest);
-    	}
-    	
-    	$this->determineContext();
-    	
-    	$this->historySize = $historySize;
-    	
-    	if(!isset($_SESSION['history']))
-    	{
-    		$_SESSION['history'] = array();
-    	}
-    	
-    	$this->updateHistory();
+		
+		if(class_exists($class)) // Verification de l'existance du module
+		{	
+			$this->module = new $class();
+			
+			if(method_exists($this->module, $routedRequest['action'])) // Verification de l'existance de l'action
+			{
+				if(!empty($routedRequest['params']))
+				{
+					$this->params = $routedRequest['params'];
+				}
+				else
+				{
+					$this->params = array();
+				}
+				
+				$this->action = $routedRequest['action'];
+				$this->module->checkParams($this->action, $this->params); // Vérifie les paramètres de l'action (méthode propre à chaque contrôleur)
+			}
+			else
+			{
+				/*
+					Gestion de l'environnement :
+						- Environnement de dev : affichage de l'erreur
+						- Autre : affichage de l'erreur 404.
+				*/
+				if(Registry::get('envMode') === 'dev')
+				{
+					throw new Exception('La méthode n\'existe pas !');
+				}
+				
+				$module = '\app\modules\\'.Registry::get('defaultModule');
+				$this->module = new $module();
+				$this->action = 'error404';
+				$this->params = array($routedRequest);
+			}
+		}
+		else
+		{
+			if(Registry::get('envMode') === 'dev')
+			{
+				throw new Exception('La classe n\'existe pas !');
+			}
+			
+			$module = '\app\modules\\'.Registry::get('defaultModule');
+			$this->module = new $module();
+			$this->action = 'error404';
+			$this->params = array($routedRequest);
+		}
+		
+		$this->determineContext(); // Récupère les informations du client
+		
+		$this->historySize = $historySize;
+		
+		if(!isset($_SESSION['history']))
+		{
+			$_SESSION['history'] = array();
+		}
+		
+		$this->updateHistory(); // Gère l'historique
 	}
 	
 	protected function __clone() { }
 	
 	public static function getInstance($historySize = 6) {
 		if(!isset(self::$instance))
-        {
-        	self::$instance = new self($historySize);
-        }
-        
-        return self::$instance;
+		{
+			self::$instance = new self($historySize);
+		}
+		
+		return self::$instance;
 	}
 	
 	public function __get($var) {
 		return $this->$var;
 	}
 	
+	/*
+		Fonction rechargeant la page actuelle
+	*/
 	public function reload()
 	{
 		Response::getInstance()->status(303)->location(APP_BASE_URL.$this->getLastUrl())->send();
 		return $this;
 	}
 	
+	/*
+		Fonction redirigeant vers la page précédente (utilisation de l'historique)
+	*/
 	public function back()
 	{
 		Response::getInstance()->status(303)->location(APP_BASE_URL.$this->getPreviousUrl())->send();
 		return $this;
 	}
 	
+	/*
+		Fonction mettant à jour l'historique présent dans la variable de session.
+	*/
 	protected function updateHistory()
 	{
 		if($this->context['requestMethod'] === 'GET')
