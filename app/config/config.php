@@ -17,13 +17,15 @@ new F\Registry(array(
 	'defaultCharset' => 'utf-8',
 	'defaultLanguage' => 'fr-fr',
 	'defaultPageTitle' => '42medias.com',
-	'database' => array(
-		'driver' => 'mysql',
-		'host' => 'localhost',
-		'dbname' => 'testdb',
-		'username' => 'root',
-		'password' => 'root',
-		'options' => array()
+	'databases' => array(
+		'default' => array(
+			'type' => 'mysql',
+			'host' => 'localhost',
+			'dbname' => 'testdb',
+			'username' => 'root',
+			'password' => 'root',
+			'options' => array()
+			)
 		),
 	'routes' => array(
 		'article/:num' => array('module' => 'produit', 'action' => 'view'),

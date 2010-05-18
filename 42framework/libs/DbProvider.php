@@ -3,32 +3,36 @@ namespace framework\libs;
 
 class DbProvider
 {
-	protected static $instance = null;
+	protected static $connexions = array();
 	
-	protected function __construct()
+	public function getConnexion($connexion = 'default')
 	{
-		$dbType = Registry::get('database.driver');
+		if(!empty(self::$connexions[$connexion]))
+		{
+			self::$connexions[$connexion] = $this->createConnexion($connexion);
+		}
 		
-		if($dbType == 'mongo')
+		return self::$connexions[$connexion];
+	}
+	
+	public function createConnexion($connexion)
+	{
+		$dbConfig = Registry::get('databases.'.$connexion);
+		
+		if($dbConfig['type'] == 'mongo')
 		{
 			
 		}
 		else
 		{
-			$dsn = Registry::get('database.driver').':host='.Registry::get('database.host').';dbname='.Registry::get('database.dbname');
-			return new \PDO($dsn, Registry::get('database.username'), Registry::get('database.password'), Registry::get('database.options'));
+			$dsn = $dbConfig['type'].':host='.$dbConfig['host'].';dbname='.$dbConfig['dbname'];
+			self::$connexions[$connexion] = new \PDO($dsn, $dbConfig['username'], $dbConfig['password'], $dbConfig['options']);
 		}
 	}
 	
-	protected function __clone() {}
-	
-	public static function getInstance()
+	public function deleteConnexion($connexion)
 	{
-		if(!isset(self::$instance))
-		{
-			self::$instance = new self();
-		}
-		return self::$instance;
+		self::$connexions[$connexion] = null;
 	}
 }
 ?>
