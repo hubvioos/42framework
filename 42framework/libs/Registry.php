@@ -41,6 +41,33 @@ class Registry
        	
         return isset($_SESSION['registry'][$key]) ? $_SESSION['registry'][$key] : null;
     }
+    
+    public static isset($key)
+    {
+    	if(strpos($key, '.'))
+        {
+        	$key = explode('.', $key);
+       		$taille = sizeof($key);
+       		$ok = false;
+       		$value = null;
+       		
+       		for($i=0;$i<$taille;$i++)
+       		{
+       			if($i == 0 && $ok = isset($_SESSION['registry'][$key[0]]))
+       			{
+       				$value = $_SESSION['registry'][$key[0]];
+       			}
+       			elseif($ok = isset($value[$key[$i]]))
+       			{
+       				$value = $value[$key[$i]];
+       			}
+       		}
+       		
+       		return $ok;
+       	}
+       	
+       	return isset($_SESSION['registry'][$key]) ? true : false;
+    }
 
     public static function set($key, $value)
     {

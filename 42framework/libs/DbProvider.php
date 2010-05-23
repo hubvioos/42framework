@@ -41,21 +41,7 @@ class DbProvider
 					$auth = '';
 				}
 				
-				$servers = '';
-				
-				if(!empty($dbConfig['host']) && !empty($dbConfig['port']))
-				{
-					$servers = $dbConfig['host'].':'.$dbConfig['port'];
-				}
-				else
-				{
-					foreach($dbConfig['servers'] as $serv)
-					{
-						$servers .= ','.$serv['host'].':'.$serv['port'];
-					}
-					
-					$servers = ltrim($servers, ',');
-				}
+				$hosts = implode(',', $dbConfig['host']);
 				
 				if(empty($dbConfig['dbname']))
 				{
@@ -66,7 +52,7 @@ class DbProvider
 					$dbname = '/'.$dbConfig['dbname'];
 				}
 				
-				$dsn = 'mongodb://'.$auth.$servers.$dbname;
+				$dsn = 'mongodb://'.$auth.$hosts.$dbname;
 				Registry::set('databases.'.$connexion.'dsn', $dsn);
 			}
 			else
