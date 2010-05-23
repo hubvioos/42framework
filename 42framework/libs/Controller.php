@@ -7,10 +7,36 @@ class Controller
 	protected $view = null;
 	protected $execView = true;
 	protected $layout_vars = array();
+	protected $modelsUsed = array();
 	
 	public function __construct()
 	{
+		if(!empty($this->useModels))
+		{
+			foreach($this->useModels as $name)
+			{
+				$model = 'app\models\\'.$name;
+				$this->modelsUsed[$name] = new $model;
+			}
+		}
+	}
+	
+	public function __get($key)
+	{
+		if(isset($this->modelsUsed[$key]))
+		{
+			return $this->modelsUsed[$key];
+		}
 		
+		throw new Exception('Le modèle appelé n\'est pas chargé !');
+	}
+	
+	public function loadModel($name)
+	{
+		$model = 'app\models\\'.$name;
+		$this->modelsUsed[$name] = new $model;
+		
+		return $this->modelsUsed[$name];
 	}
 	
 	public function checkParams($action, $params)

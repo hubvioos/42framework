@@ -42,7 +42,7 @@ class Registry
         return isset($_SESSION['registry'][$key]) ? $_SESSION['registry'][$key] : null;
     }
     
-    public static isset($key)
+    public static function exists($key)
     {
     	if(strpos($key, '.'))
         {

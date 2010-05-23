@@ -3,8 +3,11 @@ namespace app\modules;
 
 class globals extends \framework\libs\Controller
 {
+	protected $useModels = array('Article');
+	
 	public function index()
 	{
+		//$this->Article->sayItWorks();
 		$this->set('text', 'It works !');
 		$this->set('pseudo', 'kevinard');
 	}
