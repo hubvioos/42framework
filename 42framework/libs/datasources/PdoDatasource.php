@@ -58,10 +58,10 @@ class PdoDatasource implements I\CrudDatasource, I\Datasource, I\DbDatasource, I
         return $values;
     }
 	
-	public function find($fields, $where = array(), $order = null, $limit = null, $offset = null)
+	public function find($fields, $from, $where = array(), $order = null, $limit = null, $offset = null)
 	{
 		$query = new adapters\Sql;
-		$query->select($fields, $this->tableName)->where($where)->orderBy($order)->limit($limit, $offset);
+		$query->select($fields, $from)->where($where)->orderBy($order)->limit($limit, $offset);
 		
 		$statement = $this->db->prepare($query->buildQuery());
 		$this->db->execute($query->getParameters());
@@ -70,16 +70,16 @@ class PdoDatasource implements I\CrudDatasource, I\Datasource, I\DbDatasource, I
 		return $result;
 	}
 	
-	public function count($field = '', $where = array())
+	public function count($field, $from, $where = array())
 	{
 		$query = new adapters\Sql;
-		$query->select(array('COUNT('.$field.')'), $this->tableName)->where($where);
+		$query->select(array('COUNT('.$field.')'), $from)->where($where);
 		
 		$statement = $this->db->prepare($query->buildQuery());
 		$this->db->execute($query->getParameters());
 		$result = $statement->fetchAll(\PDO::FETCH_ASSOC);
         
-        return (integer)$result[0]['COUNT(*)'];
+        return (integer)$result[0]['COUNT('.$field.')'];
 	}
 	
 	public function beforeSave()

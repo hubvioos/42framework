@@ -3,13 +3,13 @@ namespace framework\libs\interfaces;
 
 interface CrudDatasource
 {
-	public function create($object);
+	public function create();
 	
-	public function read($object);
+	public function read();
 	
-	public function update($object);
+	public function update();
 	
-	public function delete($object);
+	public function delete();
 }
 
 ?>

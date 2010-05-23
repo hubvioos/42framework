@@ -3,9 +3,9 @@ namespace framework\libs\interfaces;
 
 interface Datasource
 {
-	public function count($object, $criteria = array());
+	public function count($field, $from, $where = array());
 	
-	public function find($object, $criteria = array(), $order = null, $limit = null, $offset = null);
+	public function find($fields, $from, $where = array(), $order = null, $limit = null, $offset = null);
 }
 
 ?>
