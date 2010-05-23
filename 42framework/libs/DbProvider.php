@@ -14,7 +14,7 @@ class DbProvider
 	{
 		if(!empty(self::$connexions[$connexion]))
 		{
-			self::$connexions[$connexion] = self::createConnexion($connexion);
+			self::createConnexion($connexion);
 		}
 		
 		return self::$connexions[$connexion];
