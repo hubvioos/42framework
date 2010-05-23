@@ -12,7 +12,7 @@ class DbProvider
 	// retourne la connection demandée, en la créant si elle n'existe pas.
 	public static function getConnexion($connexion = 'default')
 	{
-		if(!empty(self::$connexions[$connexion]))
+		if(empty(self::$connexions[$connexion]))
 		{
 			self::createConnexion($connexion);
 		}
@@ -30,7 +30,7 @@ class DbProvider
 		{
 			// pour de meilleures performances, la chaîne de connection n'est générée qu'une seule fois.
 			// Les fois suivantes, elle est directement récupérée dans la configuration
-			if(!empty($dbConfig['dsn']))
+			if(empty($dbConfig['dsn']))
 			{
 				if(!empty($dbConfig['username']) && !empty($dbConfig['password']))
 				{
@@ -66,7 +66,7 @@ class DbProvider
 		{
 			// pour de meilleures performances, la chaîne de connection n'est générée qu'une seule fois.
 			// Les fois suivantes, elle est directement récupérée dans la configuration
-			if(!empty($dbConfig['dsn']))
+			if(empty($dbConfig['dsn']))
 			{
 				$dsn = $dbConfig['type'].':host='.$dbConfig['host'].';dbname='.$dbConfig['dbname'];
 				Registry::set('databases.'.$connexion.'dsn', $dsn);

@@ -1,7 +1,7 @@
 <?php
 namespace app\models;
 
-class Article
+class Article extends \framework\libs\datasources\PdoDatasource
 {
 	public function sayItWorks()
 	{

@@ -21,7 +21,7 @@ new F\Registry(array(
 		'default' => array(
 			'type' => 'mysql',
 			'host' => 'localhost',
-			'dbname' => 'testdb',
+			'dbname' => 'test',
 			'username' => 'root',
 			'password' => 'root',
 			'options' => array()

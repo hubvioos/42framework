@@ -2,7 +2,7 @@
 namespace framework\libs\datasources;
 use framework\libs\interfaces as I;
 
-class PdoDatasource implements I\CrudDatasource, I\Datasource, I\DbDatasource, I\TransactionDatasource,
+class PdoDatasource implements I\CrudDatasource, I\Datasource, I\DbDatasource, I\TransactionDatasource
 {
 	protected $db = null;
 	protected $tableName = null;
@@ -12,7 +12,7 @@ class PdoDatasource implements I\CrudDatasource, I\Datasource, I\DbDatasource, I
 	
 	public function __construct($connexion = 'default', $tableName = __CLASS__, $primaryKey = 'id')
 	{
-		$this->db = DbProvider::getConnexion($connexion);
+		$this->db = \framework\libs\DbProvider::getConnexion($connexion);
 		$this->tableName = $tableName;
 		$this->primaryKey = $primaryKey;
 		$this->isNew = true;

@@ -7,7 +7,7 @@ interface DbDatasource
 	
 	public function query($query);
 	
-	public function describeTable($tableName);
+	public function describeTable();
 }
 
 ?>
