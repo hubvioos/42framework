@@ -136,6 +136,8 @@ class Controller
 	
 	public function display($exit = true)
 	{
+		Response::getInstance()->send();
+		
 		echo $this->render();
 		
 		if($exit)

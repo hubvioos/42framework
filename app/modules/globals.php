@@ -3,7 +3,7 @@ namespace app\modules;
 
 class globals extends \framework\libs\Controller
 {
-	protected $useModels = array('Article');
+	//protected $useModels = array('Article');
 	
 	public function index()
 	{
