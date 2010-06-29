@@ -13,10 +13,9 @@ class Controller
 	{
 		if(!empty($this->useModels))
 		{
-			foreach($this->useModels as $name)
+			foreach($this->useModels as $name => $class)
 			{
-				$model = 'app\models\\'.$name;
-				$this->modelsUsed[$name] = new $model;
+				$this->loadModel($name, $class);
 			}
 		}
 	}
@@ -31,9 +30,14 @@ class Controller
 		throw new Exception('Le modèle appelé n\'est pas chargé !');
 	}
 	
-	public function loadModel($name)
+	public function loadModel($name, $class = null)
 	{
-		$model = 'app\models\\'.$name;
+		if($class == null)
+		{
+			$class = $name;
+		}
+		
+		$model = 'app\models\\'.$class;
 		$this->modelsUsed[$name] = new $model;
 		
 		return $this->modelsUsed[$name];
@@ -48,10 +52,11 @@ class Controller
 	{
 		$this->setExecView(false);
 		$this->setLayout(false);
+		Response::getInstance()->status(404);
 		$module = '\app\modules\\'.Registry::get('defaultModule');
 		$module = new $module();
 		$module->execute('error404', array($params));
-		$module->display(false);
+		$module->display(true);
 	}
 	
 	public function execute($action, $params)

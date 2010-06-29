@@ -35,10 +35,15 @@ function autoload($class)
     	case 'framework':
     		$file = FRAMEWORK.DS.$directories.'.php';
     		break;
-    	
     	case 'app':
     		$file = APP.DS.$directories.'.php';
     		break;
+    	/*case 'plugin':
+    		$file = APP.DS.'plugins'.DS.$directories.'.php';
+    		break;
+    	case 'vendor':
+    		$file = APP.DS.'vendors'.DS.$directories.'.php';
+    		break;*/
     }
     
     require($file);

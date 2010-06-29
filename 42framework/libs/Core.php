@@ -43,6 +43,22 @@ class Core
 		}
 	}
 	
+	// cette fonction permet de charger une classe externe
+	public static function loadVendor($name)
+	{
+		$name = '\app\vendors\\'.implode('\\', explode('/', ltrim($name, '/')));
+		
+		spl_autoload_call($name);
+	}
+	
+	// cette fonction permet de charger un plugin
+	public static function loadPlugin($name)
+	{
+		$name = '\app\plugins\\'.implode('\\', explode('/', ltrim($name, '/')));
+		
+		spl_autoload_call($name);
+	}
+	
 	/*
 		Méthode principale de l'éxecution de la page
 	*/

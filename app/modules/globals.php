@@ -8,6 +8,7 @@ class globals extends \framework\libs\Controller
 	public function index()
 	{
 		//$this->Article->sayItWorks();
+		//\framework\libs\Core::loadPlugin('test');
 		$this->set('text', 'It works !');
 		$this->set('pseudo', 'kevinard');
 	}
