@@ -7,13 +7,6 @@ class Model
 	
 	public function __construct()
 	{
-		
-		
-		$this->db = DbProvider::getConnexion('default');
-	}
-	
-	public function __construct()
-	{
 		if(!empty($this->useDatasources))
 		{
 			foreach($this->useDatasources as $name => $class)
