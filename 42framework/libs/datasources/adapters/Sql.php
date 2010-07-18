@@ -145,7 +145,7 @@ class Sql
 		return $query;
 	}
 	
-	public buildSelect()
+	public function buildSelect()
 	{
 		$query = $this->queryType.' ';
 		
@@ -222,7 +222,7 @@ class Sql
 		return $query;
 	}
 	
-	public buildInsert()
+	public function buildInsert()
 	{
 		$query = $this->queryType.' ';
 		
@@ -245,7 +245,7 @@ class Sql
 		return $query;
 	}
 	
-	public buildUpdate()
+	public function buildUpdate()
 	{
 		$query = $this->queryType.' ';
 		
@@ -285,7 +285,7 @@ class Sql
 		return $query;
 	}
 	
-	public builddelete()
+	public function builddelete()
 	{
 		$query = $this->queryType.' ';
 		

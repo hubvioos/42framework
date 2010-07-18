@@ -1,5 +1,6 @@
 <?php
 namespace framework\libs\cache;
+use framework\libs as F;
 
 class Memcached extends CacheEngine
 {
@@ -13,14 +14,14 @@ class Memcached extends CacheEngine
 	
 	public function serversConf()
 	{
-		$servers = Registry::get('memcache.servers');
+		$servers = F\Registry::get('memcache.servers');
 		if(sizeof($servers) > 1)
 		{
-			$this->memcache->addServers($servers)
+			$this->memcache->addServers($servers);
 		}
 		else
 		{
-			$this->memcache->addServer($servers['host'], $port['port']);
+			$this->memcache->addServer($servers['host'], $servers['port']);
 		}
 	}
 	

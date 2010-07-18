@@ -1,5 +1,6 @@
 <?php
 namespace framework\libs\datasources;
+use framework\libs as F;
 
 class MongoDatasource
 {
@@ -7,7 +8,7 @@ class MongoDatasource
 	
 	public function __construct()
 	{
-		$this->db = DbProvider::getConnexion('default');
+		$this->db = F\DbProvider::getConnexion('default');
 	}
 }
 ?>

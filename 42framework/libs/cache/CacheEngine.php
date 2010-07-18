@@ -34,9 +34,9 @@ abstract class CacheEngine
 		$this->create($content);
 	}
 	
-	/*abstract public function get();
+	abstract public function get();
 	abstract public function delete();
 	abstract public function create($content);
-	abstract public function exists();*/
+	abstract public function exists();
 }
 ?>

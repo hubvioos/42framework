@@ -4,3 +4,7 @@ app/logs/*
 app/medias/*
 app/cache/*
 */*.orig
+.project
+.buildpath
+.settings/*
+.DS_STORE

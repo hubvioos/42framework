@@ -3,7 +3,7 @@ namespace framework\libs;
 
 class Cache
 {
-	public function getEngine($engine = null, $cacheKey = null, $ttl = false)
+	public static function getEngine($engine = null, $cacheKey = null, $ttl = false)
 	{
 		if($engine == null)
 		{

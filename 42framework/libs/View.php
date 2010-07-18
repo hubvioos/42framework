@@ -29,7 +29,7 @@ class View
     {
     	if($cacheFragment)
     	{
-    		$cache = new FileCache('fragments-'.trim($file, '/'), $cacheTtl);
+    		$cache = Cache::getEngine('file', 'fragments-'.trim($file, '/'), $cacheTtl);
     		
     		if($cache->exists())
     		{
