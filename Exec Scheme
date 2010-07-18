@@ -13,6 +13,9 @@ webroot/index.php
 		|				|> defines VIEW
 		|				
 		|> MODULE -> display()
+						|
+						|> RESPONSE -> send()
 						|> render()
+								|
 								|> includes Layout
 								|> includes View
