@@ -38,12 +38,27 @@
 	Développer un outil permettant la mise en place simplifié d'un système d'accès sécurisé aux données, tels
 	que espace membre, partie admin, etc...
 
+** Outils en ligne de commande :
+	Proposer un ensemble d'outils en ligne de commande pour effectuer certaines tâches
+	(création d'un nouveau projet, génération de code, etc...).
+
 
 
 -----!! ORGANISATION !!-----
 
 **>>>> Commentaires :
 	Commenter tous les fichiers, en utilisant la syntaxe phpDoc ou pas !
+	
+** Réorganisation du code :
+	Implémenter les designs patterns nécessaires (strategy, observer...). Améliorer la maintenabilité du code,
+	refactoriser.
+
+** TESTS :
+	Implémenter les suites de test nécessaires. Objectif : code couvert à 100%.
+
+** Environnement de travail :
+	Organiser un "workflow" efficient (intégration continue, test, etc...). Utilisation de Phing,
+	PHPUnderControl, PHPUnit, etc...
 
 
 
