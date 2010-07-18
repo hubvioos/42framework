@@ -51,5 +51,10 @@ class Memcached extends CacheEngine
 	{
 		return $this->memcache->delete($this->getKey($key));
 	}
+	
+	public function exists()
+	{
+		return false;
+	}
 }
 ?>
