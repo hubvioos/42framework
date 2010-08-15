@@ -1,10 +1,9 @@
 *~
-42framework/libs/backup/*
 app/logs/*
 app/medias/*
 app/cache/*
 */*.orig
-.project
+.project/*
 .buildpath
 .settings/*
 .DS_STORE

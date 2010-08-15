@@ -6,6 +6,10 @@ class ResponseException extends Exception { }
 
 class Response
 {
+	/**
+	 * Contains the response
+	 * @var mixed (Framework\View or string)
+	 */
 	protected $body = null;
 	
 	protected static $status = '200 OK';
@@ -13,6 +17,8 @@ class Response
 	protected static $cookies = array();
 
 	protected static $headers = array();
+	
+	protected static $globalsVars = array();
 
 	protected static $instance = null;
 	
@@ -39,6 +45,12 @@ class Response
 		return new Response();
 	}
 	
+	public function clearResponse ()
+	{
+		$this->setBody(null);
+		return $this;
+	}
+	
 	public static function getCurrent ()
 	{
 		return self::$current;
@@ -52,6 +64,33 @@ class Response
 	public function setBody ($value)
 	{
 		$this->body = $value;
+		return $this;
+	}
+	
+	public function getGlobalsVars ()
+	{
+		return self::$globalsVars;
+	}
+	
+	public function getGlobalVar ($name)
+	{
+		if (!isset(self::$globalsVars[$name]))
+		{
+			return null;
+		}
+		return self::$globalsVars[$name];
+	}
+	
+	public function setGlobalVar ($name, $value = false)
+	{
+		if (is_array($name))
+		{
+			self::$globalsVars = $name;
+		}
+		else 
+		{
+			self::$globalsVars[$name] = $value;
+		}
 		return $this;
 	}
 
@@ -256,12 +295,21 @@ class Response
 			{
 				header($name.': '.$value);
 			}
-			return $this;
 		}
+		return $this;
 	}
 
 	public function getHeader ($name)
 	{
 		return (isset(self::$headers[$name]) == false ? null : self::$headers[$name]);
+	}
+	
+	public function __toString()
+	{
+		if ($this->body instanceof View)
+		{
+			return $this->body->render();
+		}
+		return $this->body;
 	}
 }

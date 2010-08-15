@@ -40,7 +40,7 @@ class Controller
 			{
 				$this->setView(Config::$config['defaultView']);
 			}
-			return Response::factory(View::factory($this->view, $this->vars)->render());
+			return Response::factory(View::factory($this->view, $this->vars));
 		}
 		else 
 		{
@@ -56,6 +56,7 @@ class Controller
 	public function setView ($view)
 	{
 		$this->view = $view;
+		return $this;
 	}
 
 	/**
@@ -74,5 +75,6 @@ class Controller
 		{
 			$this->vars[$var] = $value;
 		}
+		return $this;
 	}
 }

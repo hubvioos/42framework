@@ -81,9 +81,15 @@ class Core
 	 * @param string $module
 	 * @return Framework\Controller
 	 */
-	public static function loadModule ($module)
+	public static function loadModule ($module, $controller = 'MainController')
 	{
+		$module = '\Application\modules\\'.$module.'\controllers\\'.$controller;
 		
+		if (!isset(self::$modules[$module]))
+		{
+			self::$modules[$module] = new $module;
+		}
+		return self::$modules[$module];
 	}
 	
 	/**
@@ -95,7 +101,13 @@ class Core
 	 */
 	public static function loadModel ($module, $model)
 	{
+		$model = '\Application\modules\\'.$module.'\models\\'.$model;
 		
+		if (!isset(self::$models[$model]))
+		{
+			self::$models[$model] = new $model;
+		}
+		return self::$models[$model];
 	}
 	
 	/**
@@ -103,7 +115,18 @@ class Core
 	 */
 	public function execute ()
 	{
-		$this->response = $this->request->execute();
+		$this->response->setBody($this->request->execute());
+		
+		if ($this->response->getGlobalVar('layout') !== false)
+		{
+			if ($this->response->getGlobalVar('layout') === null)
+			{
+				$this->response->setGlobalVar('layout', Config::$config['defaultLayout']);
+			}
+			$this->response->setGlobalVar('contentForLayout', $this->response->getBody());
+			$this->response->setBody(View::factory($this->response->getGlobalVar('layout'), $this->response->getGlobalsVars()));
+		}
+		return $this;
 	}
 	
 	/**
