@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <buildpath>
-	<buildpathentry kind="src" path="42framework/config"/>
-	<buildpathentry excluding="backup/" kind="src" path="42framework/libs"/>
-	<buildpathentry kind="src" path="42framework/utils"/>
 	<buildpathentry kind="src" path="app/config"/>
-	<buildpathentry kind="src" path="app/models"/>
-	<buildpathentry kind="src" path="app/modules"/>
-	<buildpathentry kind="src" path="app/views/fragments"/>
-	<buildpathentry kind="src" path="app/views/globals"/>
-	<buildpathentry kind="src" path="app/views/layouts"/>
 	<buildpathentry kind="src" path="app/views/produit"/>
 	<buildpathentry kind="src" path="app/webroot"/>
+	<buildpathentry kind="src" path="42framework/utils"/>
+	<buildpathentry kind="src" path="app/modules"/>
+	<buildpathentry kind="src" path="app/views/fragments"/>
+	<buildpathentry kind="src" path="app/views/layouts"/>
+	<buildpathentry kind="con" path="com.zend.php.phpunit.CONTAINER"/>
 	<buildpathentry kind="con" path="org.eclipse.php.core.LANGUAGE"/>
+	<buildpathentry kind="src" path="app/views/globals"/>
+	<buildpathentry kind="src" path="42framework/config"/>
+	<buildpathentry kind="src" path="app/models"/>
 </buildpath>
