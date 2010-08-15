@@ -6,12 +6,39 @@ class CoreException extends Exception { }
 
 class Core
 {
+	/**
+	 * @var Framework\Core
+	 */
 	private static $instance = null;
+	
+	/**
+	 * @var Framework\Request
+	 */
 	protected $request = null;
+	
+	/**
+	 * @var Framework\Response
+	 */
 	protected $response = null;
+	
+	/**
+	 * Contains models already loaded
+	 * 
+	 * @var Array
+	 */
 	protected static $models = array();
+	
+	/**
+	 * Contains modules already loaded
+	 * 
+	 * @var Array
+	 */
 	protected static $modules = array();
 	
+	/**
+	 * @param Framework\Request $request
+	 * @param Framework\Response $response
+	 */
 	protected function __construct (Request $request, Response $response)
 	{
 		$this->request = $request;
@@ -19,6 +46,8 @@ class Core
 	}
 	
 	/**
+	 * Returns the unique instance of Framework\Core
+	 * 
 	 * @param Framework\Request $request
 	 * @param Framework\Response $response
 	 * @return Framework\Core
@@ -35,6 +64,8 @@ class Core
 	protected function __clone () { }
 	
 	/**
+	 * Inits the application
+	 * 
 	 * @param array $config
 	 * @return Framework\Core
 	 */
@@ -44,22 +75,40 @@ class Core
 		return $this;
 	}
 	
+	/**
+	 * Load the module $module, if it isn't already loaded
+	 * 
+	 * @param string $module
+	 * @return Framework\Controller
+	 */
 	public static function loadModule ($module)
 	{
 		
 	}
 	
+	/**
+	 * Load the model $model, from the module $module, if it isn't already loaded
+	 * 
+	 * @param string $module
+	 * @param string $model
+	 * @return Framework\Model
+	 */
 	public static function loadModel ($module, $model)
 	{
 		
 	}
 	
+	/**
+	 * Main execution method
+	 */
 	public function execute ()
 	{
 		$this->response = $this->request->execute();
 	}
 	
 	/**
+	 * Returns the response corresponding to the main request
+	 * 
 	 * @return Framework\Response
 	 */
 	public function getResponse ()
