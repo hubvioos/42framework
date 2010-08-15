@@ -7,13 +7,15 @@ class ClassLoaderException extends Exception { }
 
 class ClassLoader
 {
-	public function __construct()
+    private $autoload;
+    
+	public function __construct(Array $autoload = array())
 	{
-		
+	    $this->autoload = $autoload;
 	}
 	
-	public function load ()
+	public function load ($className)
 	{
-		
+		require_once $this->autoload[$className];
 	}
 }
