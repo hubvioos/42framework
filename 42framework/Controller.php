@@ -32,8 +32,7 @@ class Controller
 	 */
 	public function execute (Request $request)
 	{
-		$response = Response::factory();
-		$response = call_user_func_array(array($this, $request->action), $request->params);
+		$actionResponse = call_user_func_array(array($this, $request->action), $request->params);
 		
 		if ($this->view !== false)
 		{
@@ -41,7 +40,11 @@ class Controller
 			{
 				$this->setView(Config::$config['defaultView']);
 			}
-			Response::factory($response);
+			return Response::factory(View::factory($this->view, $this->vars)->render());
+		}
+		else 
+		{
+			return Response::factory($actionResponse);
 		}
 	}
 

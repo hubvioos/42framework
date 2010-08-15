@@ -28,7 +28,7 @@ class View
 		}
 	}
 	
-	public function factory ($file, $vars)
+	public static function factory ($file, $vars)
 	{
 		return new View($file, $vars);
 	}
