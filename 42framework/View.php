@@ -11,6 +11,8 @@ class View
 
 	// variables supplèmentaires
 	protected $vars = array();
+	
+	protected static $globalsVars = array();
 
 	// on définit l'adresse du fichier de vue à inclure et on récupère les variables supplémentaires
 	public function __construct ($file, $vars = false)
@@ -48,11 +50,28 @@ class View
 		}
 		return $this->vars[$name];
 	}
+	
+	// assigne une variable supplémentaire au tableau vars
+	public static function setGlobal ($name, $value)
+	{
+		self::$globalsVars[$name] = $value;
+	}
+	
+	public static function getGlobal($name)
+	{
+		if (!isset(self::$globalsVars[$name]))
+		{
+			throw new ViewException ($name.' : global var doesn\'t exist.');
+			return null;
+		}
+		return self::$globalsVars[$name];
+	}
 
 	// effectue le rendu de la vue
 	public function render ()
 	{
-		extract($this->vars, EXTR_SKIP);
+		extract(self::$globalsVars);
+		extract($this->vars);
 		
 		ob_start();
 		include $this->file;

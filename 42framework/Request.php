@@ -1,5 +1,6 @@
 <?php
 namespace Framework;
+use Framework\Utils;
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
 class RequestException extends Exception { }
@@ -7,6 +8,8 @@ class RequestException extends Exception { }
 class Request
 {
 	public $module = null;
+	
+	public $controller = null;
 
 	public $action = null;
 
@@ -45,6 +48,7 @@ class Request
 	protected function __construct ($module, $action, $params, $internal = true)
 	{
 		$this->module = $module;
+		$this->controller = Utils\ClassLoader::getController($module, $action);
 		$this->action = $action;
 		$this->params = $params;
 		$this->isInternal = $internal;
@@ -111,7 +115,7 @@ class Request
 	
 	public function execute ()
 	{
-		$module = Core::loadModule(self::$current->module);
+		$module = Core::loadModule(self::$current->module, self::$current->controller);
 		return $module->execute(self::$current);
 	}
 

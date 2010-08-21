@@ -10,4 +10,9 @@ class Model
 	{
 		
 	}
+	
+	public static function factory ()
+	{
+		return new self();
+	}
 }

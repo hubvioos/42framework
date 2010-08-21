@@ -7,15 +7,31 @@ class ClassLoaderException extends Exception { }
 
 class ClassLoader
 {
-    private $autoload;
+    protected $autoload;
     
-	public function __construct(Array $autoload = array())
+    protected static $actionsMap;
+    
+	public function __construct(Array $autoload = array(), Array $actionsMap = array())
 	{
 	    $this->autoload = $autoload;
+	    self::$actionsMap = $actionsMap;
 	}
 	
 	public function load ($className)
 	{
-		require_once $this->autoload[$className];
+		if (!isset($this->autoload[$className]))
+		{
+			throw new ClassLoaderException($className.' doesn\'t exist in autoload configuration. Try recompile autoload.');
+		}
+		require $this->autoload[$className];
+	}
+	
+	public static function getController ($module, $action)
+	{
+		if (!isset(self::$actionsMap[$module][$action]))
+		{
+			throw new ClassLoaderException('Controller for '.$action.'action in '.$module.' module is not set. Try recompile actionsMap.');
+		}
+		return self::$actionsMap[$module][$action];
 	}
 }

@@ -1,5 +1,4 @@
 <?php
-use Framework;
 use \Framework;
 define('DS', DIRECTORY_SEPARATOR);
 define('WEBROOT', dirname(__FILE__));

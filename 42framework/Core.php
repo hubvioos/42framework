@@ -9,7 +9,7 @@ class Core
 	/**
 	 * @var Framework\Core
 	 */
-	private static $instance = null;
+	protected static $instance = null;
 	
 	/**
 	 * @var Framework\Request
@@ -26,14 +26,14 @@ class Core
 	 * 
 	 * @var Array
 	 */
-	protected static $models = array();
+	protected $models = array();
 	
 	/**
 	 * Contains modules already loaded
 	 * 
 	 * @var Array
 	 */
-	protected static $modules = array();
+	protected $modules = array();
 	
 	/**
 	 * @param Framework\Request $request
@@ -85,11 +85,11 @@ class Core
 	{
 		$module = '\Application\modules\\'.$module.'\controllers\\'.$controller;
 		
-		if (!isset(self::$modules[$module]))
+		if (!isset(self::$instance->modules[$module]))
 		{
-			self::$modules[$module] = new $module;
+			self::$instance->modules[$module] = new $module;
 		}
-		return self::$modules[$module];
+		return self::$instance->modules[$module];
 	}
 	
 	/**
@@ -103,11 +103,11 @@ class Core
 	{
 		$model = '\Application\modules\\'.$module.'\models\\'.$model;
 		
-		if (!isset(self::$models[$model]))
+		if (!isset(self::$instance->models[$model]))
 		{
-			self::$models[$model] = new $model;
+			self::$instance->models[$model] = new $model;
 		}
-		return self::$models[$model];
+		return self::$instance->models[$model];
 	}
 	
 	/**

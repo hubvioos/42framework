@@ -19,6 +19,20 @@ class Controller
 	 * @var array
 	 */
 	protected $vars = array();
+	
+	/**
+	 * Contains the current request
+	 * 
+	 * @var Framework\Request
+	 */
+	protected $request = null;
+	
+	/**
+	 * Contains the main response
+	 * 
+	 * @var Framework\Response
+	 */
+	protected $response = null;
 
 	public function __construct ()
 	{
@@ -32,7 +46,9 @@ class Controller
 	 */
 	public function execute (Request $request)
 	{
+		$this->before();
 		$actionResponse = call_user_func_array(array($this, $request->action), $request->params);
+		$this->after();
 		
 		if ($this->view !== false)
 		{
@@ -40,12 +56,17 @@ class Controller
 			{
 				$this->setView(Config::$config['defaultView']);
 			}
-			return Response::factory(View::factory($this->view, $this->vars));
+			$response = Response::factory(View::factory($this->view, $this->vars));
 		}
 		else 
 		{
-			return Response::factory($actionResponse);
+			$response = Response::factory($actionResponse);
 		}
+		
+		$this->view = null;
+		$this->vars = array();
+		
+		return $response;
 	}
 
 	/**
@@ -76,5 +97,15 @@ class Controller
 			$this->vars[$var] = $value;
 		}
 		return $this;
+	}
+	
+	public function before ()
+	{
+		
+	}
+	
+	public function after ()
+	{
+		
 	}
 }

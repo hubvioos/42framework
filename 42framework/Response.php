@@ -17,8 +17,6 @@ class Response
 	protected static $cookies = array();
 
 	protected static $headers = array();
-	
-	protected static $globalsVars = array();
 
 	protected static $instance = null;
 	
@@ -64,33 +62,6 @@ class Response
 	public function setBody ($value)
 	{
 		$this->body = $value;
-		return $this;
-	}
-	
-	public function getGlobalsVars ()
-	{
-		return self::$globalsVars;
-	}
-	
-	public function getGlobalVar ($name)
-	{
-		if (!isset(self::$globalsVars[$name]))
-		{
-			return null;
-		}
-		return self::$globalsVars[$name];
-	}
-	
-	public function setGlobalVar ($name, $value = false)
-	{
-		if (is_array($name))
-		{
-			self::$globalsVars = $name;
-		}
-		else 
-		{
-			self::$globalsVars[$name] = $value;
-		}
 		return $this;
 	}
 
@@ -148,7 +119,7 @@ class Response
 		return $this;
 	}
 
-	public function cookie ($name, $value = null, $expire = null, $path = null, $domain = null, $secure = null)
+	public function setCookie ($name, $value = null, $expire = null, $path = null, $domain = null, $secure = null)
 	{
 		self::$cookies[$name] = array('value' => $value, 'expire' => $expire, 'path' => $path, 'domain' => $domain, 'secure' => $secure);
 		return $this;
