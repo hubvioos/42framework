@@ -72,7 +72,7 @@ class Core
 	public function init (Array $config = array())
 	{
 		Config::loadConfig($config);
-		Route::getInstance()->init(Config::$config['routes']);
+		Route::init(Config::$config['routes']);
 		return $this;
 	}
 	
