@@ -7,8 +7,6 @@ class RequestException extends \Exception { }
 class Request
 {
 	public $module = null;
-	
-	public $controller = null;
 
 	public $action = null;
 
@@ -49,7 +47,6 @@ class Request
 	protected function __construct ($module, $action, $params, $internal = true)
 	{
 		$this->module = $module;
-		$this->controller = Utils\ClassLoader::getController($module, $action);
 		$this->action = $action;
 		$this->params = $params;
 		$this->isInternal = $internal;
@@ -64,7 +61,7 @@ class Request
 		{
 			if (PHP_SAPI === 'cli')
 			{
-				$params = Modules\Cli\CliUtils::extractParams();
+				$params = \Application\modules\cli\CliUtils::extractParams();
 				Request::$instance = Request::factory('cli', $params['action'], $params['params']);
 				Request::$isCli = true;
 			}
@@ -119,11 +116,11 @@ class Request
 		switch (func_num_args())
 		{
 			case 1:
-				$params = Route::getInstance()->extractParams(func_get_arg(0));
+				$params = Route::extractParams(func_get_arg(0));
 				$params['internal'] = true;
 				break;
 			case 2:
-				$params = Route::getInstance()->extractParams(func_get_arg(0));
+				$params = Route::extractParams(func_get_arg(0));
 				$params['internal'] = func_get_arg(1);
 				break;
 			case 3:
@@ -146,7 +143,7 @@ class Request
 	
 	public function execute ()
 	{
-		$module = Core::loadModule(Request::$current->module, Request::$current->controller);
+		$module = Core::loadModule(Request::$current->module, Request::$current->action);
 		return $module->execute(Request::$current);
 	}
 	

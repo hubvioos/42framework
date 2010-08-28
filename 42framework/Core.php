@@ -1,5 +1,7 @@
 <?php
 namespace Framework;
+use Framework\Utils;
+
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
 class CoreException extends \Exception { }
@@ -72,7 +74,7 @@ class Core
 	public function init (Array $config = array())
 	{
 		Config::loadConfig($config);
-		Route::getInstance()->init(Config::$config['routes']);
+		//Route::getInstance()->init(Config::$config['routes']);
 		return $this;
 	}
 	
@@ -82,9 +84,9 @@ class Core
 	 * @param string $module
 	 * @return Framework\Controller
 	 */
-	public static function loadModule ($module, $controller = 'MainController')
+	public static function loadModule ($module, $action)
 	{
-		$module = '\Application\modules\\'.$module.'\controllers\\'.$controller;
+		$module = Utils\ClassLoader::getModuleClassName($module, $action);
 		
 		if (!isset(self::$instance->modules[$module]))
 		{
@@ -102,7 +104,7 @@ class Core
 	 */
 	public static function loadModel ($module, $model)
 	{
-		$model = '\Application\modules\\'.$module.'\models\\'.$model;
+		$model = Utils\ClassLoader::getModelClassName($module, $model);
 		
 		if (!isset(self::$instance->models[$model]))
 		{

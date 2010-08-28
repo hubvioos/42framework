@@ -12,9 +12,13 @@ class Config
 	/**
 	 * @param array $data
 	 */
-	public static function loadConfig (Array $data = array())
+	public static function loadConfig (Array $config = array())
 	{
-		self::$config = $data;
+		if (empty($config))
+	    {
+	    	require FRAMEWORK_DIR.DS.'config'.DS.'config.php';
+	    }
+		self::$config = $config;
 	}
 
 	/**

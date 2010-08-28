@@ -13,12 +13,17 @@ class ClassLoader
     
 	public function __construct(Array $autoload = array(), Array $actionsMap = array())
 	{
-	    $this->autoload = $autoload;
+	    if (empty($autoload))
+	    {
+	    	require FRAMEWORK_DIR.DS.'config'.DS.'autoload.php';
+	    }
+		$this->autoload = $autoload;
 	    self::$actionsMap = $actionsMap;
 	}
 	
 	public function load ($className)
 	{
+		$className = strtolower($className);
 		if (!isset($this->autoload[$className]))
 		{
 			throw new ClassLoaderException($className.' doesn\'t exist in autoload configuration. Try recompile autoload.');
@@ -37,5 +42,16 @@ class ClassLoader
 			return $module;
 		}
 		return self::$actionsMap[$module][$action];
+	}
+	
+	public static function getModelClassName ($module, $model)
+	{
+		return 'Application\modules\\'.$module.'\models\\'.$model;
+	}
+	
+	public static function getModuleClassName ($module, $action)
+	{
+		$controller = self::getController($module, $action);
+		return 'Application\modules\\'.$module.'\controllers\\'.$controller;
 	}
 }
