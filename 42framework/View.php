@@ -2,7 +2,7 @@
 namespace Framework;
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
-class ViewException extends Exception { }
+class ViewException extends \Exception { }
 
 class View
 {

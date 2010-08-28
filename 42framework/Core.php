@@ -2,7 +2,7 @@
 namespace Framework;
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
-class CoreException extends Exception { }
+class CoreException extends \Exception { }
 
 class Core
 {
@@ -34,6 +34,11 @@ class Core
 	 * @var Array
 	 */
 	protected $modules = array();
+	
+	/**
+	 * @var boolean
+	 */
+	protected $isCli = false;
 	
 	/**
 	 * @param Framework\Request $request
@@ -72,7 +77,16 @@ class Core
 	public function init (Array $config = array())
 	{
 		Config::loadConfig($config);
+		if (PHP_SAPI === 'cli')
+		{
+			$this->isCli = true;
+		}
 		return $this;
+	}
+	
+	public function isCli ()
+	{
+		return $this->isCli;
 	}
 	
 	/**

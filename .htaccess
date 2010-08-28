@@ -1,4 +1,4 @@
 Options +FollowSymLinks
 RewriteEngine on
 RewriteCond %{REQUEST_URI} !docs/.*$
-RewriteRule    (.*) app/$1 [L]
+RewriteRule    (.*) application/webroot/index.php?url=$1 [L]

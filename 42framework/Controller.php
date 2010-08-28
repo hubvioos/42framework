@@ -2,7 +2,7 @@
 namespace Framework;
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
-class ControllerException extends Exception { }
+class ControllerException extends \Exception { }
 
 class Controller
 {	

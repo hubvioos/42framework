@@ -3,7 +3,7 @@ defined('FRAMEWORK_DIR') or die('Invalid script access');
 
 use \Framework as F;
 
-class ClassLoaderException extends Exception { }
+class ClassLoaderException extends \Exception { }
 
 class ClassLoader
 {
@@ -28,9 +28,13 @@ class ClassLoader
 	
 	public static function getController ($module, $action)
 	{
+		if (empty($module) || empty($action))
+		{
+			throw new ClassLoaderException('getController : Missing argument.');
+		}
 		if (!isset(self::$actionsMap[$module][$action]))
 		{
-			throw new ClassLoaderException('Controller for '.$action.'action in '.$module.' module is not set. Try recompile actionsMap.');
+			return $module;
 		}
 		return self::$actionsMap[$module][$action];
 	}

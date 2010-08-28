@@ -1,5 +1,4 @@
 <?php
-use \Framework;
 define('DS', DIRECTORY_SEPARATOR);
 define('WEBROOT', dirname(__FILE__));
 define('APPLICATION_DIR', dirname(WEBROOT));
@@ -11,7 +10,7 @@ require FRAMEWORK_DIR.DS.'utils'.DS.'ClassLoader.php';
 
 spl_autoload_register(array(new Framework\Utils\ClassLoader($autoload), 'load'));
 
-$core = Framework\Core::getInstance(Framework\Request::getInstance(), Framework\Response::getInstance())->init($config);
+$core = \Framework\Core::getInstance(\Framework\Request::getInstance(), \Framework\Response::getInstance())->init($config);
 
 $core->execute();
 $response = $core->getResponse();

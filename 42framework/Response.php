@@ -2,7 +2,7 @@
 namespace Framework;
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
-class ResponseException extends Exception { }
+class ResponseException extends \Exception { }
 
 class Response
 {
