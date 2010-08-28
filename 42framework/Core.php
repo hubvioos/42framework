@@ -74,7 +74,7 @@ class Core
 	public function init (Array $config = array())
 	{
 		Config::loadConfig($config);
-		//Route::getInstance()->init(Config::$config['routes']);
+		Utils\Route::init(Config::$config['routes']);
 		return $this;
 	}
 	
@@ -86,7 +86,7 @@ class Core
 	 */
 	public static function loadModule ($module, $action)
 	{
-		$module = Utils\ClassLoader::getModuleClassName($module, $action);
+		$module = Utils\ClassLoader::getControllerClassName($module, $action);
 		
 		if (!isset(self::$instance->modules[$module]))
 		{

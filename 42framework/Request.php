@@ -42,7 +42,7 @@ class Request
 
 	/*
 		Constructeur de la classe, partie importante pour l'exécution de la page.
-		Cette méthode s'occupe de déterminer le module et l'action à appeler, en faisant appel à l'instance de Router.
+		Cette méthode s'occupe de déterminer le module et l'action à appeler, en faisant appel à Route.
 	*/
 	protected function __construct ($module, $action, $params, $internal = true)
 	{
@@ -68,7 +68,7 @@ class Request
 			else 
 			{
 				Request::$url = $_GET['url'];
-				$params = Route::extractParams(Route::path(Request::$url));
+				$params = Utils\Route::urlToParams(Request::$url);
 				
 				Request::$instance = Request::factory($params['module'], $params['action'], $params['params'], false);
 				
@@ -116,11 +116,11 @@ class Request
 		switch (func_num_args())
 		{
 			case 1:
-				$params = Route::extractParams(func_get_arg(0));
+				$params = Utils\Route::pathToParams(func_get_arg(0));
 				$params['internal'] = true;
 				break;
 			case 2:
-				$params = Route::extractParams(func_get_arg(0));
+				$params = Utils\Route::pathToParams(func_get_arg(0));
 				$params['internal'] = func_get_arg(1);
 				break;
 			case 3:

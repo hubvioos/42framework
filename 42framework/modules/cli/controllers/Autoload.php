@@ -7,14 +7,6 @@ class CliAutoload extends CliGeneric
 {
 	public function compileAutoload ()
 	{
-		/*require VENDORS_DIR.DS.'theseer'.DS.'autoload'.DS.'classfinder.php';
-		require VENDORS_DIR.DS.'theseer'.DS.'autoload'.DS.'phpfilter.php';
-		require VENDORS_DIR.DS.'theseer'.DS.'autoload'.DS.'autoloadbuilder.php';
-
-		require VENDORS_DIR.DS.'theseer'.DS.'scanner'.DS.'directoryscanner.php';
-		require VENDORS_DIR.DS.'theseer'.DS.'scanner'.DS.'includeexcludefilter.php';
-		require VENDORS_DIR.DS.'theseer'.DS.'scanner'.DS.'filesonlyfilter.php';
-		*/
 		$scanner = new \TheSeer\Tools\DirectoryScanner;
 		$scanner->addInclude('*.php');
 		
@@ -35,11 +27,19 @@ class CliAutoload extends CliGeneric
 		$finder = new \TheSeer\Tools\ClassFinder;
 		
 		$found = array_merge($finder->parseMulti($scanner(FRAMEWORK_DIR.DS.'modules')), $finder->parseMulti($scanner(APPLICATION_DIR.DS.'modules')));
-		$classNames = array_keys($found);
-		foreach ($classNames as $class)
+		$actionsMap = array();
+		foreach (array_keys($found) as $class)
 		{
+			$ref = new \ReflectionClass(stripslashes($class));
 			
+			$methods = $ref->getMethods();
+			$namespace = $ref->getNamespaceName();
+			list(,,$module) = explode('\\', $namespace);
+			foreach ($methods as $method)
+			{
+				$actionsMap[$module][$method->getName()] = $class;
+			}
 		}
-		var_dump($found);
+		var_dump($actionsMap);
 	}
 }

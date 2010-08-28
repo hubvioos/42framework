@@ -31,15 +31,15 @@ class ClassLoader
 		require $this->autoload[$className];
 	}
 	
-	public static function getController ($module, $action)
+	public static function getControllerClassName ($module, $action)
 	{
 		if (empty($module) || empty($action))
 		{
-			throw new ClassLoaderException('getController : Missing argument.');
+			throw new ClassLoaderException('getControllerName : Missing argument.');
 		}
 		if (!isset(self::$actionsMap[$module][$action]))
 		{
-			return $module;
+			throw new ClassLoaderException('getControllerName : '.$action.' action in '.$module.' module doesn\'t exist in actionsMap. Try recompile it.');
 		}
 		return self::$actionsMap[$module][$action];
 	}
@@ -47,11 +47,5 @@ class ClassLoader
 	public static function getModelClassName ($module, $model)
 	{
 		return 'Application\modules\\'.$module.'\models\\'.$model;
-	}
-	
-	public static function getModuleClassName ($module, $action)
-	{
-		$controller = self::getController($module, $action);
-		return 'Application\modules\\'.$module.'\controllers\\'.$controller;
 	}
 }

@@ -72,13 +72,19 @@ class Config
 			
 			for ($i = 0; $i < $taille; $i++)
 			{
-				if ($i == 0 && $ok = isset(self::$config[$key[0]]))
+				if ($i == 0 && isset(self::$config[$key[0]]))
 				{
+					$ok = true;
 					$value = self::$config[$key[0]];
 				}
-				elseif ($ok = isset($value[$key[$i]]))
+				elseif (isset($value[$key[$i]]))
 				{
+					$ok = true;
 					$value = $value[$key[$i]];
+				}
+				else 
+				{
+					$ok = false;
 				}
 			}
 			return $ok;

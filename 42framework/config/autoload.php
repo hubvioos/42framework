@@ -2,7 +2,15 @@
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
 $autoload = array(
-    '\Framework\Core'       => FRAMEWORK_DIR.DS.'Core.php',
+         'theseer\\tools\\autoloadbuilder' => VENDORS_DIR.DS.'theseer'.DS.'autoload'.DS.'autoloadbuilder.php',
+         'theseer\\tools\\autoloadbuilderexception' => VENDORS_DIR.DS.'theseer'.DS.'autoload'.DS.'autoloadbuilder.php',
+         'theseer\\tools\\autoloadbuildercli' => VENDORS_DIR.DS.'theseer'.DS.'autoload'.DS.'autoloadbuildercli.php',
+         'theseer\\tools\\classfinder' => VENDORS_DIR.DS.'theseer'.DS.'autoload'.DS.'classfinder.php',
+         'theseer\\tools\\phpfilteriterator' => VENDORS_DIR.DS.'theseer'.DS.'autoload'.DS.'phpfilter.php',
+         'theseer\\tools\\directoryscanner' => VENDORS_DIR.DS.'theseer'.DS.'scanner'.DS.'directoryscanner.php',
+         'theseer\\tools\\directoryscannerexception' => VENDORS_DIR.DS.'theseer'.DS.'scanner'.DS.'directoryscanner.php',
+         'theseer\\tools\\filesonlyfilteriterator' => VENDORS_DIR.DS.'theseer'.DS.'scanner'.DS.'filesonlyfilter.php',
+         'theseer\\tools\\includeexcludefilteriterator' => VENDORS_DIR.DS.'theseer'.DS.'scanner'.DS.'includeexcludefilter.php',
          'framework\\config' => FRAMEWORK_DIR.DS.'Config.php',
          'framework\\controllerexception' => FRAMEWORK_DIR.DS.'Controller.php',
          'framework\\controller' => FRAMEWORK_DIR.DS.'Controller.php',
@@ -26,8 +34,8 @@ $autoload = array(
          'framework\\request' => FRAMEWORK_DIR.DS.'Request.php',
          'framework\\responseexception' => FRAMEWORK_DIR.DS.'Response.php',
          'framework\\response' => FRAMEWORK_DIR.DS.'Response.php',
-         'framework\\routeexception' => FRAMEWORK_DIR.DS.'Route.php',
-         'framework\\route' => FRAMEWORK_DIR.DS.'Route.php',
+         'framework\\utils\\routeexception' => FRAMEWORK_DIR.DS.'utils'.DS.'Route.php',
+         'framework\\utils\\route' => FRAMEWORK_DIR.DS.'utils'.DS.'Route.php',
          'framework\\utils\\classloaderexception' => FRAMEWORK_DIR.DS.'utils'.DS.'ClassLoader.php',
          'framework\\utils\\classloader' => FRAMEWORK_DIR.DS.'utils'.DS.'ClassLoader.php',
          'framework\\viewexception' => FRAMEWORK_DIR.DS.'View.php',
