@@ -230,9 +230,21 @@ class Response
 		}
 	}
 
-	public function redirect ($absoluteUri, $status = 302)
+	public function redirect ($absoluteUri, $status = 302, $stopProcess = true)
 	{
-		return $this->status($status)->setHeader('Location', $absoluteUri)->send();
+		if ($status < 300 || $status > 399)
+		{
+			$status = 302;
+		}
+		
+		$this->status($status)->setHeader('Location', $absoluteUri);
+		
+		if ($stopProcess)
+		{
+			$this->send();
+			exit();
+		}
+		return $this;
 	}
 
 	public function send ()

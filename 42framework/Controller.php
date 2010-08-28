@@ -52,9 +52,9 @@ class Controller
 		
 		if ($this->view !== false)
 		{
-			if ($this->view == null)
+			if ($this->view === null)
 			{
-				$this->setView(Config::$config['defaultView']);
+				$this->setView($request->action);
 			}
 			$response = Response::factory(View::factory($this->view, $this->vars));
 		}

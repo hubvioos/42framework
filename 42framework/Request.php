@@ -36,6 +36,8 @@ class Request
 	
 	public static $protocol = 'http';
 	
+	public static $isCli = false;
+	
 	protected static $current = null;
 
 	protected static $instance = null;
@@ -60,10 +62,11 @@ class Request
 	{
 		if (Request::$instance === null)
 		{
-			if (Core::getInstance()->isCli())
+			if (PHP_SAPI === 'cli')
 			{
 				$params = Modules\Cli\CliUtils::extractParams();
 				Request::$instance = Request::factory('cli', $params['action'], $params['params']);
+				Request::$isCli = true;
 			}
 			else 
 			{
@@ -94,12 +97,12 @@ class Request
 				
 				Request::$method = (!isset($_SERVER['REQUEST_METHOD'])) ? 'GET' : $_SERVER['REQUEST_METHOD'];
 				
-				Request::$acceptCharset = (!isset($_SERVER['HTTP_ACCEPT_CHARSET'])) ? Config::$config['defaultCharset'] : $this->extractValue(
+				Request::$acceptCharset = (!isset($_SERVER['HTTP_ACCEPT_CHARSET'])) ? Config::$config['defaultCharset'] : Request::$instance->extractValue(
 					$_SERVER['HTTP_ACCEPT_CHARSET']);
 				
-				Request::$acceptEncoding = (!isset($_SERVER['HTTP_ACCEPT_ENCODING'])) ? null : $this->extractValue($_SERVER['HTTP_ACCEPT_ENCODING']);
+				Request::$acceptEncoding = (!isset($_SERVER['HTTP_ACCEPT_ENCODING'])) ? null : Request::$instance->extractValue($_SERVER['HTTP_ACCEPT_ENCODING']);
 				
-				Request::$acceptLanguage = (!isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) ? Config::$config['defaultLanguage'] : $this->extractValue(
+				Request::$acceptLanguage = (!isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) ? Config::$config['defaultLanguage'] : Request::$instance->extractValue(
 					$_SERVER['HTTP_ACCEPT_LANGUAGE']);
 				
 				Request::$isSecure = (!empty($_SERVER['HTTPS']) && filter_var($_SERVER['HTTPS'], FILTER_VALIDATE_BOOLEAN));
@@ -110,9 +113,30 @@ class Request
 		return Request::$instance;
 	}
 
-	public static function factory ($module, $action, $params, $internal = true)
+	public static function factory ()
 	{
-		return new Request($module, $action, $params, $internal);
+		$params = array();
+		switch (func_num_args())
+		{
+			case 1:
+				$params = Route::getInstance()->extractParams(func_get_arg(0));
+				$params['internal'] = true;
+				break;
+			case 2:
+				$params = Route::getInstance()->extractParams(func_get_arg(0));
+				$params['internal'] = func_get_arg(1);
+				break;
+			case 3:
+				list($params['module'], $params['action'], $params['params']) = func_get_args();
+				$params['internal'] = true;
+				break;
+			case 4:
+				list($params['module'], $params['action'], $params['params'], $params['internal']) = func_get_args();
+				break;
+			default:
+				throw new RequestException('Request::factory : invalid arguments');
+		}
+		return new Request($params['module'], $params['action'], $params['params'], $params['internal']);
 	}
 	
 	public function getCurrent ()
@@ -124,6 +148,11 @@ class Request
 	{
 		$module = Core::loadModule(Request::$current->module, Request::$current->controller);
 		return $module->execute(Request::$current);
+	}
+	
+	public function isCli ()
+	{
+		return Request::$isCli;
 	}
 
 	protected function extractValue ($str)

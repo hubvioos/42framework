@@ -36,11 +36,6 @@ class Core
 	protected $modules = array();
 	
 	/**
-	 * @var boolean
-	 */
-	protected $isCli = false;
-	
-	/**
 	 * @param Framework\Request $request
 	 * @param Framework\Response $response
 	 */
@@ -57,11 +52,11 @@ class Core
 	 * @param Framework\Response $response
 	 * @return Framework\Core
 	 */
-	public static function getInstance ($request, $response)
+	public static function getInstance ($request = null, $response = null)
 	{
 		if (self::$instance === null)
 		{
-			self::$instance = new self($request, $response);
+			self::$instance = new Core($request, $response);
 		}
 		return self::$instance;
 	}
@@ -77,16 +72,8 @@ class Core
 	public function init (Array $config = array())
 	{
 		Config::loadConfig($config);
-		if (PHP_SAPI === 'cli')
-		{
-			$this->isCli = true;
-		}
+		Route::getInstance()->init(Config::$config['routes']);
 		return $this;
-	}
-	
-	public function isCli ()
-	{
-		return $this->isCli;
 	}
 	
 	/**
