@@ -17,7 +17,7 @@ class View
 	// on définit l'adresse du fichier de vue à inclure et on récupère les variables supplémentaires
 	public function __construct ($file, $vars = false)
 	{
-		$this->file = ltrim($file, '/') . '.php';
+		$this->file = $file;
 		
 		if (!file_exists($this->file))
 		{
@@ -30,7 +30,7 @@ class View
 		}
 	}
 	
-	public static function factory ($file, $vars)
+	public static function factory ($file, $vars = false)
 	{
 		return new View($file, $vars);
 	}
@@ -45,7 +45,6 @@ class View
 	{
 		if (!isset($this->vars[$name]))
 		{
-			throw new ViewException ($name.' : var doesn\'t exist.');
 			return null;
 		}
 		return $this->vars[$name];
@@ -61,7 +60,6 @@ class View
 	{
 		if (!isset(self::$globalsVars[$name]))
 		{
-			throw new ViewException ($name.' : global var doesn\'t exist.');
 			return null;
 		}
 		return self::$globalsVars[$name];

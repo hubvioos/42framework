@@ -14,6 +14,10 @@ class Route
 	
 	public static function init ($routes)
 	{
+		if (!is_array($routes))
+		{
+			$routes = array();
+		}
 		self::$routes = $routes;
 	}
 	
@@ -34,7 +38,7 @@ class Route
 	{
 		$path = null;
 
-		if($params['module'] !== Config::$config['defaultModule'])
+		if($params['module'] !== \Framework\Config::$config['defaultModule'])
 		{
 			$path .= $params['module'];
 		}
@@ -56,8 +60,8 @@ class Route
 	    $routed = false;
 	    $redirect = false;
 	    
-	    $defaultModule = Config::$config['defaultModule'];
-	    $defaultAction = Config::$config['defaultAction'];
+	    $defaultModule = \Framework\Config::$config['defaultModule'];
+	    $defaultAction = \Framework\Config::$config['defaultAction'];
 	    $defaultPath = $defaultModule . '/' . $defaultAction;
 	    
 	    // Clean the "/" at the end of the url
@@ -82,7 +86,7 @@ class Route
 		
 		if (sizeof($explodedUrl) == 1)
 		{
-		    if ($explodedUrl[0] === Config::$config['defaultAction'])
+		    if ($explodedUrl[0] === \Framework\Config::$config['defaultAction'])
 		    {
 		        $path = $defaultPath;
 		        
@@ -103,7 +107,6 @@ class Route
 		 * Change URL into path
 		 *
 		 */
-		
 		foreach(self::$routes as $routeUrl => $routeParams)
 		{
 		    // Check if route is dynamic
@@ -151,7 +154,7 @@ class Route
 		// Redirect if we need to.
 		if ($redirect)
 		{
-		    \Framework\Response::getInstance()->redirect(Config::$config['siteUrl'] . $path, 301, true);
+		    \Framework\Response::getInstance()->redirect(\Framework\Config::$config['siteUrl'] . $path, 301, true);
 		}
 			
 		return $path;

@@ -15,9 +15,16 @@ class Config
 	public static function loadConfig (Array $config = array())
 	{
 		if (empty($config))
-	    {
-	    	require FRAMEWORK_DIR.DS.'config'.DS.'config.php';
-	    }
+		{
+			try {
+			throw new CoreException('Config is not compiled. Please use compileConfig command in cli.');
+			}
+			catch (CoreException $e)
+			{
+				echo $e;
+				require FRAMEWORK_DIR.DS.'config'.DS.'config.php';
+			}
+		}
 		self::$config = $config;
 	}
 

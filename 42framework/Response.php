@@ -10,48 +10,39 @@ class Response
 	 * Contains the response
 	 * @var mixed (Framework\View or string)
 	 */
-	protected $body = null;
+	protected $body = '';
 	
-	protected static $status = '200 OK';
+	protected $status = '200 OK';
 
-	protected static $cookies = array();
+	protected $cookies = array();
 
-	protected static $headers = array();
+	protected $headers = array();
 
 	protected static $instance = null;
 	
-	protected static $current = null;
 
-	protected function __construct ()
-	{
-		self::$current = $this;
-	}
+	protected function __construct () { }
 
 	protected function __clone () { }
 
 	public static function getInstance ()
 	{
-		if (self::$instance == null)
+		if (Response::$instance == null)
 		{
-			self::$instance = new self();
+			Response::$instance = new Response();
 		}
-		return self::$instance;
+		return Response::$instance;
 	}
 	
-	public static function factory ()
+	public function factory()
 	{
 		return new Response();
 	}
 	
 	public function clearResponse ()
 	{
-		$this->setBody(null);
+		$this->setBody('');
 		return $this;
-	}
-	
-	public static function getCurrent ()
-	{
-		return self::$current;
 	}
 	
 	public function getBody ()
@@ -67,17 +58,17 @@ class Response
 
 	public function getStatus ()
 	{
-		return self::$status;
+		return $this->status;
 	}
 
 	public function getCookies ()
 	{
-		return self::$cookies;
+		return $this->cookies;
 	}
 
 	public function getHeaders ()
 	{
-		return self::$headers;
+		return $this->headers;
 	}
 
 	public function reset ()
@@ -87,26 +78,31 @@ class Response
 
 	public function resetStatus ()
 	{
-		self::$status = '200 OK';
+		$this->status = '200 OK';
 		return $this;
 	}
 
 	public function resetHeaders ()
 	{
-		self::$headers = array();
+		$this->headers = array();
 		return $this;
 	}
 
 	public function resetCookies ()
 	{
-		self::$cookies = array();
+		$this->cookies = array();
 		return $this;
 	}
 
 	protected function setStatus ($status)
 	{
-		self::$status = $status;
+		$this->status = $status;
 		return $this;
+	}
+	
+	public function stopProcess()
+	{
+		Core::getInstance()->render($this);
 	}
 
 	public function setHeader ($name, $value)
@@ -115,13 +111,13 @@ class Response
 		{
 			throw new ResponseException('Invalid header type.');
 		}
-		self::$headers[$name] = $value;
+		$this->headers[$name] = $value;
 		return $this;
 	}
 
 	public function setCookie ($name, $value = null, $expire = null, $path = null, $domain = null, $secure = null)
 	{
-		self::$cookies[$name] = array('value' => $value, 'expire' => $expire, 'path' => $path, 'domain' => $domain, 'secure' => $secure);
+		$this->cookies[$name] = array('value' => $value, 'expire' => $expire, 'path' => $path, 'domain' => $domain, 'secure' => $secure);
 		return $this;
 	}
 
@@ -284,10 +280,15 @@ class Response
 
 	public function getHeader ($name)
 	{
-		return (isset(self::$headers[$name]) == false ? null : self::$headers[$name]);
+		return (isset($this->headers[$name]) == false ? null : $this->headers[$name]);
 	}
 	
 	public function __toString()
+	{
+		return $this->render();
+	}
+	
+	public function render()
 	{
 		if ($this->body instanceof View)
 		{

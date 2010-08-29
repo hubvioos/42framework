@@ -1,7 +1,5 @@
 *~
-app/logs/*
-app/medias/*
-app/cache/*
+application/build/*
 */*.orig
 .project
 .project/*

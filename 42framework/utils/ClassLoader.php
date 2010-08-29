@@ -35,11 +35,11 @@ class ClassLoader
 	{
 		if (empty($module) || empty($action))
 		{
-			throw new ClassLoaderException('getControllerName : Missing argument.');
+			throw new ClassLoaderException('getControllerClassName : Missing argument.');
 		}
 		if (!isset(self::$actionsMap[$module][$action]))
 		{
-			throw new ClassLoaderException('getControllerName : '.$action.' action in '.$module.' module doesn\'t exist in actionsMap. Try recompile it.');
+			throw new ClassLoaderException('getControllerClassName : \''.$action.'\' action in \''.$module.'\' module doesn\'t exist in actionsMap.');
 		}
 		return self::$actionsMap[$module][$action];
 	}

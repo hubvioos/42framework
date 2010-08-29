@@ -4,8 +4,8 @@ defined('FRAMEWORK_DIR') or die('Invalid script access');
 $config = array(
     'defaultModule' => 'website',
     'defaultAction' => 'index',
-	'defaultView' => 'index.php',
-	'defaultLayout' => 'default.php',
+	'defaultLayout' => FRAMEWORK_DIR.DS.'views'.DS.'layout'.DS.'defaultLayout.php',
 	'defaultCharset' => 'utf-8',
-	'defaultLanguage' => 'fr'
+	'defaultLanguage' => 'fr',
+	'routes' => array()
 	);

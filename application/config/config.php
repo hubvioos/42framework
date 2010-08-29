@@ -2,5 +2,6 @@
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
 $config = array(
-    'siteUrl' => 'http://www.42framework.com/'
+    'siteUrl' => 'http://localhost:80/42framework/',
+    'routes' => array('testroute' => array('module' => 'test', 'action' => 'qwerty', 'params' => array()))
     );

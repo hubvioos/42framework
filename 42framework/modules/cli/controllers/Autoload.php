@@ -12,10 +12,12 @@ class CliAutoload extends CliGeneric
 		
 		$finder = new \TheSeer\Tools\ClassFinder;
 		
-		$found = array_merge($finder->parseMulti($scanner(VENDORS_DIR)), $finder->parseMulti($scanner(FRAMEWORK_DIR)), $finder->parseMulti($scanner(APPLICATION_DIR)));
+		$found = array_merge($finder->parseMulti($scanner(VENDORS_DIR)), 
+							 $finder->parseMulti($scanner(FRAMEWORK_DIR)), 
+							 $finder->parseMulti($scanner(APPLICATION_DIR)));
 		
 		$ab = new \TheSeer\Tools\AutoloadBuilder($found);
-		$ab->setTemplateFile(FRAMEWORK_DIR.DS.'modules'.DS.'cli'.DS.'views'.DS.'template.php');
+		$ab->setTemplateFile(FRAMEWORK_DIR.DS.'modules'.DS.'cli'.DS.'views'.DS.'autoloadTemplate.php');
 		$ab->save(APPLICATION_DIR.DS.'build'.DS.'autoload.php');
 	}
 	
@@ -26,20 +28,27 @@ class CliAutoload extends CliGeneric
 		
 		$finder = new \TheSeer\Tools\ClassFinder;
 		
-		$found = array_merge($finder->parseMulti($scanner(FRAMEWORK_DIR.DS.'modules')), $finder->parseMulti($scanner(APPLICATION_DIR.DS.'modules')));
+		$found = array_merge($finder->parseMulti($scanner(FRAMEWORK_DIR.DS.'modules')), 
+							 $finder->parseMulti($scanner(APPLICATION_DIR.DS.'modules')));
+		
 		$actionsMap = array();
 		foreach (array_keys($found) as $class)
 		{
 			$ref = new \ReflectionClass(stripslashes($class));
 			
-			$methods = $ref->getMethods();
+			$methods = $ref->getMethods(\ReflectionMethod::IS_PUBLIC);
 			$namespace = $ref->getNamespaceName();
 			list(,,$module) = explode('\\', $namespace);
 			foreach ($methods as $method)
 			{
-				$actionsMap[$module][$method->getName()] = $class;
+				if (strpos($method->getName(), '__') === false && !$ref->isSubclassOf('\Exception'))
+				{
+					$actionsMap[$module][$method->getName()] = $class;
+				}
 			}
 		}
-		var_dump($actionsMap);
+		$ab = new \Application\Modules\Cli\ActionsMapBuilder($actionsMap);
+		$ab->setTemplateFile(FRAMEWORK_DIR.DS.'modules'.DS.'cli'.DS.'views'.DS.'actionsMapTemplate.php');
+		$ab->save(APPLICATION_DIR.DS.'build'.DS.'actionsMap.php');
 	}
 }

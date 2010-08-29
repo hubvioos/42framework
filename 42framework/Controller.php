@@ -28,11 +28,12 @@ class Controller
 	protected $request = null;
 	
 	/**
-	 * Contains the main response
+	 * Contains, eventually, a response
 	 * 
 	 * @var Framework\Response
 	 */
 	protected $response = null;
+	
 
 	public function __construct ()
 	{
@@ -46,23 +47,44 @@ class Controller
 	 */
 	public function execute (Request $request)
 	{
-		$this->before();
-		$actionResponse = call_user_func_array(array($this, $request->action), $request->params);
-		$this->after();
-		
-		if ($this->view !== false)
+		$this->request = $request;
+		$beforeResponse = $this->before($this->request);
+		if ($beforeResponse === true)
 		{
-			if ($this->view === null)
+			$actionResponse = call_user_func_array(array($this, $this->request->action), $this->request->params);
+			$actionResponse = $this->after($this->request, $actionResponse);
+			
+			if ($this->view !== false)
 			{
-				$this->setView($request->action);
+				if ($this->view === null)
+				{
+					$this->setView($this->request->action);
+				}
+				$response = View::factory($this->view, $this->vars);
 			}
-			$response = Response::factory(View::factory($this->view, $this->vars));
+			else 
+			{
+				if ($actionResponse === null)
+				{
+					$actionResponse = '';
+				}
+				$response = $actionResponse;
+			}
 		}
-		else 
+		else
 		{
-			$response = Response::factory($actionResponse);
+			if ($this->response !== null)
+			{
+				$response = $this->response;
+			}
+			else 
+			{
+				$response = '';
+			}
 		}
 		
+		$this->request = null;
+		$this->response = null;
 		$this->view = null;
 		$this->vars = array();
 		
@@ -74,7 +96,7 @@ class Controller
 	 * 
 	 * @param mixed $view (string or false)
 	 */
-	public function setView ($view)
+	protected function setView ($view)
 	{
 		$this->view = $view;
 		return $this;
@@ -86,7 +108,7 @@ class Controller
 	 * @param mixed $var (array or string)
 	 * @param mixed $value
 	 */
-	public function set ($var, $value = false)
+	protected function set ($var, $value = false)
 	{
 		if (is_array($var))
 		{
@@ -99,13 +121,26 @@ class Controller
 		return $this;
 	}
 	
-	public function before ()
+	/**
+	 * Filter executed before the action
+	 * 
+	 * @param Framework\Request $request
+	 * @return mixed (boolean or Framework\Response)
+	 */
+	protected function before (Request $request)
 	{
-		
+		return true;
 	}
 	
-	public function after ()
+	/**
+	 * Filter executed after the action
+	 * 
+	 * @param Framework\Request $request
+	 * @param mixed $actionResponse
+	 * @return mixed
+	 */
+	protected function after (Request $request, $actionResponse)
 	{
-		
+		return $actionResponse;
 	}
 }
