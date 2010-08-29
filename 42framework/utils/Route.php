@@ -36,18 +36,11 @@ class Route
 	
 	public static function paramsToPath($params)
 	{
-		$path = null;
-
-		if($params['module'] !== \Framework\Config::$config['defaultModule'])
-		{
-			$path .= $params['module'];
-		}
-
-		$path .= '/'.$params['action'];
+		$path .= $params['module'] .'/'.$params['action'];
 
 		if(!empty($params['params']))
 		{
-			$path .= '/'.implode('/', $params['params']);
+			$path .= '/' . implode('/', $params['params']);
 		}
 
 		return $path;
