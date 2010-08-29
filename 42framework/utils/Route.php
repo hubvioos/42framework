@@ -18,7 +18,7 @@ class Route
 		{
 			$routes = array();
 		}
-		self::$routes = $routes;
+		Route::$routes = $routes;
 	}
 	
 	public static function pathToParams($path)
@@ -86,7 +86,7 @@ class Route
 		 * Change URL into path
 		 *
 		 */
-		foreach(self::$routes as $routeUrl => $routeParams)
+		foreach(Route::$routes as $routeUrl => $routeParams)
 		{
 		    // Check if route is dynamic
 		    if (strpos($routeUrl, '<') !== false)
@@ -143,9 +143,9 @@ class Route
 			$url = rtrim($url, '/');
 		}
 		
-        $pathParams = self::pathToParams($url);
+        $pathParams = Route::pathToParams($url);
 		
-		foreach($this->routes as $routeUrl => $routeParams)
+		foreach(Route::$routes as $routeUrl => $routeParams)
 		{
 		    $regex = $routeUrl['module'] . '/' . $routeUrl['action'];
 		    
@@ -205,11 +205,11 @@ class Route
 	
 	public static function paramsToUrl($params) 
 	{
-		return self::pathToUrl(self::paramsToPath($params));
+		return Route::pathToUrl(Route::paramsToPath($params));
 	}
 	
 	public static function urlToParams($url)
 	{
-		return self::pathToParams(self::urlToPath($url));
+		return Route::pathToParams(Route::urlToPath($url));
 	}
 }
