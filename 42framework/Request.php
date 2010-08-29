@@ -57,6 +57,8 @@ class Request
 
 	public static function getInstance ()
 	{
+	    $path = null;
+	    
 		if (Request::$instance === null)
 		{
 			if (PHP_SAPI === 'cli')
@@ -69,6 +71,23 @@ class Request
 			{
 				Request::$url = $_GET['url'];
 				$params = Utils\Route::urlToParams(Request::$url);
+				
+				// Redirect to root if we use the default module and action.
+				if (Request::$url != '' 
+				    && $params['module'] == Config::$config['defaultModule']
+				    && $params['action'] == Config::$config['defaultAction']
+				    && empty($params['params'])
+				    )
+				{
+				    \Framework\Response::getInstance()->redirect(\Framework\Config::$config['siteUrl'], 301, true);
+				}
+				
+				// Avoid duplicate content with just a "/" after the URL
+				if(strrchr(Request::$url, '/') === '/')
+				{
+				    \Framework\Response::getInstance()->redirect(\Framework\Config::$config['siteUrl'] . rtrim(Request::$url, '/'), 301, true);  
+				}
+	
 				
 				Request::$instance = Request::factory($params['module'], $params['action'], $params['params'], false);
 				

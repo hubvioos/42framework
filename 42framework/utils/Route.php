@@ -55,7 +55,7 @@ class Route
 	
 	public static function urlToPath($url) 
 	{    
-	    $path = $url;
+	    $path = rtrim($url, '/');
 	    
 	    $routed = false;
 	    $redirect = false;
@@ -63,13 +63,6 @@ class Route
 	    $defaultModule = \Framework\Config::$config['defaultModule'];
 	    $defaultAction = \Framework\Config::$config['defaultAction'];
 	    $defaultPath = $defaultModule . '/' . $defaultAction;
-	    
-	    // Clean the "/" at the end of the url
-		if(strrchr($path, '/') === '/')
-		{
-			$path = rtrim($path, '/');
-			$redirect = true;
-		}
 		
 		/*
 		 * Redirect to the default path in some cases
@@ -89,18 +82,11 @@ class Route
 		    if ($explodedUrl[0] === \Framework\Config::$config['defaultAction'])
 		    {
 		        $path = $defaultPath;
-		        
-    		    $redirect = true;
 		    }
 		    else
 		    {
                 $path = $explodedUrl[0] . '/' . $defaultAction;
-                
-                if ($explodedUrl[0] === $defaultModule)
-                {
-        		    $redirect = true;
-                }
-            }		    
+            }
 		}
 		
 		/*
@@ -149,14 +135,7 @@ class Route
 		        }
 		    }
 		}
-				
-		
-		// Redirect if we need to.
-		if ($redirect)
-		{
-		    \Framework\Response::getInstance()->redirect(\Framework\Config::$config['siteUrl'] . $path, 301, true);
-		}
-			
+	    
 		return $path;
 	}
 	
