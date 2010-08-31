@@ -98,7 +98,7 @@ class Route
     			}
 			
     			// Default regex
-    			preg_replace('/<(\w+)>/', '(.*)', $regex);
+    			preg_replace('#<(\w+)>#', '(.*)', $regex);
 			
     			if(preg_match_all('#^'.$regex.'$#', $url, $match, PREG_SET_ORDER))
     			{
@@ -150,7 +150,7 @@ class Route
 		    $regex = $routeParams['module'] . '/' . $routeParams['action'];
 		    
             // On sort chaque argument de la route
-    		if (preg_match_all('/<(\w+)>/', $routeUrl, $args, PREG_SET_ORDER))
+    		if (preg_match_all('#<(\w+)>#', $routeUrl, $args, PREG_SET_ORDER))
 			{
 				$url = $routeUrl;
 
@@ -175,7 +175,7 @@ class Route
     			}
 
     			// We check the path with the newly created regex.
-    			if (preg_match_all($regex, $url, $match, PREG_SET_ORDER))
+    			if (preg_match_all('#^'.$regex.'$#', $url, $match, PREG_SET_ORDER))
     			{
     			    array_shift($match[0]);
     			    
