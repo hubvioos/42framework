@@ -10,26 +10,25 @@ class CliUtils
 	 */
 	public static function extractParams ()
 	{
-		return array('action' => 'compileAutoload', 'params' => array());
-		if ($argc === 1)
+		if ($_SERVER['argc'] === 1)
 		{
 			return array('action' => 'showDoc', 'params' => array('all'));
 		}
-		if ($argc === 2)
+		if ($_SERVER['argc'] === 2)
 		{
-			return array('action' => $argv[1], 'params' => array());
+			return array('action' => $_SERVER['argv'][1], 'params' => array());
 		}
 		
 		$params = array('action' => '', 'params' => array());
-		for ($i = 1; $i < $argc; $i++)
+		for ($i = 1; $i < $_SERVER['argc']; $i++)
 		{
 			if ($i === 1)
 			{
-				$params['action'] = $argv[$i];
+				$params['action'] = $_SERVER['argv'][$i];
 			}
 			else 
 			{
-				$params['params'][] = $argv[$i];
+				$params['params'][] = $_SERVER['argv'][$i];
 			}
 		}
 		return $params;

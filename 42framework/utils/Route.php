@@ -147,11 +147,13 @@ class Route
 		
 		foreach(Route::$routes as $routeUrl => $routeParams)
 		{
-		    $regex = $routeUrl['module'] . '/' . $routeUrl['action'];
+		    $regex = $routeParams['module'] . '/' . $routeParams['action'];
 		    
             // On sort chaque argument de la route
     		if (preg_match_all('/<(\w+)>/', $routeUrl, $args, PREG_SET_ORDER))
 			{
+				$url = $routeUrl;
+
     			array_shift($args[0]);
     			
     			foreach($args[0] as $value) // Pour chaque argument on check si ça correspond

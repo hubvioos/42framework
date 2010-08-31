@@ -72,7 +72,7 @@ class Request
 				Request::$url = $_GET['url'];
 				$path = Utils\Route::urlToPath(Request::$url);
 				$params = Utils\Route::pathToParams($path);
-				
+
 				// Redirect to root if we use the default module and action.
 				if (Request::$url != '' 
 				    && $params['module'] == Config::$config['defaultModule']
@@ -82,9 +82,9 @@ class Request
 				{
 				    \Framework\Response::getInstance()->redirect(\Framework\Config::$config['siteUrl'], 301, true);
 				}
-				
 				// Avoid duplicate content of the routes.
-				if ($path != Utils\Route::pathToUrl($path))
+				else if (Request::$url != Utils\Route::pathToUrl($path)
+					&& Request::$url != '')
 				{
 				    \Framework\Response::getInstance()->redirect(\Framework\Config::$config['siteUrl'] . Utils\Route::pathToUrl($path), 301, true);
 				}
