@@ -58,28 +58,13 @@ class Route
 	    $defaultPath = $defaultModule . '/' . $defaultAction;
 		
 		/*
-		 * Redirect to the default path in some cases
+		 * Redirect to the default path if empty
 		 *
 		 */
-		
 		if ($path === '')
 		{
 		    $path = $defaultPath;
 			return $path;
-		}
-		
-		$explodedUrl = explode('/', $path);
-		
-		if (sizeof($explodedUrl) == 1)
-		{
-		    if ($explodedUrl[0] === \Framework\Config::$config['defaultAction'])
-		    {
-		        $path = $defaultPath;
-		    }
-		    else
-		    {
-                $path = $explodedUrl[0] . '/' . $defaultAction;
-            }
 		}
 		
 		/*
@@ -128,6 +113,26 @@ class Route
 		        }
 		    }
 		}
+		
+		/*
+		 * Redirect to the default path if missing arguments.
+		 *
+		 */
+		 
+		$explodedUrl = explode('/', $path);
+		
+		if (sizeof($explodedUrl) == 1)
+		{
+		    if ($explodedUrl[0] === \Framework\Config::$config['defaultAction'])
+		    {
+		        $path = $defaultPath;
+		    }
+		    else
+		    {
+                $path = $explodedUrl[0] . '/' . $defaultAction;
+            }
+		}
+        
 	    
 		return $path;
 	}
