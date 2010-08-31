@@ -70,6 +70,7 @@ class Request
 			else 
 			{
 				Request::$url = $_GET['url'];
+
 				$path = Utils\Route::urlToPath(Request::$url);
 				$params = Utils\Route::pathToParams($path);
 

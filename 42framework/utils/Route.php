@@ -77,15 +77,16 @@ class Route
 		    if (strpos($routeUrl, '<') !== false)
 		    {
 			    $regex = $routeUrl;
+
     			foreach($routeParams['params'] as $routeParam => $routeRegex)
     			{
         			$regex = str_replace('<'.$routeParam.'>', '('.$routeRegex.')', $regex);
     			}
-			
+
     			// Default regex
-    			preg_replace('#<(\w+)>#', '(.*)', $regex);
-			
-    			if(preg_match_all('#^'.$regex.'$#', $url, $match, PREG_SET_ORDER))
+    			$regex = preg_replace('#<\w*>#', '(.*)', $regex);
+				
+    			if(preg_match_all('#^'.$regex.'$#', $path, $match, PREG_SET_ORDER))
     			{
     			    $path = $routeParams['module'] . '/' . $routeParams['action'];
 			    
@@ -94,13 +95,13 @@ class Route
     			    {
     			        $path .= '/' . $value;
     			    }
-			    
+
     			    break;
     			}
 		    }
 		    else
 		    {
-		        if ($routeUrl == $url)
+		        if ($routeUrl == $path)
 		        {
 		            $path = $routeParams['module'] . '/' . $routeParams['action'];
 		            
@@ -149,7 +150,7 @@ class Route
 		}
 		
         $pathParams = Route::pathToParams($url);
-		
+
 		foreach(Route::$routes as $routeUrl => $routeParams)
 		{
 		    $regex = $routeParams['module'] . '/' . $routeParams['action'];
@@ -157,8 +158,6 @@ class Route
             // On sort chaque argument de la route
     		if (preg_match_all('#<(\w+)>#', $routeUrl, $args, PREG_SET_ORDER))
 			{
-				$url = $routeUrl;
-
     			array_shift($args[0]);
     			
     			foreach($args[0] as $value) // Pour chaque argument on check si ça correspond
@@ -173,6 +172,7 @@ class Route
         			        break;
         			    }
         			}
+
     			    if (!$found)
     			    {
     			        $regex .= '/' . '(.*)';
@@ -183,13 +183,15 @@ class Route
     			if (preg_match_all('#^'.$regex.'$#', $url, $match, PREG_SET_ORDER))
     			{
     			    array_shift($match[0]);
-    			    
+
+					$url = $routeUrl;
+
     			    // And we replace each arg by its value.
     			    foreach($args[0] as $key => $value)
     			    {
     			        $url = str_replace('<'.$value.'>', $match[0][$key], $url);
     			    }
-    			    
+
     			    return $url;
     			}
 			}
