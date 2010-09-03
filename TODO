@@ -18,3 +18,5 @@
 - Compiler les routes
 
 - Interface TheSeer
+
+- Ecriture des jeux de tests (PHPUnit)
