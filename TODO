@@ -1,0 +1,20 @@
+- ErrorHandler
+- Logger
+- Errors
+
+- Model
+
+
+- View -> path par défaut + path de views publics ?
+
+- Modifier l'AutoLoad pour mieux intégrer l'ActionsMap
+	-> Regrouper le compile autoload et actionsmap
+	-> faire en sorte que l'actionsMap ne soit pas trop bloquant
+- Améliorer installation depuis rien (+ de paramètres par défaut entre autre)
+
+- Un peu améliorer le modèle objet
+- Séparer Request et Context
+
+- Compiler les routes
+
+- Interface TheSeer
