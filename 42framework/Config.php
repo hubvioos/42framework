@@ -21,7 +21,6 @@ class Config
 			}
 			catch (CoreException $e)
 			{
-				echo $e;
 				require FRAMEWORK_DIR.DS.'config'.DS.'config.php';
 			}
 		}

@@ -8,5 +8,6 @@ $config = array(
 	'defaultCharset' => 'utf-8',
 	'defaultLanguage' => 'fr',
 	'viewExtension' => '.php',
+	'siteUrl' => 'http://localhost/',
 	'routes' => array()
 	);

@@ -14,7 +14,7 @@ class CliCommand extends \Framework\Controller
 	{
 		if (!$request->isInternal)
 		{
-			$this->response = \Framework\Request::factory('errors', 'accesDenied', array($request))->execute();
+			$this->_response = \Framework\Request::factory('errors', 'accesDenied', array($request))->execute();
 			return false;
 		}
 		return true;

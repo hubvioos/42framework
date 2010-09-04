@@ -8,8 +8,14 @@ define('VENDORS_DIR', APPLICATION_DIR.DS.'vendors');
 
 $autoload = array();
 $config = array();
-include APPLICATION_DIR.DS.'build'.DS.'autoload.php';
-include APPLICATION_DIR.DS.'build'.DS.'config.php';
+if (file_exists(APPLICATION_DIR.DS.'build'.DS.'autoload.php'))
+{
+	include APPLICATION_DIR.DS.'build'.DS.'autoload.php';
+}
+if (file_exists(APPLICATION_DIR.DS.'build'.DS.'config.php'))
+{
+	include APPLICATION_DIR.DS.'build'.DS.'config.php';
+}
 require FRAMEWORK_DIR.DS.'Core.php';
 require FRAMEWORK_DIR.DS.'utils'.DS.'ClassLoader.php';
 

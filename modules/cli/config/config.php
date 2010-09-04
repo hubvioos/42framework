@@ -1,2 +1,0 @@
-<?php
-$actionsMap = array();

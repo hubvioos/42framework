@@ -4,7 +4,7 @@ use TheSeer\Tools;
 
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
-class ConfigBuilder extends \TheSeer\Tools\AutoloadBuilder
+class ConfigBuilder extends AutoloadBuilder
 {
 	public function render ()
 	{
@@ -48,7 +48,18 @@ class ConfigBuilder extends \TheSeer\Tools\AutoloadBuilder
 				}
 				else 
 				{
-					$entries[] = "'$key' => '$v'";
+					if ($v === true)
+					{
+						$entries[] = "'$key' => true";
+					}
+					else if ($v === false)
+					{
+						$entries[] = "'$key' => false";
+					}
+					else
+					{
+						$entries[] = "'$key' => '$v'";
+					}
 				}
 			}
 			else
