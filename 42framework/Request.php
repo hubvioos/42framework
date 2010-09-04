@@ -14,29 +14,9 @@ class Request
 	
 	public $isInternal = true;
 	
-	public static $url = null;
-	
-	public static $ipAddress = '0.0.0.0';
-	
-	public static $userAgent = null;
-	
-	public static $acceptCharset = null;
-	
-	public static $acceptLanguage = null;
-	
-	public static $acceptEncoding = null;
-	
-	public static $isSecure = false;
-	
 	public static $method = 'GET';
 	
-	public static $isAjax = false;
-	
-	public static $protocol = 'http';
-	
-	public static $isCli = false;
-	
-	protected static $current = null;
+    protected static $current = null;
 
 	protected static $instance = null;
 
@@ -71,7 +51,7 @@ class Request
 			{
 				Request::$url = $_GET['url'];
 
-				$path = Utils\Route::urlToPath(Request::$url);
+				$path = Utils\Route::urlToPath(Request::$url, Config::$config['defaultModule'], Config::$config['defaultAction']);
 				$params = Utils\Route::pathToParams($path);
 
 				// Redirect to root if we use the default module and action.
@@ -81,57 +61,24 @@ class Request
 				    && empty($params['params'])
 				    )
 				{
-				    \Framework\Response::getInstance()->redirect(\Framework\Config::$config['siteUrl'], 301, true);
+				    Response::getInstance()->redirect(Config::$config['siteUrl'], 301, true);
 				}
 				// Avoid duplicate content of the routes.
 				else if (Request::$url != Utils\Route::pathToUrl($path)
 					&& Request::$url != '')
 				{
-				    \Framework\Response::getInstance()->redirect(\Framework\Config::$config['siteUrl'] . Utils\Route::pathToUrl($path), 301, true);
+				    Response::getInstance()->redirect(Config::$config['siteUrl'] . Utils\Route::pathToUrl($path), 301, true);
 				}
 								
 				// Avoid duplicate content with just a "/" after the URL
 				if(strrchr(Request::$url, '/') === '/')
 				{
-				    \Framework\Response::getInstance()->redirect(\Framework\Config::$config['siteUrl'] . rtrim(Request::$url, '/'), 301, true);  
+				    Response::getInstance()->redirect(Config::$config['siteUrl'] . rtrim(Request::$url, '/'), 301, true);  
 				}
 	
-				
 				Request::$instance = Request::factory($params['module'], $params['action'], $params['params'], false);
 				
-				if (isset($_SERVER['HTTP_X_FORWARDED_FOR']))
-				{
-					Request::$ipAddress = $_SERVER['HTTP_X_FORWARDED_FOR'];
-				}
-				elseif (isset($_SERVER['HTTP_CLIENT_IP']))
-				{
-					Request::$ipAddress = $_SERVER['HTTP_CLIENT_IP'];
-				}
-				elseif (isset($_SERVER['REMOTE_ADDR']))
-				{
-					Request::$ipAddress = $_SERVER['REMOTE_ADDR'];
-				}
-				
-				if (!filter_var(Request::$ipAddress, FILTER_VALIDATE_IP))
-				{
-					Request::$ipAddress = '0.0.0.0';
-				}
-				
-				Request::$userAgent = (!isset($_SERVER['HTTP_USER_AGENT'])) ? null : $_SERVER['HTTP_USER_AGENT'];
-				
-				Request::$method = (!isset($_SERVER['REQUEST_METHOD'])) ? 'GET' : $_SERVER['REQUEST_METHOD'];
-				
-				Request::$acceptCharset = (!isset($_SERVER['HTTP_ACCEPT_CHARSET'])) ? Config::$config['defaultCharset'] : Request::$instance->extractValue(
-					$_SERVER['HTTP_ACCEPT_CHARSET']);
-				
-				Request::$acceptEncoding = (!isset($_SERVER['HTTP_ACCEPT_ENCODING'])) ? null : Request::$instance->extractValue($_SERVER['HTTP_ACCEPT_ENCODING']);
-				
-				Request::$acceptLanguage = (!isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) ? Config::$config['defaultLanguage'] : Request::$instance->extractValue(
-					$_SERVER['HTTP_ACCEPT_LANGUAGE']);
-				
-				Request::$isSecure = (!empty($_SERVER['HTTPS']) && filter_var($_SERVER['HTTPS'], FILTER_VALIDATE_BOOLEAN));
-				
-				Request::$isAjax = (isset($_SERVER['HTTP_X_REQUESTED_WITH']) AND strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
+        		Request::$method = (!isset($_SERVER['REQUEST_METHOD'])) ? 'GET' : $_SERVER['REQUEST_METHOD'];
 			}
 		}
 		return Request::$instance;

@@ -46,15 +46,18 @@ class Route
 		return $path;
 	}
 	
-	public static function urlToPath($url) 
-	{    
+	public static function urlToPath($url, $defaultModule, $defaultAction) 
+	{
+	    if (!is_string($url) || !is_string($defaultModule) || !is_string($defaultAction))
+		{
+			throw new RouteException(__METHOD__ . ' : Invalid params');
+		}
+		
 	    $path = rtrim($url, '/');
 	    
 	    $routed = false;
 	    $redirect = false;
 	    
-	    $defaultModule = \Framework\Config::$config['defaultModule'];
-	    $defaultAction = \Framework\Config::$config['defaultAction'];
 	    $defaultPath = $defaultModule . '/' . $defaultAction;
 		
 		/*
