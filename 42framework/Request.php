@@ -19,6 +19,8 @@ class Request
     protected static $current = null;
 
 	protected static $instance = null;
+	
+	protected static $url = null;
 
 	/*
 		Constructeur de la classe, partie importante pour l'exécution de la page.
@@ -117,7 +119,7 @@ class Request
 	
 	public function execute ()
 	{
-		$module = Core::loadModule(Request::$current->module, Request::$current->action);
+		$module = Core::loadAction(Request::$current->module, Request::$current->action);
 		return $module->execute(Request::$current);
 	}
 	

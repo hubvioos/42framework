@@ -1,6 +1,4 @@
 <?php namespace Application\modules\cli\controllers;
-use Framework;
-
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
 class CliException extends \Exception { }
@@ -12,7 +10,7 @@ class CliCommand extends \Framework\Controller
 	 * 
 	 * @param Framework\Request $request
 	 */
-	public function before($request)
+	public function _before($request)
 	{
 		if (!$request->isInternal)
 		{
@@ -22,7 +20,7 @@ class CliCommand extends \Framework\Controller
 		return true;
 	}
 	
-	public function after($request, $actionResponse)
+	public function _after($request, $actionResponse)
 	{
 		$this->setView(false);
 		\Framework\View::setGlobal('layout', false);

@@ -4,7 +4,7 @@ defined('FRAMEWORK_DIR') or die('Invalid script access');
 
 class ContextException extends \Exception { }
 
-class Context ()
+class Context
 {    
 	public static $url = null;
 	

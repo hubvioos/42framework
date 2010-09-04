@@ -7,5 +7,6 @@ $config = array(
 	'defaultLayout' => false,
 	'defaultCharset' => 'utf-8',
 	'defaultLanguage' => 'fr',
+	'viewExtension' => '.php',
 	'routes' => array()
 	);

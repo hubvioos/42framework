@@ -1,11 +1,10 @@
-<?php
-use Framework\Utils;
+<?php 
 define('DS', DIRECTORY_SEPARATOR);
 define('WEBROOT', dirname(__FILE__));
 define('APPLICATION_DIR', dirname(WEBROOT));
-define('FRAMEWORK_DIR', dirname(APPLICATION_DIR).DS.'42framework');
-define('MODULES_DIR', dirname(APPLICATION_DIR).DS.'modules');
-define('VENDORS_DIR', dirname(APPLICATION_DIR).DS.'vendors');
+define('FRAMEWORK_DIR', APPLICATION_DIR.DS.'42framework');
+define('MODULES_DIR', APPLICATION_DIR.DS.'modules');
+define('VENDORS_DIR', APPLICATION_DIR.DS.'vendors');
 
 $autoload = array();
 $config = array();

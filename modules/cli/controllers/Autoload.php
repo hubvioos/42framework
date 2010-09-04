@@ -3,9 +3,9 @@ defined('FRAMEWORK_DIR') or die('Invalid script access');
 
 class CliAutoloadException extends \Exception { }
 
-class CliAutoload extends CliGeneric
+class CompileAutoload extends CliGeneric
 {
-	public function compileAutoload ()
+	public function processAction ()
 	{
 		$scanner = new \TheSeer\Tools\DirectoryScanner;
 		$scanner->addInclude('*.php');

@@ -2,7 +2,7 @@
 namespace Framework\Utils;
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
-class ClassLoaderException extends Exception { }
+class ClassLoaderException extends \Exception { }
 
 class ClassLoader
 {

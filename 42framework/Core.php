@@ -1,7 +1,5 @@
 <?php
 namespace Framework;
-use Framework\Utils;
-
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
 class CoreException extends \Exception { }
@@ -57,10 +55,10 @@ class Core
 	 * @param Framework\Response $response
 	 * @return Framework\Core
 	 */
-	public function init (Array $config = array(), Array $autoload = array())
+	public function init (Array $autoload = array(), Array $config = array())
 	{
 		\Framework\Utils\ClassLoader::init($autoload);
-		spl_autoload_register(array(\Framework\Utils\ClassLoader, 'loadClass'));
+		spl_autoload_register(array('\\Framework\\Utils\\ClassLoader', 'loadClass'));
 		
 		Config::loadConfig($config);
 		
@@ -133,7 +131,7 @@ class Core
 	 */
 	public function execute()
 	{
-		$this->_response->setBody($this->request->execute());
+		$this->_response->setBody($this->_request->execute());
 		return $this;
 	}
 	
