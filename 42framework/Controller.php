@@ -11,56 +11,56 @@ class Controller
 	 * 
 	 * @var mixed (null, string or false)
 	 */
-	protected $view = null;
+	protected $_view = null;
 
 	/**
 	 * Contains vars for the view
 	 * 
 	 * @var array
 	 */
-	protected $vars = array();
+	protected $_vars = array();
 	
 	/**
 	 * Contains the current request
 	 * 
 	 * @var Framework\Request
 	 */
-	protected $request = null;
+	protected $_request = null;
 	
 	/**
-	 * Contains, eventually, a response
+	 * Contains the response
 	 * 
-	 * @var Framework\Response
+	 * @var mixed (View, string or null)
 	 */
-	protected $response = null;
-	
+	protected $_response = null;
 
-	public function __construct ()
+	public static function factory()
 	{
-		
+		return new self();
 	}
-
+	
 	/**
 	 * Executes the action corresponding to the current request
 	 * 
 	 * @param Framework\Request $request
 	 */
-	public function execute (Request $request)
+	public function execute(Request $request)
 	{
-		$this->request = $request;
-		$beforeResponse = $this->before($this->request);
+		$this->_request = $request;
+		$beforeResponse = $this->_before($this->_request);
 		if ($beforeResponse === true)
 		{
-			$actionResponse = call_user_func_array(array($this, $this->request->action), $this->request->params);
-			$actionResponse = $this->after($this->request, $actionResponse);
+			$actionResponse = null;
+			$actionResponse = call_user_func_array(array($this, 'processAction'), $this->_request->params);
+			$actionResponse = $this->_after($this->_request, $actionResponse);
 			
-			if ($this->view !== false)
+			if ($this->_view !== false)
 			{
-				if ($this->view === null)
+				if ($this->_view === null)
 				{
-					$this->setView($this->request->action);
+					$this->setView($this->_request->action);
 				}
-				$response = View::factory($this->view, $this->vars);
+				$this->_response = View::factory($this->_request->module, $this->_view, $this->_vars);
 			}
 			else 
 			{
@@ -68,27 +68,14 @@ class Controller
 				{
 					$actionResponse = '';
 				}
-				$response = $actionResponse;
+				$this->_response = $actionResponse;
 			}
 		}
-		else
+		elseif ($this->_response === null)
 		{
-			if ($this->response !== null)
-			{
-				$response = $this->response;
-			}
-			else 
-			{
-				$response = '';
-			}
+			$this->_response = '';
 		}
-		
-		$this->request = null;
-		$this->response = null;
-		$this->view = null;
-		$this->vars = array();
-		
-		return $response;
+		return $this->_response;
 	}
 
 	/**
@@ -96,9 +83,9 @@ class Controller
 	 * 
 	 * @param mixed $view (string or false)
 	 */
-	protected function setView ($view)
+	public function setView($view)
 	{
-		$this->view = $view;
+		$this->_view = $view;
 		return $this;
 	}
 
@@ -108,16 +95,28 @@ class Controller
 	 * @param mixed $var (array or string)
 	 * @param mixed $value
 	 */
-	protected function set ($var, $value = false)
+	public function set($var, $value = false)
 	{
 		if (is_array($var))
 		{
-			array_merge($this->vars, $var);
+			array_merge($this->_vars, $var);
 		}
 		else
 		{
-			$this->vars[$var] = $value;
+			$this->_vars[$var] = $value;
 		}
+		return $this;
+	}
+	
+	/**
+	 * Sets a global variable for the view. Shortcut for View::setGlobal()
+	 * 
+	 * @param mixed $var
+	 * @param mixed $value
+	 */
+	public function setGlobal($var, $value)
+	{
+		View::setGlobal($var, $value);
 		return $this;
 	}
 	
@@ -127,7 +126,7 @@ class Controller
 	 * @param Framework\Request $request
 	 * @return mixed (boolean or Framework\Response)
 	 */
-	protected function before (Request $request)
+	protected function _before(Request $request)
 	{
 		return true;
 	}
@@ -139,7 +138,7 @@ class Controller
 	 * @param mixed $actionResponse
 	 * @return mixed
 	 */
-	protected function after (Request $request, $actionResponse)
+	protected function _after(Request $request, $actionResponse)
 	{
 		return $actionResponse;
 	}

@@ -1,5 +1,7 @@
 <?php
 namespace Framework;
+use Framework\Utils;
+
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
 class CoreException extends \Exception { }
@@ -9,31 +11,24 @@ class Core
 	/**
 	 * @var Framework\Core
 	 */
-	protected static $instance = null;
+	protected static $_instance = null;
 	
 	/**
 	 * @var Framework\Request
 	 */
-	protected $request = null;
+	protected $_request = null;
 	
 	/**
 	 * @var Framework\Response
 	 */
-	protected $response = null;
+	protected $_response = null;
 	
 	/**
 	 * Contains models already loaded
 	 * 
 	 * @var Array
 	 */
-	protected $models = array();
-	
-	/**
-	 * Contains modules already loaded
-	 * 
-	 * @var Array
-	 */
-	protected $modules = array();
+	protected $_models = array();
 	
 	
 	protected function __construct() { }
@@ -45,11 +40,11 @@ class Core
 	 */
 	public static function getInstance ()
 	{
-		if (self::$instance === null)
+		if (Core::$_instance === null)
 		{
-			self::$instance = new Core();
+			Core::$_instance = new Core();
 		}
-		return self::$instance;
+		return Core::$_instance;
 	}
 	
 	protected function __clone () { }
@@ -62,11 +57,18 @@ class Core
 	 * @param Framework\Response $response
 	 * @return Framework\Core
 	 */
-	public function init (Array $config = array())
+	public function init (Array $config = array(), Array $autoload = array())
 	{
+		\Framework\Utils\ClassLoader::init($autoload);
+		spl_autoload_register(array(\Framework\Utils\ClassLoader, 'loadClass'));
+		
 		Config::loadConfig($config);
+		
+		date_default_timezone_set('Europe/Paris');
+		
 		Utils\Route::init(Config::$config['routes']);
 		View::setGlobal('layout', Config::$config['defaultLayout']);
+		
 		return $this;
 	}
 	
@@ -81,7 +83,7 @@ class Core
 		{
 			throw new CoreException('setRequest : Param given is not a valid Request.');
 		}
-		$this->request = $request;
+		$this->_request = $request;
 		return $this;
 	}
 	
@@ -96,43 +98,32 @@ class Core
 		{
 			throw new CoreException('setResponse : Param given is not a valid Response.');
 		}
-		$this->response = $response;
+		$this->_response = $response;
 		return $this;
 	}
 	
 	/**
-	 * Load the module $module, if it isn't already loaded
+	 * Load the action $action, from the module $module. Shortcut for ClassLoader::loadController()
 	 * 
 	 * @param string $module
+	 * @param string $action
 	 * @return Framework\Controller
 	 */
-	public static function loadModule ($module, $action)
+	public static function loadAction($module, $action)
 	{
-		$module = Utils\ClassLoader::getControllerClassName($module, $action);
-		
-		if (!isset(self::$instance->modules[$module]))
-		{
-			self::$instance->modules[$module] = new $module;
-		}
-		return self::$instance->modules[$module];
+		return Utils\ClassLoader::loadController($module, $action);
 	}
 	
 	/**
-	 * Load the model $model, from the module $module, if it isn't already loaded
+	 * Load the model $model, from the module $module. Shortcut for ClassLoader::loadModel()
 	 * 
 	 * @param string $module
 	 * @param string $model
 	 * @return Framework\Model
 	 */
-	public static function loadModel ($module, $model)
+	public static function loadModel($module, $model)
 	{
-		$model = Utils\ClassLoader::getModelClassName($module, $model);
-		
-		if (!isset(self::$instance->models[$model]))
-		{
-			self::$instance->models[$model] = new $model;
-		}
-		return self::$instance->models[$model];
+		return Utils\ClassLoader::loadModel($module, $model);
 	}
 	
 	/**
@@ -140,9 +131,9 @@ class Core
 	 * 
 	 * @return Framework\Core
 	 */
-	public function execute ()
+	public function execute()
 	{
-		$this->response->setBody($this->request->execute());
+		$this->_response->setBody($this->request->execute());
 		return $this;
 	}
 	
@@ -164,13 +155,13 @@ class Core
 			{
 				View::setGlobal('layout', Config::$config['defaultLayout']);
 			}
-			View::setGlobal('contentForLayout', $this->response->getBody());
-			$this->response->clearResponse();
-			$this->response->setBody(View::factory(View::getGlobal('layout')));
+			View::setGlobal('contentForLayout', $this->_response->getBody());
+			$this->_response->clearResponse();
+			$this->_response->setBody(View::factory(View::getGlobal('layout')));
 		}
 		
-		$this->response->send();
-		echo $this->response;
+		$this->_response->send();
+		echo $this->_response;
 		
 		exit();
 	}
@@ -180,9 +171,9 @@ class Core
 	 * 
 	 * @return Framework\Response
 	 */
-	public function getResponse ()
+	public function getResponse()
 	{
-		return $this->response;
+		return $this->_response;
 	}
 	
 	/**
@@ -190,8 +181,8 @@ class Core
 	 * 
 	 * @return Framework\Request
 	 */
-	public function getRequest ()
+	public function getRequest()
 	{
-		return $this->request;
+		return $this->_request;
 	}
 }

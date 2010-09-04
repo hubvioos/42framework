@@ -7,72 +7,80 @@ class ViewException extends \Exception { }
 class View
 {
 	// adresse du fichier de vue à inclure
-	protected $file;
+	protected $_file;
 
 	// variables supplèmentaires
-	protected $vars = array();
+	protected $_vars = array();
 	
-	protected static $globalsVars = array();
+	protected static $_globalsVars = array();
 
 	// on définit l'adresse du fichier de vue à inclure et on récupère les variables supplémentaires
-	public function __construct ($file, $vars = false)
+	public function __construct ($module, $file, $vars = false)
 	{
-		$this->file = $file;
+		$this->_file = MODULES_DIR.DS.$module.DS.'views'.DS.$file;
 		
-		if (!file_exists($this->file))
+		if (!file_exists($this->_file))
 		{
-			throw new ViewException($this->file.' : View doesn\'t exist.');
+			$globalFile = APPLICATION_DIR.DS.'views'.DS.$file;
+			if (file_exists($globalFile))
+			{
+				$this->_file = $globalFile;
+			}
+			else
+			{
+				throw new ViewException($this->_file.' : View not found.');
+			}
 		}
 		
 		if ($vars !== false)
 		{
-			$this->vars = $vars;
+			$this->_vars = $vars;
 		}
 	}
 	
-	public static function factory ($file, $vars = false)
+	public static function factory ($module, $file, $vars = false)
 	{
-		return new View($file, $vars);
+		return new View($module, $file, $vars);
 	}
 
 	// assigne une variable supplémentaire au tableau vars
 	public function __set ($name, $value)
 	{
-		$this->vars[$name] = $value;
+		$this->_vars[$name] = $value;
 	}
 	
 	public function __get($name)
 	{
-		if (!isset($this->vars[$name]))
+		if (!isset($this->_vars[$name]))
 		{
 			return null;
 		}
-		return $this->vars[$name];
+		return $this->_vars[$name];
 	}
 	
 	// assigne une variable supplémentaire au tableau vars
 	public static function setGlobal ($name, $value)
 	{
-		self::$globalsVars[$name] = $value;
+		View::$_globalsVars[$name] = $value;
 	}
 	
 	public static function getGlobal($name)
 	{
-		if (!isset(self::$globalsVars[$name]))
+		if (!isset(View::$_globalsVars[$name]))
 		{
 			return null;
 		}
-		return self::$globalsVars[$name];
+		return View::$_globalsVars[$name];
 	}
 
 	// effectue le rendu de la vue
 	public function render ()
 	{
-		extract(self::$globalsVars);
-		extract($this->vars);
+		extract(View::$_globalsVars);
+		extract($this->_vars);
 		
 		ob_start();
-		include $this->file;
+		include $this->_file;
 		return ob_get_clean();
 	}
 

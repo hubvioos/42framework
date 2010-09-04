@@ -1,51 +1,76 @@
-<?php namespace Framework\Utils;
+<?php
+namespace Framework\Utils;
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
-use \Framework as F;
-
-class ClassLoaderException extends \Exception { }
+class ClassLoaderException extends Exception { }
 
 class ClassLoader
 {
-    protected $autoload;
-    
-    protected static $actionsMap;
-    
-	public function __construct(Array $autoload = array(), Array $actionsMap = array())
-	{
-	    if (empty($autoload))
-	    {
-	    	require FRAMEWORK_DIR.DS.'config'.DS.'autoload.php';
-	    }
-		$this->autoload = $autoload;
-	    self::$actionsMap = $actionsMap;
-	}
+	protected static $_autoload;
 	
-	public function load ($className)
+	protected static $_models = array();
+
+	public static function init(Array $autoload = array())
+	{
+		if (empty($autoload))
+		{
+			require FRAMEWORK_DIR . DS . 'config' . DS . 'autoload.php';
+		}
+		ClassLoader::$_autoload = $autoload;
+	}
+
+	/**
+	 * Load the file containing $className.
+	 * 
+	 * @param string $className
+	 */
+	public static function loadClass($className)
 	{
 		$className = strtolower($className);
-		if (!isset($this->autoload[$className]))
+		if (!isset(ClassLoader::$_autoload[$className]))
 		{
-			throw new ClassLoaderException($className.' doesn\'t exist in autoload configuration. Try recompile autoload.');
+			throw new ClassLoaderException(__METHOD__.' : '.$className.' doesn\'t exist in autoload configuration. Try recompile autoload.');
 		}
-		require $this->autoload[$className];
+		require ClassLoader::$_autoload[$className];
 	}
-	
-	public static function getControllerClassName ($module, $action)
+
+	/**
+	 * Load the action $action, from the module $module.
+	 * 
+	 * @param string $module
+	 * @param string $action
+	 * @return Framework\Controller
+	 */
+	public static function loadController($module, $action)
 	{
 		if (empty($module) || empty($action))
 		{
-			throw new ClassLoaderException('getControllerClassName : Missing argument.');
+			throw new ClassLoaderException(__METHOD__.' : Missing argument.');
 		}
-		if (!isset(self::$actionsMap[$module][$action]))
-		{
-			throw new ClassLoaderException('getControllerClassName : \''.$action.'\' action in \''.$module.'\' module doesn\'t exist in actionsMap.');
-		}
-		return self::$actionsMap[$module][$action];
+		
+		$controller = 'Application\\modules\\'.$module.'\\controllers\\'.$action;
+		return new $controller;
 	}
-	
-	public static function getModelClassName ($module, $model)
+
+	/**
+	 * Load the model $model, from the module $module, if it isn't already loaded
+	 * 
+	 * @param string $module
+	 * @param string $model
+	 * @return Framework\Model
+	 */
+	public static function loadModel($module, $model)
 	{
-		return 'Application\modules\\'.$module.'\models\\'.$model;
+		if (empty($module) || empty($model))
+		{
+			throw new ClassLoaderException(__METHOD__.' : Missing argument.');
+		}
+		
+		$model = 'Application\\modules\\'.$module.'\\models\\'.$model;
+		if (!isset(ClassLoader::$_models[$model]))
+		{
+			ClassLoader::$_models[$model] = new $model;
+		}
+		return ClassLoader::$_models[$model];
 	}
 }
