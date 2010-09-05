@@ -96,7 +96,7 @@ class Request
 				{
 					Session::destroyAll();
 					
-					Message::add(Session::getInstance('message'),'warning',
+					Utils\Message::add(Session::getInstance('message'),'warning',
 						'It seems that your session has been stolen, for security reasons we destroyed it. Check your environment security.');
 					
 					Response::getInstance()->redirect(Config::$config['siteUrl'], 301, true);

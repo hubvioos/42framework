@@ -76,7 +76,7 @@ class Session implements ArrayAccess, SeekableIterator, Countable
 	
 	public function offsetGet ($offset)
 	{
-		return isset($this->_session[$key]) ? $this->_session[$key] : null;
+		return isset($this->_session[$offset]) ? $this->_session[$offset] : null;
 	}
 		
 	public function offsetSet ($offset, $value)
@@ -87,7 +87,7 @@ class Session implements ArrayAccess, SeekableIterator, Countable
 	public function offsetUnset ($offset)
 	{
 		unset ($_SESSION[$this->_namespace][$offset]);
-		unset ($this->_session[$offset])
+		unset ($this->_session[$offset]);
 	}
 	
 	public function offsetExists ($offset)

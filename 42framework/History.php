@@ -26,6 +26,11 @@ class History
 		$this->_historySize = $historySize;
 	}
 	
+	/**
+	 * @param Session $session
+	 * @param unknown_type $historySize
+	 * @return \Framework\History
+	 */
 	public static function getInstance (Session $session, $historySize)
 	{
 		if (History::$_instance === null)
@@ -47,13 +52,13 @@ class History
 	
 	public function get ()
 	{
-		return $_history;
+		return $this->_history;
 	}
 	
 	public function getPrevious ()
 	{
-		end($_history);
+		end($this->_history);
 		
-		return prev($_history);
+		return prev($this->_history);
 	}
 }

@@ -22,6 +22,8 @@ class Context
 	
 	protected $_isSecure = false;
 	
+	protected $_history = null;
+	
 	protected $_historySize = null;
 	
 	protected static $_isInit = null;
@@ -110,19 +112,19 @@ class Context
 
 	public function getPreviousUrl ()
 	{
-		$previous = $_history->getPrevious();
+		$previous = $this->_history->getPrevious();
 		return $previous['url'];
 	}
 
 	public function getPreviousIpAddress ()
 	{
-		$previous = $_history->getPrevious();
+		$previous = $this->_history->getPrevious();
 		return $previous['ipAddress'];
 	}
 
 	public function getPreviousUserAgent ()
 	{
-		$previous = $_history->getPrevious();
+		$previous = $this->_history->getPrevious();
 		return $previous['userAgent'];
 	}
 	
