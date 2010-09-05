@@ -33,11 +33,6 @@ class Controller
 	 * @var mixed (View, string or null)
 	 */
 	protected $_response = null;
-
-	public static function factory()
-	{
-		return new self();
-	}
 	
 	/**
 	 * Executes the action corresponding to the current request
@@ -87,6 +82,18 @@ class Controller
 	{
 		$this->_view = $view;
 		return $this;
+	}
+	
+	public function setLayout($layout)
+	{
+		View::setGlobal('layout', $layout);
+		return $this;
+	}
+	
+	public function setMessage($message, $category = 'notice')
+	{
+		$session = Session::getInstance('message');
+		Utils\Message::add($session, $category, $message);
 	}
 
 	/**

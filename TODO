@@ -1,6 +1,6 @@
 - ErrorHandler
 - Logger
-- Errors
+- Module Errors
 
 - Gestion des filtres
 
@@ -13,6 +13,5 @@
 - Injections
 
 - Interfaces pour plein de classes...
-- Interface TheSeer
 
 - Ecriture des jeux de tests (PHPUnit)
