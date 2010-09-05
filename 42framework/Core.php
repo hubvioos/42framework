@@ -161,7 +161,7 @@ class Core
 			}
 			View::setGlobal('contentForLayout', $this->_response->getBody());
 			$this->_response->clearResponse();
-			$this->_response->setBody(View::factory(View::getGlobal('layout')));
+			$this->_response->setBody(View::factory(Config::$config['defaultModule'], View::getGlobal('layout')));
 		}
 		
 		$this->_response->send();
