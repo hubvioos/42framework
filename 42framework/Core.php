@@ -144,9 +144,9 @@ class Core
 		if ($this->_response->getStatus() == 200)
 		{
 			$this->_context->updateHistory(array(
-				'url' => $_context->getUrl(),
-				'ipAddress' => $_context->getIpAddress(),
-				'userAgent' => $_context->getUserAgent()
+				'url' => $this->_context->getUrl(),
+				'ipAddress' => $this->_context->getIpAddress(),
+				'userAgent' => $this->_context->getUserAgent()
 				));
 		}
 		

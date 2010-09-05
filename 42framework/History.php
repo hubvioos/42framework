@@ -45,7 +45,7 @@ class History
 	
 	public function update (Array $values = array())
 	{
-		$size = sizeof($_history);
+		$size = sizeof($this->_history);
 		
 		foreach ($this->_history as $key => $value)
 		{			
