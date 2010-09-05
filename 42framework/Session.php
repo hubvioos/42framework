@@ -41,17 +41,24 @@ class Session
 	
 	public static function destroyAll ()
 	{
+		// Delete all data
+		session_unset();
 		session_destroy();
 		Session::$_isStarted = false;
 		
+		// Delete all instances
 		unset(Session::$_instance);
 		
 		return null;
 	}
 	
 	public function destroy ()
-	{
-		unset(Session::$_instance[Session::$_namespace]);
+	{	
+		// Delete data of the namespace
+		unset($_SESSION[$this->_namespace]);
+		
+		// Delete instance
+		unset(Session::$_instance[$this->_namespace]);
 		
 		return null;
 	}
