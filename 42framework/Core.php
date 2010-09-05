@@ -47,62 +47,41 @@ class Core
 	
 	protected function __clone () { }
 	
+	
 	/**
-	 * Inits the application
-	 * 
+	 * @param array $autoload
 	 * @param array $config
-	 * @param Framework\Request $request
-	 * @param Framework\Response $response
-	 * @return Framework\Core
+	 * @return \Framework\Core
 	 */
-	public function init (Array $autoload = array(), Array $config = array())
+	public function loadConfig (Array $autoload = array(), Array $config = array())
 	{
+		// Autoload
 		Utils\ClassLoader::init($autoload);
 		spl_autoload_register(array('\\Framework\\Utils\\ClassLoader', 'loadClass'));
 		
+		// Config
 		Config::loadConfig($config);
 		
-		date_default_timezone_set('Europe/Paris');
-		
+		// Routes
 		Utils\Route::init(Config::$config['routes']);
+		
+		return $this;
+	}
+
+
+	public function init (Request $request, Response $response, Context $context)
+	{		
+		// Timezone
+		date_default_timezone_set(Config::$config['defaultTimezone']);
+		
+		// Views variables
 		View::setGlobal('layout', Config::$config['defaultLayout']);
+		View::setGlobal('message', Utils\Session::getInstance('message'));
 		
-		Session::init();
-		
-		Context::getInstance(History::getInstance(Session::getInstance('history'), Config::$config['historySize']));
-		
-		View::setGlobal('message', Session::getInstance('message'));
-		
-		return $this;
-	}
-	
-	/**
-	 * Load the main request in the Core instance
-	 * @param Framework\Request $request
-	 * @return Framework\Core
-	 */
-	public function setRequest(Request $request)
-	{
-		if (!($request instanceof \Framework\Request))
-		{
-			throw new CoreException('setRequest : Param given is not a valid Request.');
-		}
 		$this->_request = $request;
-		return $this;
-	}
-	
-	/**
-	 * Load the main response in the Core instance
-	 * @param Framework\Response $response
-	 * @return Framework\Core
-	 */
-	public function setResponse(Response $response)
-	{
-		if (!($response instanceof \Framework\Response))
-		{
-			throw new CoreException('setResponse : Param given is not a valid Response.');
-		}
-		$this->_response = $response;
+		$this->_response = $response;		
+		$this->_context = $context;
+		
 		return $this;
 	}
 	
@@ -150,7 +129,7 @@ class Core
 	{
 		if ($response !== null)
 		{
-			$this->setResponse($response);
+			$this->_response = $response;
 		}
 		
 		if (View::getGlobal('layout') !== false)
@@ -166,6 +145,15 @@ class Core
 		
 		$this->_response->send();
 		echo $this->_response;
+		
+		if ($this->_response->getStatus() == 200)
+		{
+			$this->_context->updateHistory(array(
+				'url' => $this->_context->getUrl(),
+				'ipAddress' => $this->_context->getIpAddress(),
+				'userAgent' => $this->_context->getUserAgent()
+				));
+		}
 		
 		exit();
 	}
@@ -188,5 +176,15 @@ class Core
 	public function getRequest()
 	{
 		return $this->_request;
+	}
+	
+	/**
+	 * Returns the context
+	 * 
+	 * @return Framework\Context
+	 */
+	public function getContext()
+	{
+		return $this->_context;
 	}
 }

@@ -13,9 +13,24 @@ class ErrorHandler
 		
 	}
 	
-	public function exceptionHandler ()
+	/**
+	 * @param \Exception $e
+	 */
+	public function exceptionHandler ($e)
 	{
-		
+		$lines = array();
+
+		$lines[] = '<strong>Exception avec le message suivant :</strong><br />';
+		$lines[] = $e->getMessage().'<br />';
+		$lines[] = 'dans le fichier <em>'.$e->getFile().'</em> à la ligne <em>'.$e->getLine().'</em><br />';
+
+		$stack = $e->getTrace();
+
+		$lines = array_merge($lines, $this->formatTrace($stack));
+
+		$rc = implode('<br />' . PHP_EOL, $lines);
+
+		return $rc;
 	}
 	
 	public function errorHandler($errno, $errstr, $errfile, $errline ) 
@@ -25,15 +40,12 @@ class ErrorHandler
 	
 	const MAX_STRING_LEN = 16;
 	
-	protected static $logMode;
-	
-	public function __construct($display_error, $error_reporting, $logMode = 'default')
+	public function __construct($display_error, $error_reporting)
 	{
 		error_reporting($error_reporting);
 		ini_set('display_errors', $display_error);
 		set_error_handler(array($this, 'errorHandler'));
 		set_exception_handler(array($this, 'exceptionHandler'));
-		self::$logMode = $logMode;
 	}
 	
 	public static function handleError($no, $str, $file, $line, $context)
@@ -73,44 +85,7 @@ class ErrorHandler
 		}
 	}
 
-	public static function handleException($exception)
-	{
-		if (!headers_sent())
-		{
-			header('HTTP/1.0 500 Exception avec le message suivant : '.strip_tags($exception->getMessage()));
-		}
-
-		echo $exception;
-
-		exit;
-	}
-	
-	public static function logError($message) {
-		switch(self::$logMode)
-		{
-			case 'email':
-				error_log($message, 1, Registry::get('logEmail'));
-				break;
-			
-			case 'file':
-				error_log($message, 3, Registry::get('logFile'));
-				break;
-			
-			case 'all':
-				error_log($message, 1, Registry::get('logEmail'));
-				error_log($message, 3, Registry::get('logFile'));
-				break;
-				
-			case 'none':
-				break;
-			
-			case 'default':
-			default:
-				error_log($message, 3, APP.DS.'logs'.DS.'error.log');
-		}
-	}
-
-	public static function formatTrace($stack)
+	public function formatTrace($stack)
 	{
 		$lines = array();
 
@@ -177,7 +152,7 @@ class ErrorHandler
 		return $lines;
 	}
 
-	public static function codeSample($file, $line)
+	public function codeSample($file, $line)
 	{
 		$lines =  array
 		(
@@ -191,8 +166,9 @@ class ErrorHandler
 		$i = 0;
 		$start = $line - 5;
 		$stop = $line + 5;
-
-		while ($str = fgets($fh))
+		
+		$str = fgets($fh);
+		while ($str)
 		{
 			$i++;
 
@@ -214,6 +190,7 @@ class ErrorHandler
 			{
 				break;
 			}
+			$str = fgets($fh);
 		}
 
 		fclose($fh);

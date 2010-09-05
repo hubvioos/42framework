@@ -78,25 +78,21 @@ class Request
 				    Response::getInstance()->redirect(Config::$config['siteUrl'] . rtrim($url, '/'), 301, true);  
 				}
 				
-				$history = $context->getHistoryInstance();
-				
-				if ($url != $context->getPreviousUrl() || $context->getPreviousUrl() === null)
+				$previousIpAddress = $context->getPreviousIpAddress();
+				$previousUserAgent = $context->getPreviousUserAgent();
+							
+				if ($previousIpAddress !== null 
+					&& $previousIpAddress != $context->getIpAddress()
+					&& $previousUserAgent !== null
+					&& $previousUserAgent != $context->getUserAgent()
+					)
 				{
-					$history->update(array(
-										'url' => Config::$config['siteUrl'].$url,
-										'ipAddress' => $context->getIpAddress(),
-										'userAgent' => $context->getUserAgent()
-										));	
-				}
-
-				if (!Utils\Security::checkHistory($context->getHistory()))
-				{
-					//Session::destroyAll();
+					Utils\Session::destroyAll();
 					
-					//Utils\Message::add(Session::getInstance('message'),'warning',
-						//'It seems that your session has been stolen, for security reasons we destroyed it. Check your environment security.');
+					Utils\Message::add(Utils\Session::getInstance('message'),'warning',
+						'It seems that your session has been stolen, we destroyed it for security reasons. Check your environment security.');
 					
-					//Response::getInstance()->redirect(Config::$config['siteUrl'], 301, true);
+					Response::getInstance()->redirect(Config::$config['siteUrl'], 301, true);
 				}
 				
 				Request::$_instance = Request::factory($params['module'], $params['action'], $params['params'], false);

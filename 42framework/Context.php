@@ -68,7 +68,7 @@ class Context
 		$this->_isAjax = (isset($_SERVER['HTTP_X_ContextED_WITH']) AND strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
 		
 		$this->_url = $_GET['url'];
-		
+				
 		$this->_history = $history;
 	}
 	
@@ -108,40 +108,59 @@ class Context
 		return $arr;
 	}
 	
+	public function updateHistory (Array $values = array())
+	{
+		if ($this->getUrl(true) != $this->getPreviousUrl())
+		{
+			return $this->_history->update($values);
+		}
+	}
+	
 	public function getHistory ()
 	{
 		return $this->_history->get();
-	}
-	
-	/**
-	 * @return \Framework\History
-	 */
-	public function getHistoryInstance()
-	{
-		return $this->_history;
 	}
 
 	public function getPreviousUrl ()
 	{
 		$previous = $this->_history->getPrevious();
-		return $previous['url'];
+		if ($previous !== null)
+		{
+			return (isset($previous['url'])) ? $previous['url'] : null;
+		}
+		
+		return null;
 	}
 
 	public function getPreviousIpAddress ()
 	{
 		$previous = $this->_history->getPrevious();
-		return $previous['ipAddress'];
+		if ($previous !== null)
+		{
+			return (isset($previous['ipAddress'])) ? $previous['ipAddress'] : null;
+		}
+		
+		return null;
 	}
 
 	public function getPreviousUserAgent ()
 	{
 		$previous = $this->_history->getPrevious();
-		return $previous['userAgent'];
+		if ($previous !== null)
+		{
+			return (isset($previous['userAgent'])) ? $previous['userAgent'] : null;
+		}
+		
+		return null;
 	}
 	
-	public function getUrl ()
+	public function getUrl ($absolute = false)
 	{
-		return $this->_url;
+		if ($absolute === false)
+		{
+			return $this->_url;
+		}
+		return Config::$config['siteUrl'] . $this->_url;
 	}
 	
 	public function getIpAddress ()

@@ -17,7 +17,7 @@ class History
 
 	protected function __clone () { }
 	
-	protected function __construct (Session $session, $historySize)
+	protected function __construct (\Framework\Utils\Session $session, $historySize)
 	{
 		if ($session->getNamespace() != 'history')
 		{
@@ -34,7 +34,7 @@ class History
 	 * @param unknown_type $historySize
 	 * @return \Framework\History
 	 */
-	public static function getInstance (Session $session, $historySize)
+	public static function getInstance (Utils\Session $session, $historySize)
 	{
 		if (History::$_instance === null)
 		{
@@ -43,24 +43,27 @@ class History
 		return History::$_instance;
 	}
 	
-	public function update ($values = array())
+	public function update (Array $values = array())
 	{
-		$this->_history[] = $values;
+		$size = sizeof($this->_history);
 		
-		if (sizeof($this->_history) > $this->_historySize)
-		{
-			array_shift($this->_history);
+		foreach ($this->_history as $key => $value)
+		{			
+			if (!($key == 0 && $size >= $this->_historySize))
+			{				
+				$this->_history[$size-$key] = $this->_history[$size-$key-1];
+			}
 		}
+		$this->_history[0] = $values;
 	}
 	
 	public function get ()
 	{
-		return $this->_history->get();
+		return $this->_history;
 	}
 	
 	public function getPrevious ()
 	{
-		end($this->_history);
-		return prev($this->_history);
+		return (isset($this->_history[0])) ? $this->_history[Ø] : null;
 	}
 }

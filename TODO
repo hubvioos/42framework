@@ -15,3 +15,7 @@
 - Interfaces pour plein de classes...
 
 - Ecriture des jeux de tests (PHPUnit)
+
+- Passer l'url au getInstance de Request
+
+- Sortir la gestion du checkHistory du Request

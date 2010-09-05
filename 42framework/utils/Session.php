@@ -1,5 +1,5 @@
 <?php
-namespace Framework;
+namespace Framework\Utils;
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
 class SessionException extends \Exception { }
@@ -18,9 +18,9 @@ class Session implements \ArrayAccess, \SeekableIterator, \Countable
 	
 	protected function __construct ($namespace)
 	{	
-		if (!Session::$_isStarted && !Request::isCli())
+		if (!Session::$_isStarted && PHP_SAPI !== 'cli')
 		{
-			Session::init();
+			Session::start();
 		}
 		
 		$this->_session = &$_SESSION[$namespace];
@@ -39,7 +39,7 @@ class Session implements \ArrayAccess, \SeekableIterator, \Countable
 		return Session::$_instance[$namespace];
 	}
 	
-	public static function init ()
+	public static function start ()
 	{
 		if (!Session::$_isStarted)
 		{
@@ -89,7 +89,14 @@ class Session implements \ArrayAccess, \SeekableIterator, \Countable
 		
 	public function offsetSet ($offset, $value)
 	{
-		$this->_session[$offset] = $value;
+		if (is_null($offset))
+		{
+			$this->_session[] = $value;
+	    }
+		else
+		{
+			$this->_session[$offset] = $value;
+	    }
 	}
 	
 	public function offsetUnset ($offset)
