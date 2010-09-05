@@ -46,7 +46,7 @@ class History
 	public function update ($values = array())
 	{
 		$this->_history[] = $values;
-		print_r($values);
+		
 		if (sizeof($this->_history) > $this->_historySize)
 		{
 			array_shift($this->_history);
@@ -61,7 +61,6 @@ class History
 	public function getPrevious ()
 	{
 		end($this->_history);
-		
 		return prev($this->_history);
 	}
 }

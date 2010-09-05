@@ -80,7 +80,6 @@ class Request
 				
 				$history = $context->getHistoryInstance();
 				
-				var_export($context->getPreviousUrl());
 				if ($url != $context->getPreviousUrl() || $context->getPreviousUrl() === null)
 				{
 					$history->update(array(
