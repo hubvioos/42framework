@@ -4,9 +4,11 @@ defined('FRAMEWORK_DIR') or die('Invalid script access');
 
 class SessionException extends \Exception { }
 
-class Session
+class Session implements ArrayAccess, SeekableIterator, Countable
 {
-	public $session = null;
+	protected $_session = null;
+	
+	protected $_position = 0;
 	
 	protected $_namespace = null;
 	
@@ -14,15 +16,14 @@ class Session
 	
 	protected static $_instance = null;
 	
-	protected function __construct($namespace)
+	protected function __construct ($namespace)
 	{	
-		if (!Session::$_isStarted)
+		if (!Session::$_isStarted && !Request::isCli())
 		{
-			session_start();
-			Session::$_isStarted = true;
+			Session::init();
 		}
 		
-		$this->session = &$_SESSION[$namespace];
+		$this->_session = &$_SESSION[$namespace];
 		
 		$this->_namespace = $namespace;
 	}
@@ -33,10 +34,15 @@ class Session
 	{
 	    if (Session::$_instance[$namespace] === null)
 		{
-			Session::$_instance[$namespace] = new Session($namespace);
-			
+			Session::$_instance[$namespace] = new Session($namespace);	
 		}
 		return Session::$_instance[$namespace];
+	}
+	
+	public static function init ()
+	{
+		session_start();
+		Session::$_isStarted = true;
 	}
 	
 	public static function destroyAll ()
@@ -63,78 +69,67 @@ class Session
 		return null;
 	}
 	
-	
-	
-	public function set ($var, $value = false)
+	public function getNamespace ()
 	{
-		if (is_array($var))
-		{
-			array_merge($this->session, $var);
-		}
-		else
-		{
-			$this->session[$var] = $value;
-		}
+		return $this->_namespace;
+	}
+	
+	public function offsetGet ($offset)
+	{
+		return isset($this->_session[$key]) ? $this->_session[$key] : null;
+	}
 		
-		return $this;
+	public function offsetSet ($offset, $value)
+	{
+		$this->_session[$offset] = $value;
 	}
 	
-	/*
-	public function delete ($key)
+	public function offsetUnset ($offset)
 	{
-		if (strpos($key, '.'))
-		{
-			$key = explode('.', $key);
-			$size = sizeof($key);
-			
-			$value = array();
-			
-			$value[0] = &$this->session;
-				
-			for ($i = 0; $i < $size; $i++)
-			{
-				$value[$i+1] = &$value[$i][$key[$i]];
-			}
-			$value[$i+1] = 1;
-		}
-		else
-		{
-			if (isset($this->session[$key]))
-			{
-				unset($this->session[$key]);
-			}
-		}
-		
-		return $this;
-	}
-	*/
-	
-	public function get ($key)
-	{
-		if (strpos($key, '.'))
-		{
-			$key = explode('.', $key);
-			$size = sizeof($key);
-			$value = null;
-			
-			for ($i = 0; $i < $size; $i++)
-			{
-				if ($i == 0)
-				{
-					$value = $this->session[$key[0]];
-				}
-				else
-				{
-					$value = $value[$key[$i]];
-				}
-			}
-			return $value;
-		}
-		return isset($this->session[$key]) ? $this->session[$key] : null;
+		unset ($_SESSION[$this->_namespace][$offset]);
+		unset ($this->_session[$offset])
 	}
 	
-	public function getSize ()
+	public function offsetExists ($offset)
 	{
-		return sizeof($this->session);
+		return isset($this->_session[$offset]);
+	}
+	
+	public function current ()
+	{
+		return $this->_session[$this->_position];
+	}
+	
+	public function key ()
+	{
+		return $this->_position;
+	}
+	
+	public function next ()
+	{
+		$this->_position ++;
+	}
+	
+	public function rewind ()
+	{
+		$this->_position = 0;
+	}
+	
+	public function valid ()
+	{
+		return $this->offsetExists($this->_position);
+	}
+	
+	public function seek ($position)
+	{
+		if ($this->offsetExists($position))
+		{
+			$this->_position = $position;
+		}
+	}
+	
+	public function count ()
+	{
+		return sizeof($this->_session);
 	}
 }

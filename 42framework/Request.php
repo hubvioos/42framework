@@ -14,6 +14,8 @@ class Request
 	
 	protected $_isInternal = true;
 	
+	protected $_isCli = false;
+	
 	protected $_method = 'GET';
 	
 	protected $_url = null;
@@ -45,6 +47,7 @@ class Request
 			{
 				$params = \Application\modules\cli\CliUtils::extractParams();
 				Request::$_instance = Request::factory('cli', $params['action'], $params['params']);
+				$this->_isCli = true;
 			}
 			else
 			{
@@ -78,13 +81,23 @@ class Request
         		$this->method = (!isset($_SERVER['REQUEST_METHOD'])) ? 'GET' : $_SERVER['REQUEST_METHOD'];
 				
 				$context = Context::getInstance();
+				$history = History::getInstance();
 				
-				$context->updateHistory();
-				
-				if (! Utils\Security::checkHistory($context->getHistory()))
+				if ($context->getUrl() != $context->getPreviousUrl())
 				{
-					/* Here ::  Destroy session, set message, regenerate ID */
+					$history->update(array(
+										$context->getUrl(),
+										$context->getIpAddress(),
+										$context->getUserAgent()
+										));	
+				}
+
+				if (!Utils\Security::checkHistory($context->getHistory()))
+				{
 					Session::destroyAll();
+					
+					Message::add(Session::getInstance('message'),'warning',
+						'It seems that your session has been stolen, for security reasons we destroyed it. Check your environment security.');
 					
 					Response::getInstance()->redirect(Config::$config['siteUrl'], 301, true);
 				}
@@ -135,5 +148,10 @@ class Request
 	public function isInternal ()
 	{
 		return $this->_isInternal;
+	}
+
+	public function isCli ()
+	{
+		return $this->_isCli;
 	}
 }
