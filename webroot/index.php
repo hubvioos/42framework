@@ -20,8 +20,16 @@ require FRAMEWORK_DIR.DS.'Core.php';
 require FRAMEWORK_DIR.DS.'utils'.DS.'ClassLoader.php';
 
 $core = \Framework\Core::getInstance()
-			->init($autoload, $config)
-			->setRequest(\Framework\Request::getInstance())
-			->setResponse(\Framework\Response::getInstance())
+			->loadConfig($autoload, $config)
+			->init(
+				\Framework\Request::getInstance(),
+				\Framework\Response::getInstance(),
+				\Framework\Context::getInstance(
+					\Framework\History::getInstance(
+						\Framework\Utils\Session::getInstance('history'), 
+						\Framework\Config::$config['historySize']
+						)
+					)
+				)
 			->execute()
 			->render();

@@ -6,7 +6,7 @@ class MessageException extends \Exception { }
 
 class Message
 {	
-	public static function add (\Framework\Session $session, $category, $value)
+	public static function add (Session $session, $category, $value)
 	{
 		if ($session->getNamespace() != 'message')
 		{
@@ -16,7 +16,7 @@ class Message
 		$session[$category] = $value;
 	}
 	
-	public static function get (\Framework\Session $session, $category)
+	public static function get (Session $session, $category)
 	{
 		if ($session->getNamespace() != 'message')
 		{
@@ -26,7 +26,7 @@ class Message
 		return $session[$category];
 	}
 	
-	public static function clearCategory (\Framework\Session $session, $category)
+	public static function clearCategory (Session $session, $category)
 	{
 		if ($session->getNamespace() != 'message')
 		{
@@ -36,7 +36,7 @@ class Message
 		unset($session[$category]);
 	}
 	
-	public static function clearAll (\Framework\Session $session)
+	public static function clearAll (Session $session)
 	{
 		if ($session->getNamespace() != 'message')
 		{

@@ -7,6 +7,7 @@ $config = array(
 	'defaultLayout' => false,
 	'defaultCharset' => 'utf-8',
 	'defaultLanguage' => 'fr',
+	'defaultTimezone' => 'Europe/Paris',
 	'viewExtension' => '.php',
 	'siteUrl' => 'http://localhost/',
 	'routes' => array(),
