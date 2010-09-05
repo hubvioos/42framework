@@ -86,7 +86,7 @@ class Request
 					/* Here ::  Destroy session, set message, regenerate ID */
 					Session::destroyAll();
 					
-					Response::getInstance()->redirect(Config::$config['siteUrl'], 301, true)
+					Response::getInstance()->redirect(Config::$config['siteUrl'], 301, true);
 				}
 				
 				Request::$_instance = Request::factory($params['module'], $params['action'], $params['params'], false);

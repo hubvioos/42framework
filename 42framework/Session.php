@@ -8,7 +8,7 @@ class Session
 {
 	public $session = null;
 	
-	protected $_namespace = null
+	protected $_namespace = null;
 	
 	protected static $_isStarted = false;
 	
@@ -41,16 +41,23 @@ class Session
 	
 	public static function destroyAll ()
 	{
+		// Delete all data
+		session_unset();
 		session_destroy();
 		Session::$_isStarted = false;
 		
+		// Delete all instances
 		unset(Session::$_instance);
 		
 		return null;
 	}
 	
 	public function destroy ()
-	{
+	{	
+		// Delete data of the namespace
+		unset($_SESSION[$_namespace]);
+		
+		// Delete instance
 		unset(Session::$_instance[$_namespace]);
 		
 		return null;
