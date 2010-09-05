@@ -22,20 +22,34 @@ class Context
 	
 	protected $_isSecure = false;
 	
-	protected $_isCli = false;
-	
 	protected $_historySize = null;
+	
+	protected static $_isInit = null;
 
 	protected static $_instance = null;
 	
 	protected function __construct ()
-	{
-		if (PHP_SAPI === 'cli')
-		{
-			$this->_isCli = true;
-		}
+	{		
 		
-        if (isset($_SERVER['HTTP_X_FORWARDED_FOR']))
+	}
+	
+	protected function __clone () { }
+
+	/**
+	 * @return \Framework\Context
+	 */
+	public static function getInstance ()
+	{
+		if (Context::$_instance === null)
+		{
+			$this->_instance = new Context();
+    	}
+    	return $this->_instance;
+    }
+
+	public static function init (History $history)
+	{
+		if (isset($_SERVER['HTTP_X_FORWARDED_FOR']))
 		{
 			$this->_ipAddress = $_SERVER['HTTP_X_FORWARDED_FOR'];
 		}
@@ -67,22 +81,9 @@ class Context
 	
 		$this->_isAjax = (isset($_SERVER['HTTP_X_ContextED_WITH']) AND strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
 		
-		$this->_historySize = Config::$config['historySize'];
+		
+		$this->_history = $history;
 	}
-	
-	protected function __clone () { }
-
-	/**
-	 * @return \Framework\Context
-	 */
-	public static function getInstance ()
-	{
-		if (Context::$_instance === null)
-		{
-			$this->_instance = new Context();
-    	}
-    	return $this->_instance;
-    }
 
 	protected function _extractValue ($str)
 	{
@@ -102,49 +103,26 @@ class Context
 		return $arr;
 	}
 	
-	public function updateHistory ()
+	public function getHistory ()
 	{
-		$lastUrl = end(Session::getInstance('history')->session);
-		$lastUrl = $lastUrl['url'];
-		
-		if (Context::$_url != $lastUrl)
-		{
-			Session::getInstance('history')->session[] = array(
-				'url' => $this->_url,
-				'ipAddress' => $this->_ipAddress,
-				'userAgent' => $this->_userAgent
-				);
-				
-			if (sizeof(Session::getInstance('history')->session) > $this->_historySize)
-			{
-				array_shift(Session::getInstance('history')->session);
-			}
-		}
+		return $this->_history->get();
 	}
-	
-	public function getHistory()
+
+	public function getPreviousUrl ()
 	{
-		return Session::getInstance('history')->session;
-	}
-	
-	public function getPreviousUrl()
-	{
-		end(Session::getInstance('history')->session);
-		$previous = prev(Session::getInstance('history')->session);
+		$previous = $_history->getPrevious();
 		return $previous['url'];
 	}
-	
-	public function getPreviousIpAddress()
+
+	public function getPreviousIpAddress ()
 	{
-		end(Session::getInstance('history')->session);
-		$previous = prev(Session::getInstance('history')->session);
+		$previous = $_history->getPrevious();
 		return $previous['ipAddress'];
 	}
-	
-	public function getPreviousUserAgent()
+
+	public function getPreviousUserAgent ()
 	{
-		end(Session::getInstance('history')->session);
-		$previous = prev(Session::getInstance('history')->session);
+		$previous = $_history->getPrevious();
 		return $previous['userAgent'];
 	}
 	
@@ -186,10 +164,5 @@ class Context
 	public function isAjax ()
 	{
 		return $this->_isAjax;
-	}
-	
-	public function isCli ()
-	{
-		return $this->_isCli;
 	}
 }

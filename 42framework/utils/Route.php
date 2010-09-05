@@ -127,7 +127,7 @@ class Route
 		
 		if (sizeof($explodedUrl) == 1)
 		{
-		    if ($explodedUrl[0] === \Framework\Config::$config['defaultAction'])
+		    if ($explodedUrl[0] === $defaultAction)
 		    {
 		        $path = $defaultPath;
 		    }

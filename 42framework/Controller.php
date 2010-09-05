@@ -99,7 +99,7 @@ class Controller
 	{
 		if (is_array($var))
 		{
-			array_merge($this->_vars, $var);
+			$this->_vars = array_merge_recursive($this->_vars, $var);
 		}
 		else
 		{

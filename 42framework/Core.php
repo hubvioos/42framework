@@ -57,7 +57,7 @@ class Core
 	 */
 	public function init (Array $autoload = array(), Array $config = array())
 	{
-		\Framework\Utils\ClassLoader::init($autoload);
+		Utils\ClassLoader::init($autoload);
 		spl_autoload_register(array('\\Framework\\Utils\\ClassLoader', 'loadClass'));
 		
 		Config::loadConfig($config);
@@ -66,6 +66,12 @@ class Core
 		
 		Utils\Route::init(Config::$config['routes']);
 		View::setGlobal('layout', Config::$config['defaultLayout']);
+		
+		Session::init();
+		
+		Context::init(History::getInstance(Session::getInstance('history'), Config::$config['historySize']));
+		
+		View::setGlobal('message', Message::getAll(Session::getInstance('message')));
 		
 		return $this;
 	}
