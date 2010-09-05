@@ -72,6 +72,9 @@ class Context
 	
 	protected function __clone () { }
 
+	/**
+	 * @return \Framework\Context
+	 */
 	public static function getInstance ()
 	{
 		if (Context::$_instance === null)
@@ -104,7 +107,7 @@ class Context
 		$lastUrl = end(Session::getInstance('history')->session);
 		$lastUrl = $lastUrl['url'];
 		
-		if ($_url != $lastUrl)
+		if (Context::$_url != $lastUrl)
 		{
 			Session::getInstance('history')->session[] = array(
 				'url' => $this->_url,

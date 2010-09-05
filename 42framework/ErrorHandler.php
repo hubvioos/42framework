@@ -8,6 +8,11 @@ class ErrorHandler
 		
 	}
 	
+	public static function init()
+	{
+		
+	}
+	
 	public function exceptionHandler ()
 	{
 		

@@ -32,7 +32,7 @@ class Request
 		$this->_action = $_action;
 		$this->_params = $_params;
 		$this->_isInternal = $_internal;
-		Request::$_current = $_this;
+		Request::$_current = $this;
 	}
 
 	protected function __clone () { }
@@ -86,7 +86,7 @@ class Request
 					/* Here ::  Destroy session, set message, regenerate ID */
 					Session::destroyAll();
 					
-					Response::getInstance()->redirect(Config::$config['siteUrl'], 301, true)
+					Response::getInstance()->redirect(Config::$config['siteUrl'], 301, true);
 				}
 				
 				Request::$_instance = Request::factory($params['module'], $params['action'], $params['params'], false);

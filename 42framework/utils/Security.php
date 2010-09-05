@@ -12,7 +12,7 @@ class Security
 		
 		if ($last === false)
 		{
-			throw new SecurityException('checkHistory : History not filled.')
+			throw new SecurityException('checkHistory : History not filled.');
 		}
 		
 		$prev = prev($history);

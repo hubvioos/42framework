@@ -8,7 +8,7 @@ class Session
 {
 	public $session = null;
 	
-	protected $_namespace = null
+	protected $_namespace = null;
 	
 	protected static $_isStarted = false;
 	
@@ -51,7 +51,7 @@ class Session
 	
 	public function destroy ()
 	{
-		unset(Session::$_instance[$_namespace]);
+		unset(Session::$_instance[Session::$_namespace]);
 		
 		return null;
 	}
