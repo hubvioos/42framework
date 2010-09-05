@@ -9,5 +9,6 @@ $config = array(
 	'defaultLanguage' => 'fr',
 	'viewExtension' => '.php',
 	'siteUrl' => 'http://localhost/',
-	'routes' => array()
+	'routes' => array(),
+	'historySize' => 2
 	);

@@ -6,58 +6,55 @@ class RequestException extends \Exception { }
 
 class Request
 {
-	public $module = null;
+	protected $_module = null;
 
-	public $action = null;
+	protected $_action = null;
 
-	public $params = array();
+	protected $_params = array();
 	
-	public $isInternal = true;
+	protected $_isInternal = true;
 	
-	public static $method = 'GET';
+	protected $_method = 'GET';
 	
-    protected static $current = null;
+	protected $_url = null;
+	
+    protected static $_current = null;
 
-	protected static $instance = null;
-	
-	protected static $url = null;
+	protected static $_instance = null;
 
 	/*
 		Constructeur de la classe, partie importante pour l'exécution de la page.
 		Cette méthode s'occupe de déterminer le module et l'action à appeler, en faisant appel à Route.
 	*/
-	protected function __construct ($module, $action, $params, $internal = true)
+	protected function __construct ($_module, $_action, $_params, $_internal = true)
 	{
-		$this->module = $module;
-		$this->action = $action;
-		$this->params = $params;
-		$this->isInternal = $internal;
-		Request::$current = $this;
+		$this->_module = $_module;
+		$this->_action = $_action;
+		$this->_params = $_params;
+		$this->_isInternal = $_internal;
+		Request::$_current = $_this;
 	}
 
 	protected function __clone () { }
 
 	public static function getInstance ()
 	{
-	    $path = null;
-	    
-		if (Request::$instance === null)
+		if (Request::$_instance === null)
 		{
 			if (PHP_SAPI === 'cli')
 			{
 				$params = \Application\modules\cli\CliUtils::extractParams();
-				Request::$instance = Request::factory('cli', $params['action'], $params['params']);
-				Request::$isCli = true;
+				Request::$_instance = Request::factory('cli', $params['action'], $params['params']);
 			}
-			else 
+			else
 			{
-				Request::$url = $_GET['url'];
+				$this->_url = $_GET['url'];
 
-				$path = Utils\Route::urlToPath(Request::$url, Config::$config['defaultModule'], Config::$config['defaultAction']);
+				$path = Utils\Route::urlToPath($this->_url, Config::$config['defaultModule'], Config::$config['defaultAction']);
 				$params = Utils\Route::pathToParams($path);
 
 				// Redirect to root if we use the default module and action.
-				if (Request::$url != '' 
+				if ($this->url != '' 
 				    && $params['module'] == Config::$config['defaultModule']
 				    && $params['action'] == Config::$config['defaultAction']
 				    && empty($params['params'])
@@ -66,21 +63,33 @@ class Request
 				    Response::getInstance()->redirect(Config::$config['siteUrl'], 301, true);
 				}
 				// Avoid duplicate content of the routes.
-				else if (Request::$url != Utils\Route::pathToUrl($path)
-					&& Request::$url != '')
+				else if ($this->_url != Utils\Route::pathToUrl($path)
+					&& $this->_url != '')
 				{
 				    Response::getInstance()->redirect(Config::$config['siteUrl'] . Utils\Route::pathToUrl($path), 301, true);
 				}
 								
 				// Avoid duplicate content with just a "/" after the URL
-				if(strrchr(Request::$url, '/') === '/')
+				if(strrchr($this->url, '/') === '/')
 				{
-				    Response::getInstance()->redirect(Config::$config['siteUrl'] . rtrim(Request::$url, '/'), 301, true);  
+				    Response::getInstance()->redirect(Config::$config['siteUrl'] . rtrim($this->url, '/'), 301, true);  
 				}
-	
-				Request::$instance = Request::factory($params['module'], $params['action'], $params['params'], false);
 				
-        		Request::$method = (!isset($_SERVER['REQUEST_METHOD'])) ? 'GET' : $_SERVER['REQUEST_METHOD'];
+        		$this->method = (!isset($_SERVER['REQUEST_METHOD'])) ? 'GET' : $_SERVER['REQUEST_METHOD'];
+				
+				$context = Context::getInstance();
+				
+				$context->updateHistory();
+				
+				if (! Utils\Security::checkHistory($context->getHistory()))
+				{
+					/* Here ::  Destroy session, set message, regenerate ID */
+					Session::destroyAll();
+					
+					Response::getInstance()->redirect(Config::$config['siteUrl'], 301, true)
+				}
+				
+				Request::$_instance = Request::factory($params['module'], $params['action'], $params['params'], false);
 			}
 		}
 		return Request::$instance;
@@ -123,26 +132,8 @@ class Request
 		return $module->execute(Request::$current);
 	}
 	
-	public function isCli ()
+	public function isInternal ()
 	{
-		return Request::$isCli;
-	}
-
-	protected function extractValue ($str)
-	{
-		$arr = array();
-		
-		if (sizeof($str) > 0)
-		{
-			foreach (explode(',', $str) as $v)
-			{
-				if (preg_match('#^\s*([^;]+)(?:;q=([0-9]+\.[0-9]+))?$#', $v, 
-					$match))
-				{
-					$arr[] = $match[1];
-				}
-			}
-		}
-		return $arr;
+		return $this->_isInternal;
 	}
 }

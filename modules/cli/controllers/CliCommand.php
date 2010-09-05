@@ -10,9 +10,9 @@ class CliCommand extends \Framework\Controller
 	 * 
 	 * @param Framework\Request $request
 	 */
-	public function _before($request)
+	protected function _before($request)
 	{
-		if (!$request->isInternal)
+		if (!$request->isInternal())
 		{
 			$this->_response = \Framework\Request::factory('errors', 'accesDenied', array($request))->execute();
 			return false;
@@ -20,7 +20,7 @@ class CliCommand extends \Framework\Controller
 		return true;
 	}
 	
-	public function _after($request, $actionResponse)
+	protected function _after($request, $actionResponse)
 	{
 		$this->setView(false);
 		\Framework\View::setGlobal('layout', false);
