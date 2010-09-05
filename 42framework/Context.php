@@ -22,6 +22,9 @@ class Context
 	
 	protected $_isSecure = false;
 	
+	/**
+	 * @var \Framework\History
+	 */
 	protected $_history = null;
 	
 	protected $_historySize = null;
@@ -30,27 +33,8 @@ class Context
 
 	protected static $_instance = null;
 	
-	protected function __construct ()
+	protected function __construct ($history)
 	{		
-		
-	}
-	
-	protected function __clone () { }
-
-	/**
-	 * @return \Framework\Context
-	 */
-	public static function getInstance ()
-	{
-		if (Context::$_instance === null)
-		{
-			$this->_instance = new Context();
-    	}
-    	return $this->_instance;
-    }
-
-	public static function init (History $history)
-	{
 		if (isset($_SERVER['HTTP_X_FORWARDED_FOR']))
 		{
 			$this->_ipAddress = $_SERVER['HTTP_X_FORWARDED_FOR'];
@@ -64,7 +48,7 @@ class Context
 			$this->_ipAddress = $_SERVER['REMOTE_ADDR'];
 		}
 	
-		if (!filter_var(Context::$ipAddress, FILTER_VALIDATE_IP))
+		if (!filter_var($this->_ipAddress, FILTER_VALIDATE_IP))
 		{
 			$this->_ipAddress = '0.0.0.0';
 		}
@@ -83,9 +67,28 @@ class Context
 	
 		$this->_isAjax = (isset($_SERVER['HTTP_X_ContextED_WITH']) AND strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
 		
+		$this->_url = $_GET['url'];
 		
 		$this->_history = $history;
 	}
+	
+	protected function __clone () { }
+
+	/**
+	 * @return \Framework\Context
+	 */
+	public static function getInstance (History $history = null)
+	{
+		if (Context::$_instance === null)
+		{
+			if ($history === null)
+			{
+				throw new ContextException('Invalid params');
+			}
+			Context::$_instance = new Context($history);
+    	}
+    	return Context::$_instance;
+    }
 
 	protected function _extractValue ($str)
 	{
@@ -108,6 +111,14 @@ class Context
 	public function getHistory ()
 	{
 		return $this->_history->get();
+	}
+	
+	/**
+	 * @return \Framework\History
+	 */
+	public function getHistoryInstance()
+	{
+		return $this->_history;
 	}
 
 	public function getPreviousUrl ()

@@ -69,7 +69,7 @@ class Core
 		
 		Session::init();
 		
-		Context::init(History::getInstance(Session::getInstance('history'), Config::$config['historySize']));
+		Context::getInstance(History::getInstance(Session::getInstance('history'), Config::$config['historySize']));
 		
 		View::setGlobal('message', Session::getInstance('message'));
 		

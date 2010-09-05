@@ -46,7 +46,7 @@ class Controller
 		if ($beforeResponse === true)
 		{
 			$actionResponse = null;
-			$actionResponse = call_user_func_array(array($this, 'processAction'), $this->_request->params);
+			$actionResponse = call_user_func_array(array($this, 'processAction'), $this->_request->getParams());
 			$actionResponse = $this->_after($this->_request, $actionResponse);
 			
 			if ($this->_view !== false)

@@ -6,6 +6,9 @@ class HistoryException extends \Exception { }
 
 class History
 {	
+	/**
+	 * @var $_history \Framework\Session
+	 */
 	protected $_history = null;
 	
 	protected $_historySize = null;
@@ -35,7 +38,7 @@ class History
 	{
 		if (History::$_instance === null)
 		{
-			History::$_instance = new History($session);
+			History::$_instance = new History($session, $historySize);
 		}
 		return History::$_instance;
 	}
@@ -43,7 +46,7 @@ class History
 	public function update ($values = array())
 	{
 		$this->_history[] = $values;
-				
+		print_r($values);
 		if (sizeof($this->_history) > $this->_historySize)
 		{
 			array_shift($this->_history);
@@ -52,7 +55,7 @@ class History
 	
 	public function get ()
 	{
-		return $this->_history;
+		return $this->_history->get();
 	}
 	
 	public function getPrevious ()

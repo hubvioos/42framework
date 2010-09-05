@@ -4,7 +4,7 @@ defined('FRAMEWORK_DIR') or die('Invalid script access');
 
 class SessionException extends \Exception { }
 
-class Session implements ArrayAccess, SeekableIterator, Countable
+class Session implements \ArrayAccess, \SeekableIterator, \Countable
 {
 	protected $_session = null;
 	
@@ -41,8 +41,11 @@ class Session implements ArrayAccess, SeekableIterator, Countable
 	
 	public static function init ()
 	{
-		session_start();
-		Session::$_isStarted = true;
+		if (!Session::$_isStarted)
+		{
+			session_start();
+			Session::$_isStarted = true;
+		}
 	}
 	
 	public static function destroyAll ()
@@ -53,7 +56,7 @@ class Session implements ArrayAccess, SeekableIterator, Countable
 		Session::$_isStarted = false;
 		
 		// Delete all instances
-		unset(Session::$_instance);
+		Session::$_instance = null;
 		
 		return null;
 	}
@@ -64,7 +67,7 @@ class Session implements ArrayAccess, SeekableIterator, Countable
 		unset($_SESSION[$this->_namespace]);
 		
 		// Delete instance
-		unset(Session::$_instance[$this->_namespace]);
+		Session::$_instance[$this->_namespace] = null;
 		
 		return null;
 	}
@@ -72,6 +75,11 @@ class Session implements ArrayAccess, SeekableIterator, Countable
 	public function getNamespace ()
 	{
 		return $this->_namespace;
+	}
+	
+	public function get()
+	{
+		return $this->_session;
 	}
 	
 	public function offsetGet ($offset)

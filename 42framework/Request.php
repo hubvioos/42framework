@@ -18,8 +18,6 @@ class Request
 	
 	protected $_method = 'GET';
 	
-	protected $_url = null;
-	
     protected static $_current = null;
 
 	protected static $_instance = null;
@@ -28,11 +26,12 @@ class Request
 		Constructeur de la classe, partie importante pour l'exécution de la page.
 		Cette méthode s'occupe de déterminer le module et l'action à appeler, en faisant appel à Route.
 	*/
-	protected function __construct ($_module, $_action, $_params, $_internal = true)
+	protected function __construct ($_module, $_action, $_params, $_internal = true, $_method = 'GET')
 	{
 		$this->_module = $_module;
 		$this->_action = $_action;
 		$this->_params = $_params;
+		$this->_method = $_method;
 		$this->_isInternal = $_internal;
 		Request::$_current = $this;
 	}
@@ -51,13 +50,14 @@ class Request
 			}
 			else
 			{
-				$this->_url = $_GET['url'];
-
-				$path = Utils\Route::urlToPath($this->_url, Config::$config['defaultModule'], Config::$config['defaultAction']);
+				$context = Context::getInstance();
+				$url = $context->getUrl();
+				
+				$path = Utils\Route::urlToPath($url, Config::$config['defaultModule'], Config::$config['defaultAction']);
 				$params = Utils\Route::pathToParams($path);
-
+				
 				// Redirect to root if we use the default module and action.
-				if ($this->url != '' 
+				if ($url != '' 
 				    && $params['module'] == Config::$config['defaultModule']
 				    && $params['action'] == Config::$config['defaultAction']
 				    && empty($params['params'])
@@ -66,46 +66,44 @@ class Request
 				    Response::getInstance()->redirect(Config::$config['siteUrl'], 301, true);
 				}
 				// Avoid duplicate content of the routes.
-				else if ($this->_url != Utils\Route::pathToUrl($path)
-					&& $this->_url != '')
+				else if ($url != Utils\Route::pathToUrl($path)
+					&& $url != '')
 				{
 				    Response::getInstance()->redirect(Config::$config['siteUrl'] . Utils\Route::pathToUrl($path), 301, true);
 				}
 								
 				// Avoid duplicate content with just a "/" after the URL
-				if(strrchr($this->url, '/') === '/')
+				if(strrchr($url, '/') === '/')
 				{
-				    Response::getInstance()->redirect(Config::$config['siteUrl'] . rtrim($this->url, '/'), 301, true);  
+				    Response::getInstance()->redirect(Config::$config['siteUrl'] . rtrim($url, '/'), 301, true);  
 				}
 				
-        		$this->method = (!isset($_SERVER['REQUEST_METHOD'])) ? 'GET' : $_SERVER['REQUEST_METHOD'];
+				$history = $context->getHistoryInstance();
 				
-				$context = Context::getInstance();
-				$history = History::getInstance();
-				
-				if ($context->getUrl() != $context->getPreviousUrl())
+				var_export($context->getPreviousUrl());
+				if ($url != $context->getPreviousUrl() || $context->getPreviousUrl() === null)
 				{
 					$history->update(array(
-										$context->getUrl(),
-										$context->getIpAddress(),
-										$context->getUserAgent()
+										'url' => Config::$config['siteUrl'].$url,
+										'ipAddress' => $context->getIpAddress(),
+										'userAgent' => $context->getUserAgent()
 										));	
 				}
 
 				if (!Utils\Security::checkHistory($context->getHistory()))
 				{
-					Session::destroyAll();
+					//Session::destroyAll();
 					
-					Utils\Message::add(Session::getInstance('message'),'warning',
-						'It seems that your session has been stolen, for security reasons we destroyed it. Check your environment security.');
+					//Utils\Message::add(Session::getInstance('message'),'warning',
+						//'It seems that your session has been stolen, for security reasons we destroyed it. Check your environment security.');
 					
-					Response::getInstance()->redirect(Config::$config['siteUrl'], 301, true);
+					//Response::getInstance()->redirect(Config::$config['siteUrl'], 301, true);
 				}
 				
 				Request::$_instance = Request::factory($params['module'], $params['action'], $params['params'], false);
 			}
 		}
-		return Request::$instance;
+		return Request::$_instance;
 	}
 
 	public static function factory ()
@@ -136,15 +134,47 @@ class Request
 	
 	public function getCurrent ()
 	{
-		return Request::$current;
+		return Request::$_current;
 	}
 	
 	public function execute ()
 	{
-		$module = Core::loadAction(Request::$current->module, Request::$current->action);
-		return $module->execute(Request::$current);
+		$module = Core::loadAction(Request::$_current->_module, Request::$_current->_action);
+		return $module->execute(Request::$_current);
 	}
 	
+	/**
+	 * @return the $_module
+	 */
+	public function getModule ()
+	{
+		return $this->_module;
+	}
+
+	/**
+	 * @return the $_action
+	 */
+	public function getAction ()
+	{
+		return $this->_action;
+	}
+
+	/**
+	 * @return the $_params
+	 */
+	public function getParams ()
+	{
+		return $this->_params;
+	}
+
+	/**
+	 * @return the $_method
+	 */
+	public function getMethod ()
+	{
+		return $this->_method;
+	}
+
 	public function isInternal ()
 	{
 		return $this->_isInternal;
