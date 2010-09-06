@@ -14,8 +14,6 @@ class Request
 	
 	protected $_isInternal = true;
 	
-	protected $_isCli = false;
-	
 	protected $_method = 'GET';
 	
     protected static $_current = null;
@@ -46,7 +44,6 @@ class Request
 			{
 				$params = \Application\modules\cli\CliUtils::extractParams();
 				Request::$_instance = Request::factory('cli', $params['action'], $params['params']);
-				$this->_isCli = true;
 			}
 			else
 			{
@@ -173,10 +170,5 @@ class Request
 	public function isInternal ()
 	{
 		return $this->_isInternal;
-	}
-
-	public function isCli ()
-	{
-		return $this->_isCli;
 	}
 }
