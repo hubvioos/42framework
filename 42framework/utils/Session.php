@@ -18,9 +18,15 @@ class Session implements \ArrayAccess, \SeekableIterator, \Countable
 	
 	protected function __construct ($namespace)
 	{	
-		Session::start();
-		
-		$this->_session = &$_SESSION[$namespace];
+		if (PHP_SAPI !== 'cli')
+		{
+			Session::start();
+			$this->_session = &$_SESSION[$namespace];
+		}
+		else
+		{
+			$this->_session = array();
+		}
 		
 		$this->_namespace = $namespace;
 	}
@@ -29,12 +35,7 @@ class Session implements \ArrayAccess, \SeekableIterator, \Countable
 
 	public static function getInstance ($namespace = 'default')
 	{
-		if (PHP_SAPI === 'cli')
-		{
-			return null;
-		}
-		
-	    if (Session::$_instance[$namespace] === null)
+		if (Session::$_instance[$namespace] === null)
 		{
 			Session::$_instance[$namespace] = new Session($namespace);	
 		}
@@ -43,7 +44,7 @@ class Session implements \ArrayAccess, \SeekableIterator, \Countable
 	
 	public static function start ()
 	{
-		if (!Session::$_isStarted && PHP_SAPI !== 'cli')
+		if (!Session::$_isStarted)
 		{
 			session_start();
 			Session::$_isStarted = true;
