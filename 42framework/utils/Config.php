@@ -1,5 +1,5 @@
 <?php
-namespace Framework;
+namespace Framework\Utils;
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
 class Config
@@ -12,7 +12,7 @@ class Config
 	/**
 	 * @param array $data
 	 */
-	public static function loadConfig (Array $config = array())
+	public static function init (Array $config = array(), $configPath)
 	{
 		if (empty($config))
 		{
@@ -21,7 +21,7 @@ class Config
 			}
 			catch (CoreException $e)
 			{
-				require FRAMEWORK_DIR.DS.'config'.DS.'config.php';
+				require $configPath;
 			}
 		}
 		self::$config = $config;

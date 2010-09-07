@@ -10,11 +10,11 @@ class ClassLoader
 	
 	protected static $_models = array();
 
-	public static function init(Array $autoload = array())
+	public static function init(Array $autoload = array(), $autoloadPath)
 	{
 		if (empty($autoload))
 		{
-			require FRAMEWORK_DIR . DS . 'config' . DS . 'autoload.php';
+			require $autoloadPath;
 		}
 		ClassLoader::$_autoload = $autoload;
 	}

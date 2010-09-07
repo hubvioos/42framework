@@ -55,12 +55,12 @@ class Context
 	
 		$this->_userAgent = (!isset($_SERVER['HTTP_USER_AGENT'])) ? null : $_SERVER['HTTP_USER_AGENT'];
 	
-		$this->_acceptCharset = (!isset($_SERVER['HTTP_ACCEPT_CHARSET'])) ? Config::$config['defaultCharset'] : $this->_extractValue(
+		$this->_acceptCharset = (!isset($_SERVER['HTTP_ACCEPT_CHARSET'])) ? Utils\Config::$config['defaultCharset'] : $this->_extractValue(
 			$_SERVER['HTTP_ACCEPT_CHARSET']);
 	
 		$this->_acceptEncoding = (!isset($_SERVER['HTTP_ACCEPT_ENCODING'])) ? null : $this->_extractValue($_SERVER['HTTP_ACCEPT_ENCODING']);
 	
-		$this->_acceptLanguage = (!isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) ? Config::$config['defaultLanguage'] : $this->_extractValue(
+		$this->_acceptLanguage = (!isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) ? Utils\Config::$config['defaultLanguage'] : $this->_extractValue(
 			$_SERVER['HTTP_ACCEPT_LANGUAGE']);
 	
 		$this->_isSecure = (!empty($_SERVER['HTTPS']) && filter_var($_SERVER['HTTPS'], FILTER_VALIDATE_BOOLEAN));
@@ -160,7 +160,7 @@ class Context
 		{
 			return $this->_url;
 		}
-		return Config::$config['siteUrl'] . $this->_url;
+		return Utils\Config::$config['siteUrl'] . $this->_url;
 	}
 	
 	public function getIpAddress ()

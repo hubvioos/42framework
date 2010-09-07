@@ -53,29 +53,29 @@ class Core
 	 * @param array $config
 	 * @return \Framework\Core
 	 */
-	public function loadConfig (Array $autoload = array(), Array $config = array())
+	public function init (Array $autoload = array(), Array $config = array())
 	{
 		// Autoload
-		Utils\ClassLoader::init($autoload);
+		Utils\ClassLoader::init($autoload, FRAMEWORK_DIR.DS.'config'.DS.'autoload.php');
 		spl_autoload_register(array('\\Framework\\Utils\\ClassLoader', 'loadClass'));
 		
-		// Config
-		Config::loadConfig($config);
+		// Utils\Config
+		Utils\Config::init($config, FRAMEWORK_DIR.DS.'config'.DS.'config.php');
 		
 		// Routes
-		Utils\Route::init(Config::$config['routes']);
+		Utils\Route::init(Utils\Config::$config['routes']);
 		
 		return $this;
 	}
 
 
-	public function init (Context $context, Request $request, Response $response)
+	public function bootstrap (Context $context, Request $request, Response $response)
 	{		
 		// Timezone
-		date_default_timezone_set(Config::$config['defaultTimezone']);
+		date_default_timezone_set(Utils\Config::$config['defaultTimezone']);
 		
 		// Views variables
-		View::setGlobal('layout', Config::$config['defaultLayout']);
+		View::setGlobal('layout', Utils\Config::$config['defaultLayout']);
 		View::setGlobal('message', Utils\Session::getInstance('message'));
 		
 		$this->_request = $request;
@@ -136,11 +136,11 @@ class Core
 		{
 			if (View::getGlobal('layout') === null)
 			{
-				View::setGlobal('layout', Config::$config['defaultLayout']);
+				View::setGlobal('layout', Utils\Config::$config['defaultLayout']);
 			}
 			View::setGlobal('contentForLayout', $this->_response->getBody());
 			$this->_response->clearResponse();
-			$this->_response->setBody(View::factory(Config::$config['defaultModule'], View::getGlobal('layout')));
+			$this->_response->setBody(View::factory(Utils\Config::$config['defaultModule'], View::getGlobal('layout')));
 		}
 		
 		$this->_response->send();

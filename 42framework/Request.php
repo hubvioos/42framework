@@ -50,29 +50,29 @@ class Request
 				$context = Context::getInstance();
 				$url = $context->getUrl();
 				
-				$path = Utils\Route::urlToPath($url, Config::$config['defaultModule'], Config::$config['defaultAction']);
+				$path = Utils\Route::urlToPath($url, Utils\Config::$config['defaultModule'], Utils\Config::$config['defaultAction']);
 				$params = Utils\Route::pathToParams($path);
 				
 				// Redirect to root if we use the default module and action.
 				if ($url != '' 
-				    && $params['module'] == Config::$config['defaultModule']
-				    && $params['action'] == Config::$config['defaultAction']
+				    && $params['module'] == Utils\Config::$config['defaultModule']
+				    && $params['action'] == Utils\Config::$config['defaultAction']
 				    && empty($params['params'])
 				    )
 				{
-				    Response::getInstance()->redirect(Config::$config['siteUrl'], 301, true);
+				    Response::getInstance()->redirect(Utils\Config::$config['siteUrl'], 301, true);
 				}
 				// Avoid duplicate content of the routes.
 				else if ($url != Utils\Route::pathToUrl($path)
 					&& $url != '')
 				{
-				    Response::getInstance()->redirect(Config::$config['siteUrl'] . Utils\Route::pathToUrl($path), 301, true);
+				    Response::getInstance()->redirect(Utils\Config::$config['siteUrl'] . Utils\Route::pathToUrl($path), 301, true);
 				}
 								
 				// Avoid duplicate content with just a "/" after the URL
 				if(strrchr($url, '/') === '/')
 				{
-				    Response::getInstance()->redirect(Config::$config['siteUrl'] . rtrim($url, '/'), 301, true);  
+				    Response::getInstance()->redirect(Utils\Config::$config['siteUrl'] . rtrim($url, '/'), 301, true);  
 				}
 				
 				$previousIpAddress = $context->getPreviousIpAddress();
@@ -89,7 +89,7 @@ class Request
 					Utils\Message::add(Utils\Session::getInstance('message'),'warning',
 						'It seems that your session has been stolen, we destroyed it for security reasons. Check your environment security.');
 					
-					Response::getInstance()->redirect(Config::$config['siteUrl'], 301, true);
+					Response::getInstance()->redirect(Utils\Config::$config['siteUrl'], 301, true);
 				}
 				
 				Request::$_instance = Request::factory($params['module'], $params['action'], $params['params'], false);
