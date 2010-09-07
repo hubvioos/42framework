@@ -69,7 +69,7 @@ class Core
 	}
 
 
-	public function init (Request $request, Response $response, Context $context)
+	public function init (Context $context, Request $request, Response $response)
 	{		
 		// Timezone
 		date_default_timezone_set(Config::$config['defaultTimezone']);

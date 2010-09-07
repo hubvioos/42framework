@@ -17,11 +17,11 @@ class View
 	// on définit l'adresse du fichier de vue à inclure et on récupère les variables supplémentaires
 	public function __construct ($module, $file, $vars = false)
 	{
-		$this->_file = MODULES_DIR.DS.$module.DS.'views'.DS.$file.DS.Config::$config['viewExtension'];
+		$this->_file = MODULES_DIR.DS.$module.DS.'views'.DS.$file.Config::$config['viewExtension'];
 		
 		if (!file_exists($this->_file))
 		{
-			$globalFile = APPLICATION_DIR.DS.'views'.DS.$file.DS.Config::$config['viewExtension'];
+			$globalFile = APPLICATION_DIR.DS.'views'.DS.$file.Config::$config['viewExtension'];
 			if (file_exists($globalFile))
 			{
 				$this->_file = $globalFile;

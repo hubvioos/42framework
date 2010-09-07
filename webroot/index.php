@@ -22,14 +22,14 @@ require FRAMEWORK_DIR.DS.'utils'.DS.'ClassLoader.php';
 $core = \Framework\Core::getInstance()
 			->loadConfig($autoload, $config)
 			->init(
-				\Framework\Request::getInstance(),
-				\Framework\Response::getInstance(),
 				\Framework\Context::getInstance(
 					\Framework\History::getInstance(
 						\Framework\Utils\Session::getInstance('history'), 
 						\Framework\Config::$config['historySize']
 						)
-					)
+					),
+				\Framework\Request::getInstance(),
+				\Framework\Response::getInstance()
 				)
 			->execute()
 			->render();

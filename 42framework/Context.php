@@ -67,7 +67,7 @@ class Context
 	
 		$this->_isAjax = (isset($_SERVER['HTTP_X_ContextED_WITH']) AND strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
 		
-		$this->_url = $_GET['url'];
+		$this->_url = (!isset($_GET['url'])) ? null : $_GET['url'];
 				
 		$this->_history = $history;
 	}

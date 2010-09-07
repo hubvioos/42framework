@@ -53,9 +53,9 @@ class Controller
 			{
 				if ($this->_view === null)
 				{
-					$this->setView($this->_request->action);
+					$this->setView($this->_request->getAction());
 				}
-				$this->_response = View::factory($this->_request->module, $this->_view, $this->_vars);
+				$this->_response = View::factory($this->_request->getModule(), $this->_view, $this->_vars);
 			}
 			else 
 			{

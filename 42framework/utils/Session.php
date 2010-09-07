@@ -35,7 +35,7 @@ class Session implements \ArrayAccess, \SeekableIterator, \Countable
 
 	public static function getInstance ($namespace = 'default')
 	{
-		if (Session::$_instance[$namespace] === null)
+		if (!isset(Session::$_instance[$namespace]) || Session::$_instance[$namespace] === null)
 		{
 			Session::$_instance[$namespace] = new Session($namespace);	
 		}
@@ -67,7 +67,7 @@ class Session implements \ArrayAccess, \SeekableIterator, \Countable
 	public function destroy ()
 	{	
 		// Delete data of the namespace
-		unset($_SESSION[$this->_namespace]);
+		$_SESSION[$this->_namespace] = null;
 		
 		// Delete instance
 		Session::$_instance[$this->_namespace] = null;
