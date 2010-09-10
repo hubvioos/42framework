@@ -17,6 +17,7 @@ class ClassLoader
 			require $autoloadPath;
 		}
 		ClassLoader::$_autoload = $autoload;
+		spl_autoload_register(array('\\Framework\\Utils\\ClassLoader', 'loadClass'));
 	}
 
 	/**

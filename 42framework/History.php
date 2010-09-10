@@ -17,7 +17,11 @@ class History
 
 	protected function __clone () { }
 	
-	protected function __construct (Utils\Session $session, $historySize)
+	/**
+	 * @param \Framework\Utils\Session $session
+	 * @param integer $historySize
+	 */
+	protected function __construct (\Framework\Utils\Session $session, $historySize)
 	{
 		if ($session->getNamespace() != 'history')
 		{

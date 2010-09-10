@@ -18,8 +18,6 @@ class Request
 	
     protected static $_current = null;
 
-	protected static $_instance = null;
-
 	/*
 		Constructeur de la classe, partie importante pour l'exécution de la page.
 		Cette méthode s'occupe de déterminer le module et l'action à appeler, en faisant appel à Route.
@@ -35,68 +33,6 @@ class Request
 	}
 
 	protected function __clone () { }
-
-	public static function getInstance ()
-	{
-		if (Request::$_instance === null)
-		{
-			if (PHP_SAPI === 'cli')
-			{
-				$params = \Application\modules\cli\CliUtils::extractParams();
-				Request::$_instance = Request::factory('cli', $params['action'], $params['params']);
-			}
-			else
-			{
-				$context = Context::getInstance();
-				$url = $context->getUrl();
-				
-				$path = Utils\Route::urlToPath($url, Utils\Config::$config['defaultModule'], Utils\Config::$config['defaultAction']);
-				$params = Utils\Route::pathToParams($path);
-				
-				// Redirect to root if we use the default module and action.
-				if ($url != '' 
-				    && $params['module'] == Utils\Config::$config['defaultModule']
-				    && $params['action'] == Utils\Config::$config['defaultAction']
-				    && empty($params['params'])
-				    )
-				{
-				    Response::getInstance()->redirect(Utils\Config::$config['siteUrl'], 301, true);
-				}
-				// Avoid duplicate content of the routes.
-				else if ($url != Utils\Route::pathToUrl($path)
-					&& $url != '')
-				{
-				    Response::getInstance()->redirect(Utils\Config::$config['siteUrl'] . Utils\Route::pathToUrl($path), 301, true);
-				}
-								
-				// Avoid duplicate content with just a "/" after the URL
-				if(strrchr($url, '/') === '/')
-				{
-				    Response::getInstance()->redirect(Utils\Config::$config['siteUrl'] . rtrim($url, '/'), 301, true);  
-				}
-				
-				$previousIpAddress = $context->getPreviousIpAddress();
-				$previousUserAgent = $context->getPreviousUserAgent();
-							
-				if ($previousIpAddress !== null 
-					&& $previousIpAddress != $context->getIpAddress()
-					&& $previousUserAgent !== null
-					&& $previousUserAgent != $context->getUserAgent()
-					)
-				{
-					Utils\Session::destroyAll();
-					
-					Utils\Message::add(Utils\Session::getInstance('message'),'warning',
-						'It seems that your session has been stolen, we destroyed it for security reasons. Check your environment security.');
-					
-					Response::getInstance()->redirect(Utils\Config::$config['siteUrl'], 301, true);
-				}
-				
-				Request::$_instance = Request::factory($params['module'], $params['action'], $params['params'], false);
-			}
-		}
-		return Request::$_instance;
-	}
 
 	public static function factory ()
 	{

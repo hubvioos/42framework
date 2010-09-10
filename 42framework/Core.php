@@ -57,7 +57,6 @@ class Core
 	{
 		// Autoload
 		Utils\ClassLoader::init($autoload, FRAMEWORK_DIR.DS.'config'.DS.'autoload.php');
-		spl_autoload_register(array('\\Framework\\Utils\\ClassLoader', 'loadClass'));
 		
 		// Utils\Config
 		Utils\Config::init($config, FRAMEWORK_DIR.DS.'config'.DS.'config.php');
@@ -69,20 +68,84 @@ class Core
 	}
 
 
-	public function bootstrap (Context $context, Request $request, Response $response)
+	public function bootstrap (Context $context, Response $response)
 	{		
+		if (PHP_SAPI === 'cli')
+		{
+			$params = \Application\modules\cli\CliUtils::extractParams();
+			$params['module'] = 'cli';
+			$params['internal'] = true;
+		}
+		else
+		{
+			$url = $context->getUrl();
+			
+			$path = Utils\Route::urlToPath($url, Utils\Config::$config['defaultModule'], Utils\Config::$config['defaultAction']);
+			$params = Utils\Route::pathToParams($path);
+			
+			$this->duplicateContentPolicy($url, $path, $params);
+			$this->requestSecurityPolicy($context);
+		}
 		// Timezone
 		date_default_timezone_set(Utils\Config::$config['defaultTimezone']);
-		
+			
 		// Views variables
 		View::setGlobal('layout', Utils\Config::$config['defaultLayout']);
 		View::setGlobal('message', Utils\Session::getInstance('message'));
-		
-		$this->_request = $request;
-		$this->_response = $response;		
+					
 		$this->_context = $context;
+		$this->_request = Request::factory($params['module'], $params['action'], $params['params'], $params['internal']);
+		$this->_response = $response;
 		
 		return $this;
+	}
+	
+	public function duplicateContentPolicy ($url, $path, $params)
+	{
+		// Redirect to root if we use the default module and action.
+		if ($url != '' 
+		    && $params['module'] == Utils\Config::$config['defaultModule']
+		    && $params['action'] == Utils\Config::$config['defaultAction']
+		    && empty($params['params'])
+		    )
+		{
+		    Response::getInstance()->redirect(Utils\Config::$config['siteUrl'], 301, true);
+		}
+		// Avoid duplicate content of the routes.
+		else if ($url != Utils\Route::pathToUrl($path)
+			&& $url != '')
+		{
+		    Response::getInstance()->redirect(Utils\Config::$config['siteUrl'] . Utils\Route::pathToUrl($path), 301, true);
+		}
+						
+		// Avoid duplicate content with just a "/" after the URL
+		if(strrchr($url, '/') === '/')
+		{
+		    Response::getInstance()->redirect(Utils\Config::$config['siteUrl'] . rtrim($url, '/'), 301, true);  
+		}
+	}
+	
+	/**
+	 * @param \Framework\Context $context
+	 */
+	public function requestSecurityPolicy ($context)
+	{
+		$previousIpAddress = $context->getPreviousIpAddress();
+		$previousUserAgent = $context->getPreviousUserAgent();
+					
+		if ($previousIpAddress !== null 
+			&& $previousIpAddress != $context->getIpAddress()
+			&& $previousUserAgent !== null
+			&& $previousUserAgent != $context->getUserAgent()
+			)
+		{
+			Utils\Session::destroyAll();
+			
+			Utils\Message::add(Utils\Session::getInstance('message'),'warning',
+				'It seems that your session has been stolen, we destroyed it for security reasons. Check your environment security.');
+			
+			Response::getInstance()->redirect(Utils\Config::$config['siteUrl'], 301, true);
+		}
 	}
 	
 	/**

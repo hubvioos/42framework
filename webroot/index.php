@@ -28,7 +28,6 @@ $core = \Framework\Core::getInstance()
 						\Framework\Utils\Config::$config['historySize']
 						)
 					),
-				\Framework\Request::getInstance(),
 				\Framework\Response::getInstance()
 				)
 			->execute()

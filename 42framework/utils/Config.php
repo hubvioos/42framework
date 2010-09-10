@@ -17,9 +17,9 @@ class Config
 		if (empty($config))
 		{
 			try {
-			throw new CoreException('Config is not compiled. Please use compileConfig command in cli.');
+			throw new \Framework\CoreException('Config is not compiled. Please use compileConfig command in cli.');
 			}
-			catch (CoreException $e)
+			catch (\Framework\CoreException $e)
 			{
 				require $configPath;
 			}
