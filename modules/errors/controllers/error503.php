@@ -11,7 +11,7 @@ class error503 extends \Framework\Controller
 							->clearResponse()
 							->reset()
 							->status(503)
-							->setBody(\Framework\View::factory('errors', 'error503');
+							->setBody(\Framework\View::factory('errors', 'error503'));
 					
 		return true;
 	}

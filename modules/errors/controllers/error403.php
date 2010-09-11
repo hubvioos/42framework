@@ -11,7 +11,7 @@ class error403 extends \Framework\Controller
 							->clearResponse()
 							->reset()
 							->status(403)
-							->setBody(\Framework\View::factory('errors', 'error403');
+							->setBody(\Framework\View::factory('errors', 'error403'));
 					
 		return true;
 	}
