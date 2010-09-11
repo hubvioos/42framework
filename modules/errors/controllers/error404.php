@@ -11,7 +11,7 @@ class error404 extends \Framework\Controller
 							->clearResponse()
 							->reset()
 							->status(404)
-							->setBody(\Framework\View::factory('errors', 'error404');
+							->setBody(\Framework\View::factory('errors', 'error404'));
 					
 		return true;
 	}
