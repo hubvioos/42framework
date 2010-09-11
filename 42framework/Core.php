@@ -58,7 +58,7 @@ class Core
 		// Autoload
 		Utils\ClassLoader::init($autoload, FRAMEWORK_DIR.DS.'config'.DS.'autoload.php');
 		
-		// Utils\Config
+		// Config
 		Utils\Config::init($config, FRAMEWORK_DIR.DS.'config'.DS.'config.php');
 		
 		// Routes

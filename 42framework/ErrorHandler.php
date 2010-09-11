@@ -8,9 +8,12 @@ class ErrorHandler
 		
 	}
 	
-	public static function init()
+	public static function init($error_reporting, $display_error)
 	{
-		
+		error_reporting($error_reporting);
+		ini_set('display_errors', $display_error);
+		set_error_handler(array($this, 'errorHandler'));
+		set_exception_handler(array($this, 'exceptionHandler'));
 	}
 	
 	/**
