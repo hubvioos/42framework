@@ -25,6 +25,9 @@ class Response
 
 	protected function __clone () { }
 
+	/**
+	 * @return \Framework\Response
+	 */
 	public static function getInstance ()
 	{
 		if (Response::$instance == null)
@@ -34,11 +37,17 @@ class Response
 		return Response::$instance;
 	}
 	
+	/**
+	 * @return \Framework\Response
+	 */
 	public function factory()
 	{
 		return new Response();
 	}
 	
+	/**
+	 * @return \Framework\Response
+	 */
 	public function clearResponse ()
 	{
 		$this->setBody('');
@@ -50,6 +59,9 @@ class Response
 		return $this->body;
 	}
 	
+	/**
+	 * @return \Framework\Response
+	 */
 	public function setBody ($value)
 	{
 		$this->body = $value;
@@ -71,29 +83,44 @@ class Response
 		return $this->headers;
 	}
 
+	/**
+	 * @return \Framework\Response
+	 */
 	public function reset ()
 	{
 		return $this->resetStatus()->resetCookies()->resetHeaders();
 	}
 
+	/**
+	 * @return \Framework\Response
+	 */
 	public function resetStatus ()
 	{
 		$this->status = '200 OK';
 		return $this;
 	}
 
+	/**
+	 * @return \Framework\Response
+	 */
 	public function resetHeaders ()
 	{
 		$this->headers = array();
 		return $this;
 	}
 
+	/**
+	 * @return \Framework\Response
+	 */
 	public function resetCookies ()
 	{
 		$this->cookies = array();
 		return $this;
 	}
 
+	/**
+	 * @return \Framework\Response
+	 */
 	protected function setStatus ($status)
 	{
 		$this->status = $status;
@@ -105,6 +132,9 @@ class Response
 		Core::getInstance()->render($this);
 	}
 
+	/**
+	 * @return \Framework\Response
+	 */
 	public function setHeader ($name, $value)
 	{
 		if (!is_string($name))
@@ -115,12 +145,18 @@ class Response
 		return $this;
 	}
 
+	/**
+	 * @return \Framework\Response
+	 */
 	public function setCookie ($name, $value = null, $expire = null, $path = null, $domain = null, $secure = null)
 	{
 		$this->cookies[$name] = array('value' => $value, 'expire' => $expire, 'path' => $path, 'domain' => $domain, 'secure' => $secure);
 		return $this;
 	}
 
+	/**
+	 * @return \Framework\Response
+	 */
 	public function status ($status)
 	{
 		switch ($status)
@@ -226,6 +262,9 @@ class Response
 		}
 	}
 
+	/**
+	 * @return \Framework\Response
+	 */
 	public function redirect ($absoluteUri, $status = 302, $stopProcess = true)
 	{
 		if ($status < 300 || $status > 399)
@@ -243,6 +282,9 @@ class Response
 		return $this;
 	}
 
+	/**
+	 * @return \Framework\Response
+	 */
 	public function send ()
 	{
 		if (headers_sent())

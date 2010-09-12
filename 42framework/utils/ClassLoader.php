@@ -28,7 +28,7 @@ class ClassLoader
 	public static function loadClass($className)
 	{
 		$className = strtolower($className);
-		if (!isset(ClassLoader::$_autoload[$className]))
+		if (!ClassLoader::canLoadClass($className))
 		{
 			throw new ClassLoaderException(__METHOD__.' : '.$className.' doesn\'t exist in autoload configuration. Try recompile autoload.');
 		}
@@ -73,5 +73,15 @@ class ClassLoader
 			ClassLoader::$_models[$model] = new $model;
 		}
 		return ClassLoader::$_models[$model];
+	}
+	
+	public static function canLoadClass ($className)
+	{
+		$className = strtolower($className);
+		if (isset(ClassLoader::$_autoload[$className]))
+		{
+			return true;
+		}
+		return false;
 	}
 }

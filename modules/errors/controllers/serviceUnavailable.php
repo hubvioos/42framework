@@ -1,7 +1,7 @@
 <?php namespace Application\modules\errors\controllers;
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
-class serviceUnavailable extends \Framework\Controller
+class serviceUnavailable extends generic
 {
 	public function processAction ($request = null)
 	{

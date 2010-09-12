@@ -1,7 +1,7 @@
 <?php namespace Application\modules\errors\controllers;
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
-class forbidden extends \Framework\Controller
+class forbidden extends generic
 {
 	public function processAction ($request = null)
 	{
