@@ -1,7 +1,7 @@
 <?php namespace Application\modules\errors\controllers;
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
-class notFound extends \Framework\Controller
+class notFound extends generic
 {
 	public function processAction ($request = null)
 	{

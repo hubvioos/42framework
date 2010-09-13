@@ -42,22 +42,29 @@ class Request
 			case 1:
 				$params = Utils\Route::pathToParams(func_get_arg(0));
 				$params['internal'] = true;
+				$params['method'] = 'GET';
 				break;
 			case 2:
 				$params = Utils\Route::pathToParams(func_get_arg(0));
 				$params['internal'] = func_get_arg(1);
+				$params['method'] = 'GET';
 				break;
 			case 3:
 				list($params['module'], $params['action'], $params['params']) = func_get_args();
 				$params['internal'] = true;
+				$params['method'] = 'GET';
 				break;
 			case 4:
 				list($params['module'], $params['action'], $params['params'], $params['internal']) = func_get_args();
+				$params['method'] = 'GET';
+				break;
+			case 5:
+				list($params['module'], $params['action'], $params['params'], $params['internal'], $params['method']) = func_get_args();
 				break;
 			default:
 				throw new RequestException('Request::factory : invalid arguments');
 		}
-		return new Request($params['module'], $params['action'], $params['params'], $params['internal']);
+		return new Request($params['module'], $params['action'], $params['params'], $params['internal'], $params['method']);
 	}
 	
 	public function getCurrent ()

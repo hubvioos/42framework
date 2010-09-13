@@ -141,7 +141,7 @@ class Route
 		return $path;
 	}
 	
-	public function pathToUrl($path)
+	public static function pathToUrl($path)
 	{	
 	    $url = $path;
 	    

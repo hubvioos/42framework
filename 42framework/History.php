@@ -68,6 +68,6 @@ class History
 	
 	public function getPrevious ()
 	{
-		return (isset($this->_history[0])) ? $this->_history[Ø] : null;
+		return (isset($this->_history[0])) ? $this->_history[0] : null;
 	}
 }

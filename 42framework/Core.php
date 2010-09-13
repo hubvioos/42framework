@@ -21,13 +21,6 @@ class Core
 	 */
 	protected $_response = null;
 	
-	/**
-	 * Contains models already loaded
-	 * 
-	 * @var Array
-	 */
-	protected $_models = array();
-	
 	
 	protected function __construct() { }
 	
@@ -61,6 +54,10 @@ class Core
 		// Config
 		Utils\Config::init($config, FRAMEWORK_DIR.DS.'config'.DS.'config.php');
 		
+		ErrorHandler::getInstance()
+			->start(Utils\Config::$config['errorReporting'], Utils\Config::$config['displayErrors'])
+			->attach(new ErrorHandlerListeners\Html());
+		
 		// Routes
 		Utils\Route::init(Utils\Config::$config['routes']);
 		
@@ -82,17 +79,23 @@ class Core
 			
 			$path = Utils\Route::urlToPath($url, Utils\Config::$config['defaultModule'], Utils\Config::$config['defaultAction']);
 			$params = Utils\Route::pathToParams($path);
+			$params['internal'] = false;
+			
+			// Views variables
+			View::setGlobal('layout', Utils\Config::$config['defaultLayout']);
+			View::setGlobal('message', Utils\Session::getInstance('message'));
+			
+			if (!Utils\ClassLoader::canLoadClass('Application\\modules\\'.$params['module'].'\\controllers\\'.$params['action']))
+			{
+				Request::factory('errors/error404')->execute();
+			}
 			
 			$this->duplicateContentPolicy($url, $path, $params);
 			$this->requestSecurityPolicy($context);
 		}
 		// Timezone
 		date_default_timezone_set(Utils\Config::$config['defaultTimezone']);
-			
-		// Views variables
-		View::setGlobal('layout', Utils\Config::$config['defaultLayout']);
-		View::setGlobal('message', Utils\Session::getInstance('message'));
-					
+		
 		$this->_context = $context;
 		$this->_request = Request::factory($params['module'], $params['action'], $params['params'], $params['internal']);
 		$this->_response = $response;

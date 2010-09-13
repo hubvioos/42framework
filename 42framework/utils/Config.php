@@ -16,15 +16,9 @@ class Config
 	{
 		if (empty($config))
 		{
-			try {
-			throw new \Framework\CoreException('Config is not compiled. Please use compileConfig command in cli.');
-			}
-			catch (\Framework\CoreException $e)
-			{
-				require $configPath;
-			}
+			require $configPath;
 		}
-		self::$config = $config;
+		Config::$config = $config;
 	}
 
 	/**
@@ -32,7 +26,7 @@ class Config
 	 */
 	public static function getConfig ()
 	{
-		return self::$config;
+		return Config::$config;
 	}
 
 	/**
@@ -51,7 +45,7 @@ class Config
 			{
 				if ($i == 0)
 				{
-					$value = self::$config[$key[0]];
+					$value = Config::$config[$key[0]];
 				}
 				else
 				{
@@ -60,7 +54,7 @@ class Config
 			}
 			return $value;
 		}
-		return isset(self::$config[$key]) ? self::$config[$key] : null;
+		return isset(Config::$config[$key]) ? Config::$config[$key] : null;
 	}
 
 	/**
@@ -78,10 +72,10 @@ class Config
 			
 			for ($i = 0; $i < $taille; $i++)
 			{
-				if ($i == 0 && isset(self::$config[$key[0]]))
+				if ($i == 0 && isset(Config::$config[$key[0]]))
 				{
 					$ok = true;
-					$value = self::$config[$key[0]];
+					$value = Config::$config[$key[0]];
 				}
 				elseif (isset($value[$key[$i]]))
 				{
@@ -95,7 +89,7 @@ class Config
 			}
 			return $ok;
 		}
-		return isset(self::$config[$key]) ? true : false;
+		return isset(Config::$config[$key]) ? true : false;
 	}
 
 	/**
@@ -104,6 +98,6 @@ class Config
 	 */
 	public static function set ($key, $value)
 	{
-		self::$config[$key] = $value;
+		Config::$config[$key] = $value;
 	}
 }
