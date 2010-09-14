@@ -4,6 +4,8 @@ defined('FRAMEWORK_DIR') or die('Invalid script access');
 
 class Html implements \Framework\interfaces\iErrorHandlerListener
 {
+	const MAX_STRING_LEN = 16;
+	
 	/**
 	 * @param \Framework\interfaces\iErrorHandler $errorHandler
 	 */
@@ -36,8 +38,6 @@ class Html implements \Framework\interfaces\iErrorHandlerListener
 		}
 		$response->stopProcess();
 	}
-	
-	const MAX_STRING_LEN = 16;
 	
 	public function formatTrace ($stack)
 	{
