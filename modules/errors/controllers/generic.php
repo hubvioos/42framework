@@ -15,6 +15,6 @@ class generic extends \Framework\Controller
 	
 	public function _after (\Framework\Request $request, $actionResponse)
 	{
-		\Framework\Core::getInstance()->render($this->_reponse);
+		\Framework\Core::getInstance()->render($this->_response);
 	}
 }

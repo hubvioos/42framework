@@ -12,9 +12,11 @@ class Request
 
 	protected $_params = array();
 	
-	protected $_isInternal = true;
+	protected $_state = null;
 	
-	protected $_method = 'GET';
+	const DEFAULT_STATE = -1;
+	const CLI_STATE = -50;
+	const FIRST_REQUEST = -100;
 	
     protected static $_current = null;
 
@@ -22,49 +24,20 @@ class Request
 		Constructeur de la classe, partie importante pour l'exécution de la page.
 		Cette méthode s'occupe de déterminer le module et l'action à appeler, en faisant appel à Route.
 	*/
-	protected function __construct ($_module, $_action, $_params, $_internal = true, $_method = 'GET')
+	protected function __construct ($module, $action, $params, $state)
 	{
-		$this->_module = $_module;
-		$this->_action = $_action;
-		$this->_params = $_params;
-		$this->_method = $_method;
-		$this->_isInternal = $_internal;
+		$this->_module = $module;
+		$this->_action = $action;
+		$this->_params = $params;
+		$this->_state = $state;
 		Request::$_current = $this;
 	}
 
 	protected function __clone () { }
 
-	public static function factory ()
+	public static function factory ($module, $action, Array $params = array(), $state = Request::DEFAULT_STATE)
 	{
-		$params = array();
-		switch (func_num_args())
-		{
-			case 1:
-				$params = Utils\Route::pathToParams(func_get_arg(0));
-				$params['internal'] = true;
-				$params['method'] = 'GET';
-				break;
-			case 2:
-				$params = Utils\Route::pathToParams(func_get_arg(0));
-				$params['internal'] = func_get_arg(1);
-				$params['method'] = 'GET';
-				break;
-			case 3:
-				list($params['module'], $params['action'], $params['params']) = func_get_args();
-				$params['internal'] = true;
-				$params['method'] = 'GET';
-				break;
-			case 4:
-				list($params['module'], $params['action'], $params['params'], $params['internal']) = func_get_args();
-				$params['method'] = 'GET';
-				break;
-			case 5:
-				list($params['module'], $params['action'], $params['params'], $params['internal'], $params['method']) = func_get_args();
-				break;
-			default:
-				throw new RequestException('Request::factory : invalid arguments');
-		}
-		return new Request($params['module'], $params['action'], $params['params'], $params['internal'], $params['method']);
+		return new Request($module, $action, $params, $state);
 	}
 	
 	public function getCurrent ()
@@ -110,8 +83,8 @@ class Request
 		return $this->_method;
 	}
 
-	public function isInternal ()
+	public function getState ()
 	{
-		return $this->_isInternal;
+		return $this->_state;
 	}
 }

@@ -71,7 +71,8 @@ class Core
 		{
 			$params = \Application\modules\cli\CliUtils::extractParams();
 			$params['module'] = 'cli';
-			$params['internal'] = true;
+			
+			$state = Request::CLI_STATE;
 		}
 		else
 		{
@@ -79,7 +80,8 @@ class Core
 			
 			$path = Utils\Route::urlToPath($url, Utils\Config::$config['defaultModule'], Utils\Config::$config['defaultAction']);
 			$params = Utils\Route::pathToParams($path);
-			$params['internal'] = false;
+			
+			$state = Request::FIRST_REQUEST;
 			
 			// Views variables
 			View::setGlobal('layout', Utils\Config::$config['defaultLayout']);
@@ -87,7 +89,7 @@ class Core
 			
 			if (!Utils\ClassLoader::canLoadClass('Application\\modules\\'.$params['module'].'\\controllers\\'.$params['action']))
 			{
-				Request::factory('errors/error404')->execute();
+				Request::factory('errors','error404',array(),Request::FIRST_REQUEST)->execute();
 			}
 			
 			$this->duplicateContentPolicy($url, $path, $params);
@@ -97,7 +99,7 @@ class Core
 		date_default_timezone_set(Utils\Config::$config['defaultTimezone']);
 		
 		$this->_context = $context;
-		$this->_request = Request::factory($params['module'], $params['action'], $params['params'], $params['internal']);
+		$this->_request = Request::factory($params['module'], $params['action'], $params['params'], $state);
 		$this->_response = $response;
 		
 		return $this;

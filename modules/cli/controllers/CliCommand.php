@@ -12,10 +12,10 @@ class CliCommand extends \Framework\Controller
 	 */
 	protected function _before($request)
 	{
-		if (!$request->isInternal())
+		if ($request->getState() == \Framework\Request::CLI_STATE)
 		{
-			//$this->_response = \Framework\Request::factory('errors', 'accesDenied', array($request))->execute();
-			//return false;
+			$this->_response = \Framework\Request::factory('errors', 'error403', array($request))->execute();
+			return false;
 		}
 		return true;
 	}
