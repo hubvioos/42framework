@@ -69,7 +69,7 @@ class Core
 	{		
 		if (PHP_SAPI === 'cli')
 		{
-			$params = \Application\modules\cli\CliLibs::extractParams();
+			$params = \Application\modules\cli\CliUtils::extractParams();
 			$params['module'] = 'cli';
 			
 			$state = Request::CLI_STATE;
@@ -89,7 +89,7 @@ class Core
 			
 			if (!Libs\ClassLoader::canLoadClass('Application\\modules\\'.$params['module'].'\\controllers\\'.$params['action']))
 			{
-				Request::factory('errors','error404',array(),Request::FIRST_REQUEST)->execute();
+				Request::factory('errors', 'error404', array(), Request::FIRST_REQUEST)->execute();
 			}
 			
 			$this->duplicateContentPolicy($url, $path, $params);

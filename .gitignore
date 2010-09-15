@@ -1,6 +1,7 @@
 *~
 build/*
 */*.orig
+doc/*
 .project
 .project/*
 .buildpath

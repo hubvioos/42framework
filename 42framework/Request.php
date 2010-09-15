@@ -47,8 +47,8 @@ class Request
 	
 	public function execute ()
 	{
-		$module = Core::loadAction(self::$_current->_module, self::$_current->_action);
-		return $module->execute(self::$_current);
+		$module = Core::loadAction($this->_module, $this->_action);
+		return $module->execute($this);
 	}
 	
 	/**
@@ -73,14 +73,6 @@ class Request
 	public function getParams ()
 	{
 		return $this->_params;
-	}
-
-	/**
-	 * @return the $_method
-	 */
-	public function getMethod ()
-	{
-		return $this->_method;
 	}
 
 	public function getState ()

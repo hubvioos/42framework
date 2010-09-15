@@ -17,15 +17,15 @@ if (file_exists(APPLICATION_DIR.DS.'build'.DS.'config.php'))
 	include APPLICATION_DIR.DS.'build'.DS.'config.php';
 }
 require FRAMEWORK_DIR.DS.'Core.php';
-require FRAMEWORK_DIR.DS.'utils'.DS.'ClassLoader.php';
+require FRAMEWORK_DIR.DS.'libs'.DS.'ClassLoader.php';
 
 $core = \Framework\Core::getInstance()
 			->init($autoload, $config)
 			->bootstrap(
 				\Framework\Context::getInstance(
 					\Framework\History::getInstance(
-						\Framework\Utils\Session::getInstance('history'), 
-						\Framework\Utils\Config::$config['historySize']
+						\Framework\Libs\Session::getInstance('history'), 
+						\Framework\Config::$config['historySize']
 						)
 					),
 				\Framework\Response::getInstance()

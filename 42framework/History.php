@@ -21,7 +21,7 @@ class History
 	 * @param \Framework\Libs\Session $session
 	 * @param integer $historySize
 	 */
-	protected function __construct (Libs\Session $session, $historySize)
+	protected function __construct (\Framework\Libs\Session $session, $historySize)
 	{
 		if ($session->getNamespace() != 'history')
 		{
