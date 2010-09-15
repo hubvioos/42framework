@@ -1,5 +1,5 @@
 <?php
-namespace Framework\Utils;
+namespace Framework\Libs;
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
 class SessionException extends \Exception { }
@@ -20,7 +20,7 @@ class Session implements \ArrayAccess, \SeekableIterator, \Countable
 	{	
 		if (PHP_SAPI !== 'cli')
 		{
-			Session::start();
+			self::start();
 			$this->_session = &$_SESSION[$namespace];
 		}
 		else
@@ -35,19 +35,19 @@ class Session implements \ArrayAccess, \SeekableIterator, \Countable
 
 	public static function getInstance ($namespace = 'default')
 	{
-		if (!isset(Session::$_instance[$namespace]) || Session::$_instance[$namespace] === null)
+		if (!isset(self::$_instance[$namespace]) || self::$_instance[$namespace] === null)
 		{
-			Session::$_instance[$namespace] = new Session($namespace);	
+			self::$_instance[$namespace] = new self($namespace);	
 		}
-		return Session::$_instance[$namespace];
+		return self::$_instance[$namespace];
 	}
 	
 	public static function start ()
 	{
-		if (!Session::$_isStarted)
+		if (!self::$_isStarted)
 		{
 			session_start();
-			Session::$_isStarted = true;
+			self::$_isStarted = true;
 		}
 	}
 	
@@ -56,10 +56,10 @@ class Session implements \ArrayAccess, \SeekableIterator, \Countable
 		// Delete all data
 		session_unset();
 		session_destroy();
-		Session::$_isStarted = false;
+		self::$_isStarted = false;
 		
 		// Delete all instances
-		Session::$_instance = null;
+		self::$_instance = null;
 		
 		return null;
 	}
@@ -70,7 +70,7 @@ class Session implements \ArrayAccess, \SeekableIterator, \Countable
 		$_SESSION[$this->_namespace] = null;
 		
 		// Delete instance
-		Session::$_instance[$this->_namespace] = null;
+		self::$_instance[$this->_namespace] = null;
 		
 		return null;
 	}

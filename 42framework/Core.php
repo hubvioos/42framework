@@ -31,11 +31,11 @@ class Core
 	 */
 	public static function getInstance ()
 	{
-		if (Core::$_instance === null)
+		if (self::$_instance === null)
 		{
-			Core::$_instance = new Core();
+			self::$_instance = new self();
 		}
-		return Core::$_instance;
+		return self::$_instance;
 	}
 	
 	protected function __clone () { }
@@ -49,17 +49,17 @@ class Core
 	public function init (Array $autoload = array(), Array $config = array())
 	{
 		// Autoload
-		Utils\ClassLoader::init($autoload, FRAMEWORK_DIR.DS.'config'.DS.'autoload.php');
+		Libs\ClassLoader::init($autoload, FRAMEWORK_DIR.DS.'config'.DS.'autoload.php');
 		
 		// Config
-		Utils\Config::init($config, FRAMEWORK_DIR.DS.'config'.DS.'config.php');
+		Config::init($config, FRAMEWORK_DIR.DS.'config'.DS.'config.php');
 		
 		ErrorHandler::getInstance()
-			->start(Utils\Config::$config['errorReporting'], Utils\Config::$config['displayErrors'])
+			->start(Config::$config['errorReporting'], Config::$config['displayErrors'])
 			->attach(new ErrorHandlerListeners\Html());
 		
 		// Routes
-		Utils\Route::init(Utils\Config::$config['routes']);
+		Libs\Route::init(Config::$config['routes']);
 		
 		return $this;
 	}
@@ -69,7 +69,7 @@ class Core
 	{		
 		if (PHP_SAPI === 'cli')
 		{
-			$params = \Application\modules\cli\CliUtils::extractParams();
+			$params = \Application\modules\cli\CliLibs::extractParams();
 			$params['module'] = 'cli';
 			
 			$state = Request::CLI_STATE;
@@ -78,16 +78,16 @@ class Core
 		{
 			$url = $context->getUrl();
 			
-			$path = Utils\Route::urlToPath($url, Utils\Config::$config['defaultModule'], Utils\Config::$config['defaultAction']);
-			$params = Utils\Route::pathToParams($path);
+			$path = Libs\Route::urlToPath($url, Config::$config['defaultModule'], Config::$config['defaultAction']);
+			$params = Libs\Route::pathToParams($path);
 			
 			$state = Request::FIRST_REQUEST;
 			
 			// Views variables
-			View::setGlobal('layout', Utils\Config::$config['defaultLayout']);
-			View::setGlobal('message', Utils\Session::getInstance('message'));
+			View::setGlobal('layout', Config::$config['defaultLayout']);
+			View::setGlobal('message', Libs\Session::getInstance('message'));
 			
-			if (!Utils\ClassLoader::canLoadClass('Application\\modules\\'.$params['module'].'\\controllers\\'.$params['action']))
+			if (!Libs\ClassLoader::canLoadClass('Application\\modules\\'.$params['module'].'\\controllers\\'.$params['action']))
 			{
 				Request::factory('errors','error404',array(),Request::FIRST_REQUEST)->execute();
 			}
@@ -96,7 +96,7 @@ class Core
 			$this->requestSecurityPolicy($context);
 		}
 		// Timezone
-		date_default_timezone_set(Utils\Config::$config['defaultTimezone']);
+		date_default_timezone_set(Config::$config['defaultTimezone']);
 		
 		$this->_context = $context;
 		$this->_request = Request::factory($params['module'], $params['action'], $params['params'], $state);
@@ -109,24 +109,24 @@ class Core
 	{
 		// Redirect to root if we use the default module and action.
 		if ($url != '' 
-		    && $params['module'] == Utils\Config::$config['defaultModule']
-		    && $params['action'] == Utils\Config::$config['defaultAction']
+		    && $params['module'] == Config::$config['defaultModule']
+		    && $params['action'] == Config::$config['defaultAction']
 		    && empty($params['params'])
 		    )
 		{
-		    Response::getInstance()->redirect(Utils\Config::$config['siteUrl'], 301, true);
+		    Response::getInstance()->redirect(Config::$config['siteUrl'], 301, true);
 		}
 		// Avoid duplicate content of the routes.
-		else if ($url != Utils\Route::pathToUrl($path)
+		else if ($url != Libs\Route::pathToUrl($path)
 			&& $url != '')
 		{
-		    Response::getInstance()->redirect(Utils\Config::$config['siteUrl'] . Utils\Route::pathToUrl($path), 301, true);
+		    Response::getInstance()->redirect(Config::$config['siteUrl'] . Libs\Route::pathToUrl($path), 301, true);
 		}
 						
 		// Avoid duplicate content with just a "/" after the URL
 		if(strrchr($url, '/') === '/')
 		{
-		    Response::getInstance()->redirect(Utils\Config::$config['siteUrl'] . rtrim($url, '/'), 301, true);  
+		    Response::getInstance()->redirect(Config::$config['siteUrl'] . rtrim($url, '/'), 301, true);  
 		}
 	}
 	
@@ -144,12 +144,12 @@ class Core
 			&& $previousUserAgent != $context->getUserAgent()
 			)
 		{
-			Utils\Session::destroyAll();
+			Libs\Session::destroyAll();
 			
-			Utils\Message::add(Utils\Session::getInstance('message'),'warning',
+			Libs\Message::add(Libs\Session::getInstance('message'),'warning',
 				'It seems that your session has been stolen, we destroyed it for security reasons. Check your environment security.');
 			
-			Response::getInstance()->redirect(Utils\Config::$config['siteUrl'], 301, true);
+			Response::getInstance()->redirect(Config::$config['siteUrl'], 301, true);
 		}
 	}
 	
@@ -162,7 +162,7 @@ class Core
 	 */
 	public static function loadAction($module, $action)
 	{
-		return Utils\ClassLoader::loadController($module, $action);
+		return Libs\ClassLoader::loadController($module, $action);
 	}
 	
 	/**
@@ -174,7 +174,7 @@ class Core
 	 */
 	public static function loadModel($module, $model)
 	{
-		return Utils\ClassLoader::loadModel($module, $model);
+		return Libs\ClassLoader::loadModel($module, $model);
 	}
 	
 	/**
@@ -204,11 +204,11 @@ class Core
 		{
 			if (View::getGlobal('layout') === null)
 			{
-				View::setGlobal('layout', Utils\Config::$config['defaultLayout']);
+				View::setGlobal('layout', Config::$config['defaultLayout']);
 			}
 			View::setGlobal('contentForLayout', $this->_response->getBody());
 			$this->_response->clearResponse();
-			$this->_response->setBody(View::factory(Utils\Config::$config['defaultModule'], View::getGlobal('layout')));
+			$this->_response->setBody(View::factory(Config::$config['defaultModule'], View::getGlobal('layout')));
 		}
 		
 		$this->_response->send();

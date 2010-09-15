@@ -92,8 +92,8 @@ class Controller
 	
 	public function setMessage($message, $category = 'notice')
 	{
-		$session = Utils\Session::getInstance('message');
-		Utils\Message::add($session, $category, $message);
+		$session = Libs\Session::getInstance('message');
+		Libs\Message::add($session, $category, $message);
 	}
 
 	/**

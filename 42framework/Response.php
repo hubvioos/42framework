@@ -30,11 +30,11 @@ class Response
 	 */
 	public static function getInstance ()
 	{
-		if (Response::$instance == null)
+		if (self::$instance == null)
 		{
-			Response::$instance = new Response();
+			self::$instance = new self();
 		}
-		return Response::$instance;
+		return self::$instance;
 	}
 	
 	/**

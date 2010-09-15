@@ -1,5 +1,5 @@
 <?php
-namespace Framework\Utils;
+namespace Framework\Libs;
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
 class ClassLoaderException extends \Exception { }
@@ -16,7 +16,7 @@ class ClassLoader
 		{
 			require $autoloadPath;
 		}
-		ClassLoader::$_autoload = $autoload;
+		self::$_autoload = $autoload;
 		spl_autoload_register(array('\\Framework\\Utils\\ClassLoader', 'loadClass'));
 	}
 
@@ -28,11 +28,11 @@ class ClassLoader
 	public static function loadClass($className)
 	{
 		$className = strtolower($className);
-		if (!ClassLoader::canLoadClass($className))
+		if (!self::canLoadClass($className))
 		{
 			throw new ClassLoaderException(__METHOD__.' : '.$className.' doesn\'t exist in autoload configuration. Try recompile autoload.');
 		}
-		require ClassLoader::$_autoload[$className];
+		require self::$_autoload[$className];
 	}
 
 	/**
@@ -68,17 +68,17 @@ class ClassLoader
 		}
 		
 		$model = 'Application\\modules\\'.$module.'\\models\\'.$model;
-		if (!isset(ClassLoader::$_models[$model]))
+		if (!isset(self::$_models[$model]))
 		{
-			ClassLoader::$_models[$model] = new $model;
+			self::$_models[$model] = new $model;
 		}
-		return ClassLoader::$_models[$model];
+		return self::$_models[$model];
 	}
 	
 	public static function canLoadClass ($className)
 	{
 		$className = strtolower($className);
-		if (isset(ClassLoader::$_autoload[$className]))
+		if (isset(self::$_autoload[$className]))
 		{
 			return true;
 		}

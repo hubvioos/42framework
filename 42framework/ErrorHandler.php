@@ -23,19 +23,19 @@ class ErrorHandler implements interfaces\iErrorHandler
 	 */
 	public static function getInstance ()
 	{
-		if (ErrorHandler::$_instance === null)
+		if (self::$_instance === null)
 		{
-			ErrorHandler::$_instance = new ErrorHandler();
+			self::$_instance = new ErrorHandler();
 		}
-		return ErrorHandler::$_instance;
+		return self::$_instance;
 	}
 	
 	protected function __clone () { }
 	
-	public function start ($error_reporting, $display_error)
+	public function start ($errorReporting, $displayError)
 	{
-		error_reporting($error_reporting);
-		ini_set('display_errors', $display_error);
+		error_reporting($errorReporting);
+		ini_set('display_errors', $displayError);
 		set_error_handler(array($this, 'errorHandler'));
 		set_exception_handler(array($this, 'exceptionHandler'));
 		return $this;

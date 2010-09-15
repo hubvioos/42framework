@@ -1,5 +1,5 @@
 <?php
-namespace Framework\Utils;
+namespace Framework\Libs;
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
 class MessageException extends \Exception { }

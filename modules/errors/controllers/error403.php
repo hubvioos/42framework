@@ -1,7 +1,7 @@
 <?php namespace Application\modules\errors\controllers;
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
-class error403 extends generic
+class error403 extends \Application\modules\errors\generic
 {
 	public function processAction ($request = null)
 	{

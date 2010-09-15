@@ -1,5 +1,5 @@
 <?php
-namespace Framework\Utils;
+namespace Framework;
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
 class Config
@@ -18,7 +18,7 @@ class Config
 		{
 			require $configPath;
 		}
-		Config::$config = $config;
+		self::$config = $config;
 	}
 
 	/**
@@ -26,7 +26,7 @@ class Config
 	 */
 	public static function getConfig ()
 	{
-		return Config::$config;
+		return self::$config;
 	}
 
 	/**
@@ -45,7 +45,7 @@ class Config
 			{
 				if ($i == 0)
 				{
-					$value = Config::$config[$key[0]];
+					$value = self::$config[$key[0]];
 				}
 				else
 				{
@@ -54,7 +54,7 @@ class Config
 			}
 			return $value;
 		}
-		return isset(Config::$config[$key]) ? Config::$config[$key] : null;
+		return isset(self::$config[$key]) ? self::$config[$key] : null;
 	}
 
 	/**
@@ -72,10 +72,10 @@ class Config
 			
 			for ($i = 0; $i < $taille; $i++)
 			{
-				if ($i == 0 && isset(Config::$config[$key[0]]))
+				if ($i == 0 && isset(self::$config[$key[0]]))
 				{
 					$ok = true;
-					$value = Config::$config[$key[0]];
+					$value = self::$config[$key[0]];
 				}
 				elseif (isset($value[$key[$i]]))
 				{
@@ -89,7 +89,7 @@ class Config
 			}
 			return $ok;
 		}
-		return isset(Config::$config[$key]) ? true : false;
+		return isset(self::$config[$key]) ? true : false;
 	}
 
 	/**
@@ -98,6 +98,6 @@ class Config
 	 */
 	public static function set ($key, $value)
 	{
-		Config::$config[$key] = $value;
+		self::$config[$key] = $value;
 	}
 }

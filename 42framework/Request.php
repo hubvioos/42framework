@@ -30,25 +30,25 @@ class Request
 		$this->_action = $action;
 		$this->_params = $params;
 		$this->_state = $state;
-		Request::$_current = $this;
+		self::$_current = $this;
 	}
 
 	protected function __clone () { }
 
-	public static function factory ($module, $action, Array $params = array(), $state = Request::DEFAULT_STATE)
+	public static function factory ($module, $action, Array $params = array(), $state = self::DEFAULT_STATE)
 	{
-		return new Request($module, $action, $params, $state);
+		return new self($module, $action, $params, $state);
 	}
 	
 	public function getCurrent ()
 	{
-		return Request::$_current;
+		return self::$_current;
 	}
 	
 	public function execute ()
 	{
-		$module = Core::loadAction(Request::$_current->_module, Request::$_current->_action);
-		return $module->execute(Request::$_current);
+		$module = Core::loadAction(self::$_current->_module, self::$_current->_action);
+		return $module->execute(self::$_current);
 	}
 	
 	/**

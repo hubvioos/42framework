@@ -29,7 +29,7 @@ class ExternalRequest extends Request
 		$this->_params = $_params;
 		$this->_method = $_method;
 		$this->_isInternal = $_internal;
-		Request::$_current = $this;
+		self::$_current = $this;
 	}
 
 	protected function __clone () { }
@@ -40,12 +40,12 @@ class ExternalRequest extends Request
 		switch (func_num_args())
 		{
 			case 1:
-				$params = Utils\Route::pathToParams(func_get_arg(0));
+				$params = Libs\Route::pathToParams(func_get_arg(0));
 				$params['internal'] = true;
 				$params['method'] = 'GET';
 				break;
 			case 2:
-				$params = Utils\Route::pathToParams(func_get_arg(0));
+				$params = Libs\Route::pathToParams(func_get_arg(0));
 				$params['internal'] = func_get_arg(1);
 				$params['method'] = 'GET';
 				break;
@@ -62,20 +62,20 @@ class ExternalRequest extends Request
 				list($params['module'], $params['action'], $params['params'], $params['internal'], $params['method']) = func_get_args();
 				break;
 			default:
-				throw new RequestException('Request::factory : invalid arguments');
+				throw new RequestException('self::factory : invalid arguments');
 		}
 		return new Request($params['module'], $params['action'], $params['params'], $params['internal'], $params['method']);
 	}
 	
 	public function getCurrent ()
 	{
-		return Request::$_current;
+		return self::$_current;
 	}
 	
 	public function execute ()
 	{
-		$module = Core::loadAction(Request::$_current->_module, Request::$_current->_action);
-		return $module->execute(Request::$_current);
+		$module = Core::loadAction(self::$_current->_module, self::$_current->_action);
+		return $module->execute(self::$_current);
 	}
 	
 	/**

@@ -1,7 +1,7 @@
-<?php namespace Application\modules\errors\controllers;
+<?php namespace Application\modules\errors;
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
-class generic extends \Framework\Controller
+abstract class generic extends \Framework\Controller
 {
 	protected $_response = null;
 	

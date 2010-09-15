@@ -7,7 +7,7 @@ class HistoryException extends \Exception { }
 class History
 {	
 	/**
-	 * @var $_history \Framework\Session
+	 * @var $_history \Framework\Libs\Session
 	 */
 	protected $_history = null;
 	
@@ -18,10 +18,10 @@ class History
 	protected function __clone () { }
 	
 	/**
-	 * @param \Framework\Utils\Session $session
+	 * @param \Framework\Libs\Session $session
 	 * @param integer $historySize
 	 */
-	protected function __construct (\Framework\Utils\Session $session, $historySize)
+	protected function __construct (Libs\Session $session, $historySize)
 	{
 		if ($session->getNamespace() != 'history')
 		{
@@ -38,13 +38,13 @@ class History
 	 * @param unknown_type $historySize
 	 * @return \Framework\History
 	 */
-	public static function getInstance (Utils\Session $session, $historySize)
+	public static function getInstance (Libs\Session $session, $historySize)
 	{
-		if (History::$_instance === null)
+		if (self::$_instance === null)
 		{
-			History::$_instance = new History($session, $historySize);
+			self::$_instance = new self($session, $historySize);
 		}
-		return History::$_instance;
+		return self::$_instance;
 	}
 	
 	public function update (Array $values = array())

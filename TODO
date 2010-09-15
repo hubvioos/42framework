@@ -1,15 +1,19 @@
 - Logger
-- Module Errors
 
 - Gestion des filtres
 
-- Model
+- Model à améliorer
 
-- Un peu améliorer le modèle objet
+
+- Classe Application
+
+- Injections (Session, BDDs, Cache, etc.)
+
 
 - Compiler les routes
 
-- Injections
+
+- Un peu améliorer le modèle objet
 
 - Interfaces pour plein de classes...
 

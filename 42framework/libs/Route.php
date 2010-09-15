@@ -1,5 +1,5 @@
 <?php
-namespace Framework\Utils;
+namespace Framework\Libs;
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
 class RouteException extends \Exception { }
@@ -18,7 +18,7 @@ class Route
 		{
 			$routes = array();
 		}
-		Route::$routes = $routes;
+		self::$routes = $routes;
 	}
 	
 	public static function pathToParams($path)
@@ -154,7 +154,7 @@ class Route
 		
         $pathParams = Route::pathToParams($url);
 
-		foreach(Route::$routes as $routeUrl => $routeParams)
+		foreach(self::$routes as $routeUrl => $routeParams)
 		{
 		    $regex = $routeParams['module'] . '/' . $routeParams['action'];
 		    
@@ -217,11 +217,11 @@ class Route
 	
 	public static function paramsToUrl($params) 
 	{
-		return Route::pathToUrl(Route::paramsToPath($params));
+		return self::pathToUrl(self::paramsToPath($params));
 	}
 	
 	public static function urlToParams($url)
 	{
-		return Route::pathToParams(Route::urlToPath($url));
+		return self::pathToParams(self::urlToPath($url));
 	}
 }
