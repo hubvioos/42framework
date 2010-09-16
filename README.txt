@@ -24,7 +24,7 @@ de chose : gearman. Un module permettant de créer simplement des
 Une documentation est en cours de rédaction.
 
 42framework est disponible en téléchargement à l'adresse suivante :
-http://github.com/Ingolmo/42framework (branche reorga).
+http://github.com/42medias/42framework
 
 Le développement n'est pas terminé et le projet continuera à évoluer dans les prochains mois. Cependant, la version actuelle est fonctionnelle et peut donc être utilisée.
 
