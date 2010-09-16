@@ -1,20 +1,18 @@
-- Logger
+- Création du Libs\Logger
 
 - Gestion des filtres
 
-- Model à améliorer
+- Améliorer le Model
+- Intégrer un ORM ou quelquechose dans le genre
 
+- Création de la classe Application
 
-- Classe Application
+- Création des classes de Cache
 
-- Injections (Session, BDDs, Cache, etc.)
+- Utiliser des injections (Session, BDDs, Cache, etc.)
 
+- Créations des commandes pour compiler les routes
 
-- Compiler les routes
-
-
-- Un peu améliorer le modèle objet
-
-- Interfaces pour plein de classes...
+- Améliorer le modèle objet
 
 - Ecriture des jeux de tests (PHPUnit)
