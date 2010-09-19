@@ -33,19 +33,13 @@ if (file_exists(APPLICATION_DIR.DS.'build'.DS.'config.php'))
 {
 	include APPLICATION_DIR.DS.'build'.DS.'config.php';
 }
-require FRAMEWORK_DIR.DS.'Core.php';
+//require FRAMEWORK_DIR.DS.'Config.php';
+require FRAMEWORK_DIR.DS.'BaseContainer.php';
+require FRAMEWORK_DIR.DS.'ApplicationContainer.php';
+require FRAMEWORK_DIR.DS.'Application.php';
 require FRAMEWORK_DIR.DS.'libs'.DS.'ClassLoader.php';
 
-$core = \Framework\Core::getInstance()
-			->init($autoload, $config)
-			->bootstrap(
-				\Framework\Context::getInstance(
-					\Framework\History::getInstance(
-						\Framework\Libs\Session::getInstance('history'), 
-						\Framework\Config::$config['historySize']
-						)
-					),
-				\Framework\Response::getInstance()
-				)
-			->execute()
+$application = \Framework\Application::getInstance(new \Framework\ApplicationContainer($config, $autoload))
+			->bootstrap()
+			->run()
 			->render();

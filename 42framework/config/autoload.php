@@ -29,6 +29,7 @@ $autoload = array(
          'theseer\\tools\\filesonlyfilteriterator' => VENDORS_DIR.DS.'theseer'.DS.'scanner'.DS.'filesonlyfilter.php',
          'theseer\\tools\\includeexcludefilteriterator' => VENDORS_DIR.DS.'theseer'.DS.'scanner'.DS.'includeexcludefilter.php',
          'framework\\config' => FRAMEWORK_DIR.DS.'Config.php',
+		 'framework\\basecontainer' => FRAMEWORK_DIR.DS.'BaseContainer.php',
          'framework\\contextexception' => FRAMEWORK_DIR.DS.'Context.php',
          'framework\\context' => FRAMEWORK_DIR.DS.'Context.php',
 		 'framework\\libs\\session' => FRAMEWORK_DIR.DS.'libs'.DS.'Session.php',

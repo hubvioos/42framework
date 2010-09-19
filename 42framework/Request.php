@@ -54,6 +54,10 @@ class Request
 
 	public static function factory ($module, $action, Array $params = array(), $state = self::DEFAULT_STATE)
 	{
+		if ($state === null)
+		{
+			$state = self::DEFAULT_STATE;
+		}
 		return new self($module, $action, $params, $state);
 	}
 	
@@ -64,7 +68,7 @@ class Request
 	
 	public function execute ()
 	{
-		$module = Core::loadAction($this->_module, $this->_action);
+		$module = Application::getInstance()->loadAction($this->_module, $this->_action);
 		return $module->execute($this);
 	}
 	

@@ -101,6 +101,7 @@ class ErrorHandler implements interfaces\iErrorHandler
 	{
 		foreach ($this->_observers as $obs)
 		{
+			/* @var $obs interfaces\iErrorHandlerListener */
 			$obs->update($this);
 		}
 		return $this;

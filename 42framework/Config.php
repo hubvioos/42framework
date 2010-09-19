@@ -29,7 +29,7 @@ class Config
 	/**
 	 * @param array $data
 	 */
-	public static function init (Array $config = array(), $configPath)
+	public static function init (Array $config = array(), $configPath = null)
 	{
 		if (empty($config))
 		{

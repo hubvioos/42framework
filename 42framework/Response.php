@@ -146,7 +146,7 @@ class Response
 	
 	public function stopProcess()
 	{
-		Core::getInstance()->render($this);
+		Application::getInstance()->render($this);
 	}
 
 	/**

@@ -28,7 +28,7 @@ class CliCommand extends \Framework\Controller
 	 * 
 	 * @param Framework\Request $request
 	 */
-	protected function _before($request)
+	protected function _before(\Framework\Request $request)
 	{
 		if ($request->getState() == \Framework\Request::CLI_STATE)
 		{
@@ -38,7 +38,7 @@ class CliCommand extends \Framework\Controller
 		return true;
 	}
 	
-	protected function _after($request, $actionResponse)
+	protected function _after(\Framework\Request $request, $actionResponse)
 	{
 		$this->setView(false);
 		\Framework\View::setGlobal('layout', false);

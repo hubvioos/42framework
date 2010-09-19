@@ -30,5 +30,7 @@ $config = array(
 	'viewExtension' => '.php',
 	'siteUrl' => 'http://localhost/',
 	'routes' => array(),
-	'historySize' => 2
+	'historySize' => 2,
+	'errorHandlerListeners' => array('Framework\\ErrorHandlerListeners\\Html'),
+	'viewExtension' => '.php'
 	);
