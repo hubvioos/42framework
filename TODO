@@ -3,7 +3,10 @@
 - Gestion des filtres
 
 - Améliorer le Model
-- Intégrer un ORM ou quelquechose dans le genre
+- Intégrer un ORM ou quelquechose dans le genre (Doctrine)
+
+- Améliorer le ClassLoader
+- Améliorer le module CLI
 
 - Création de la classe Application
 
