@@ -29,7 +29,7 @@ class ApplicationContainer extends BaseContainer
 		{
 			require FRAMEWORK_DIR.DS.'config'.DS.'config.php';
 		}
-		$this->config = new \ArrayIterator($config);
+		$this->config = new \ArrayObject($config);
 		$this->autoload = $autoload;
 		$this->classLoader = function ($c) {
 			static $loader = null;
@@ -64,9 +64,6 @@ class ApplicationContainer extends BaseContainer
 			/* @var $c ApplicationContainer */
 			return \Framework\History::getInstance($c->getSession('history'), $c->config['historySize']);
 		};
-		$this->sessionClass = function ($c) {
-			return 'Framework\\Libs\\Session';
-		};
 		$this->requestClass = function ($c) {
 			return 'Framework\\Request';
 		};
@@ -82,9 +79,14 @@ class ApplicationContainer extends BaseContainer
 	
 	public function getSession($namespace = 'default')
 	{
-		/* @var $session Libs\Session */
-		$session = $this->sessionClass;
-		return $session::getInstance($namespace);
+		static $session = array();
+		
+		if (!isset($session[$namespace]) || !$session[$namespace] instanceof \Framework\libs\Session)
+		{
+			$session[$namespace] = new \Framework\libs\Session($namespace);
+		}
+		
+		return $session[$namespace];
 	}
 	
 	public function getRequest($module, $action, $params = array(), $state = null)
