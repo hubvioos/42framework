@@ -21,29 +21,38 @@ defined('FRAMEWORK_DIR') or die('Invalid script access');
 
 class ApplicationContainerException extends \Exception { }
 
+/**
+ * @method \Framework\Config getConfig()
+ * @method \Framework\ErrorHandler getErrorHandler()
+ * @method \Framework\Libs\ClassLoader getClassLoader()
+ * @method array getAutoload()
+ * @method \Framework\Context getContext()
+ * @method \Framework\History getHistory()
+ * @method \Framework\Response getResponse() Returns the main instance of Response
+ * @method \Framework\Response getNewResponse()
+ * @method string getViewClass()
+ * @method \Framework\Application getApplication()
+ */
 class ApplicationContainer extends BaseContainer
 {
 	public function __construct (array $config = array(), array $autoload = array())
-	{		
-		if (empty($config))
-		{
-			require FRAMEWORK_DIR.DS.'config'.DS.'config.php';
-		}
-		$this->config = new \ArrayObject($config);
+	{
+		$this->config = new Config($config, FRAMEWORK_DIR.DS.'config'.DS.'config.php');
 		$this->autoload = $autoload;
-		$this->classLoader = function ($c) {
-			static $loader = null;
-			if ($loader === null)
+		
+		$this->classLoader = $this->asUniqueInstance(
+			function ($c)
 			{
 				/* @var $loader Libs\ClassLoader */
 				$loader = '\\Framework\\Libs\\ClassLoader';
+				/* @var $c ApplicationContainer */
 				$loader::init($c->getAutoload(), FRAMEWORK_DIR.DS.'config'.DS.'autoload.php');
+				return $loader;
 			}
-			return $loader;
-		};
-		$this->errorHandler = function ($c) {
-			static $errorHandler = null;
-			if ($errorHandler === null)
+		);
+		
+		$this->errorHandler = $this->asUniqueInstance(
+			function ($c)
 			{
 				$errorHandler = \Framework\ErrorHandler::getInstance();
 				foreach ($c->config['errorHandlerListeners'] as $lis)
@@ -51,30 +60,37 @@ class ApplicationContainer extends BaseContainer
 					$errorHandler->attach(new $lis());
 				}
 				$errorHandler->start($c->config['errorReporting'], $c->config['displayErrors']);
+				return $errorHandler;
 			}
-			return $errorHandler;
+		);
+		
+		$this->context = function ($c)
+		{
+			return \Framework\Context::getInstance($c->getHistory());
 		};
-		$this->routerClass = function ($c) {
-			return 'Framework\\Libs\\Route';
-		};
-		$this->context = function ($c) {
-			return \Framework\Context::getInstance($c->history);
-		};
-		$this->history = function ($c) {
+		
+		$this->history = function ($c)
+		{
 			/* @var $c ApplicationContainer */
 			return \Framework\History::getInstance($c->getSession('history'), $c->config['historySize']);
 		};
-		$this->requestClass = function ($c) {
-			return 'Framework\\Request';
+		
+		$responseFunc = function ($c)
+		{
+			return new \Framework\Response();
 		};
-		$this->response = function ($c) {
-			return \Framework\Response::getInstance();
-		};
-		$this->viewClass = function ($c) {
+		$this->response = $this->asUniqueInstance($responseFunc);
+		$this->newResponse = $responseFunc;
+		
+		$this->viewClass = function ($c)
+		{
 			return 'Framework\\View';
 		};
 		
-		return $this;
+		$this->application = function ($c)
+		{
+			return \Framework\Application::getInstance($c);
+		};
 	}
 	
 	public function getSession($namespace = 'default')
@@ -89,10 +105,25 @@ class ApplicationContainer extends BaseContainer
 		return $session[$namespace];
 	}
 	
-	public function getRequest($module, $action, $params = array(), $state = null)
+	/**
+	 * @param string $module
+	 * @param string $action
+	 * @param array $params
+	 * @param string $state
+	 * @return \Framework\Request
+	 */
+	public function getNewRequest($module, $action, $params = array(), $state = null)
 	{
-		/* @var $request Request */
-		$request = $this->requestClass;
-		return $request::factory($module, $action, $params, $state);
+		return Request::factory($module, $action, $params, $state);
+	}
+	
+	public function getCurrentRequest()
+	{
+		return Request::getCurrent();
+	}
+	
+	public function getNewView($module, $file, $vars = false)
+	{
+		return new View($module, $file, $vars);
 	}
 }

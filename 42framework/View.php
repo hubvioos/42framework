@@ -16,12 +16,14 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
+
 namespace Framework;
+
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
 class ViewException extends \Exception { }
 
-class View
+class View extends FrameworkObject
 {
 	// adresse du fichier de vue à inclure
 	protected $_file;
@@ -34,7 +36,7 @@ class View
 	// on définit l'adresse du fichier de vue à inclure et on récupère les variables supplémentaires
 	public function __construct ($module, $file, $vars = false)
 	{
-		$config = Application::getInstance()->getContainer()->getConfig();
+		$config = $this->getContainer()->getConfig();
 		$this->_file = MODULES_DIR.DS.$module.DS.'views'.DS.$file.$config['viewExtension'];
 		
 		if (!file_exists($this->_file))
@@ -54,11 +56,6 @@ class View
 		{
 			$this->_vars = $vars;
 		}
-	}
-	
-	public static function factory ($module, $file, $vars = false)
-	{
-		return new self($module, $file, $vars);
 	}
 
 	// assigne une variable supplémentaire au tableau vars

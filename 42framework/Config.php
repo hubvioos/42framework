@@ -19,102 +19,35 @@
 namespace Framework;
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
-class Config
-{
-	/**
-	 * @var array
-	 */
-	public static $config = array();
+class ConfigException extends \Exception { }
 
-	/**
-	 * @param array $data
-	 */
-	public static function init (Array $config = array(), $configPath = null)
+class Config extends \ArrayObject
+{
+	public function __construct(array $config = array(), $configPath = null)
 	{
 		if (empty($config))
 		{
+			if ($configPath === null)
+			{
+				throw new ConfigException('configPath is not defined! Unable to load any configuration.');
+			}
 			require $configPath;
 		}
-		self::$config = $config;
+		parent::__construct($config);
 	}
-
-	/**
-	 * @return array
-	 */
-	public static function getConfig ()
+	
+	public function toArray()
 	{
-		return self::$config;
+		return $this->getArrayCopy();
 	}
-
-	/**
-	 * @param string $key
-	 * @return mixed (value corresponding to $key or null)
-	 */
-	public static function get ($key)
+	
+	public function __get($offset)
 	{
-		if (strpos($key, '.'))
-		{
-			$key = explode('.', $key);
-			$taille = sizeof($key);
-			$value = null;
-			
-			for ($i = 0; $i < $taille; $i++)
-			{
-				if ($i == 0)
-				{
-					$value = self::$config[$key[0]];
-				}
-				else
-				{
-					$value = $value[$key[$i]];
-				}
-			}
-			return $value;
-		}
-		return isset(self::$config[$key]) ? self::$config[$key] : null;
+		return $this->offsetGet($offset);
 	}
-
-	/**
-	 * @param string $key
-	 * @return boolean
-	 */
-	public static function exists ($key)
+	
+	public function __set($offset, $value)
 	{
-		if (strpos($key, '.'))
-		{
-			$key = explode('.', $key);
-			$taille = sizeof($key);
-			$ok = false;
-			$value = null;
-			
-			for ($i = 0; $i < $taille; $i++)
-			{
-				if ($i == 0 && isset(self::$config[$key[0]]))
-				{
-					$ok = true;
-					$value = self::$config[$key[0]];
-				}
-				elseif (isset($value[$key[$i]]))
-				{
-					$ok = true;
-					$value = $value[$key[$i]];
-				}
-				else 
-				{
-					$ok = false;
-				}
-			}
-			return $ok;
-		}
-		return isset(self::$config[$key]) ? true : false;
-	}
-
-	/**
-	 * @param string $key
-	 * @param mixed $value
-	 */
-	public static function set ($key, $value)
-	{
-		self::$config[$key] = $value;
+		$this->offsetSet($offset, $value);
 	}
 }

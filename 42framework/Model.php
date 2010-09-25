@@ -21,7 +21,7 @@ defined('FRAMEWORK_DIR') or die('Invalid script access');
 
 class ModelException extends \Exception { }
 
-class Model
+class Model extends FrameworkObject
 {
 	protected $_dataSources = array();
 	

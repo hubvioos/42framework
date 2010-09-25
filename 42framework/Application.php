@@ -16,23 +16,23 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
+
 namespace Framework;
+
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
 class ApplicationException extends \Exception { }
 
-class Application
+class Application extends FrameworkObject
 {
 	/**
 	 * @var Framework\Application
 	 */
 	protected static $_instance = null;
 	
-	protected $_container = null;
-	
 	protected function __construct(ApplicationContainer $container)
 	{
-		$this->_container = $container;
+		$this->setContainer($container);
 	}
 	
 	/**
@@ -58,13 +58,11 @@ class Application
 
 	public function bootstrap ()
 	{
-		$this->_container->getClassLoader();
-		$this->_container->getErrorHandler();
+		$this->getContainer()->getClassLoader();
+		$this->getContainer()->getErrorHandler();
 		
-		/* @var $router Libs\Route */
-		$router = $this->_container->getRouterClass();
-		$config = $this->_container->getConfig();
-		$router::init($config['routes']);
+		$config = $this->getContainer()->getConfig();
+		Libs\Route::init($config['routes']);
 		
 		return $this;
 	}
@@ -73,24 +71,24 @@ class Application
 	{
 		// Redirect to root if we use the default module and action.
 		if ($url != '' 
-		    && $params['module'] == $this->_container->config['defaultModule']
-		    && $params['action'] == $this->_container->config['defaultAction']
+		    && $params['module'] == $this->getContainer()->config['defaultModule']
+		    && $params['action'] == $this->getContainer()->config['defaultAction']
 		    && empty($params['params'])
 		    )
 		{
-		    Response::getInstance()->redirect($this->_container->config['siteUrl'], 301, true);
+		    $this->getContainer()->getNewResponse()->redirect($this->getContainer()->config['siteUrl'], 301, true);
 		}
 		// Avoid duplicate content of the routes.
 		else if ($url != Libs\Route::pathToUrl($path)
 			&& $url != '')
 		{
-		    Response::getInstance()->redirect($this->_container->config['siteUrl'] . Libs\Route::pathToUrl($path), 301, true);
+		    $this->getContainer()->getNewResponse()->redirect($this->getContainer()->config['siteUrl'] . Libs\Route::pathToUrl($path), 301, true);
 		}
 						
 		// Avoid duplicate content with just a "/" after the URL
 		if(strrchr($url, '/') === '/')
 		{
-		    Response::getInstance()->redirect($this->_container->config['siteUrl'] . rtrim($url, '/'), 301, true);  
+		    $this->getContainer()->getNewResponse()->redirect($this->getContainer()->config['siteUrl'] . rtrim($url, '/'), 301, true);  
 		}
 	}
 	
@@ -110,19 +108,25 @@ class Application
 		{
 			Libs\Session::destroyAll();
 			
-			Libs\Message::add(Libs\Session::getInstance('message'),'warning',
+			Libs\Message::add($this->getContainer()->getSession('message'),'warning',
 				'It seems that your session has been stolen, we destroyed it for security reasons. Check your environment security.');
 			
-			Response::getInstance()->redirect($this->_container->config['siteUrl'], 301, true);
+			$this->getContainer()->getNewResponse()->redirect($this->getContainer()->config['siteUrl'], 301, true);
 		}
 	}
 	
-	/**
-	 * @return \Framework\ApplicationContainer
-	 */
-	public function getContainer()
+	public function viewSetGlobal($key, $value)
 	{
-		return $this->_container;
+		$view = $this->getContainer()->getViewClass();
+		/* @var $view View */
+		$view::setGlobal($key, $value);
+	}
+	
+	public function viewGetGlobal($key)
+	{
+		$view = $this->getContainer()->getViewClass();
+		/* @var $view View */
+		return $view::getGlobal($key);
 	}
 	
 	/**
@@ -135,7 +139,7 @@ class Application
 	public function loadAction($module, $action)
 	{
 		/* @var $loader Libs\ClassLoader */
-		$loader = $this->_container->getClassLoader();
+		$loader = $this->getContainer()->getClassLoader();
 		return $loader::loadController($module, $action);
 	}
 	
@@ -149,7 +153,7 @@ class Application
 	public function loadModel($module, $model)
 	{
 		/* @var $loader Libs\ClassLoader */
-		$loader = $this->_container->getClassLoader();
+		$loader = $this->getContainer()->getClassLoader();
 		return $loader::loadModel($module, $model);
 	}
 	
@@ -160,7 +164,7 @@ class Application
 	 */
 	public function run()
 	{
-		$config = $this->_container->getConfig();
+		$config = $this->getContainer()->getConfig();
 		if (PHP_SAPI === 'cli')
 		{
 			$params = \Application\modules\cli\CliUtils::extractParams();
@@ -170,36 +174,35 @@ class Application
 		}
 		else
 		{
-			$url = $this->_container->getContext()->getUrl();
-			/* @var $router Libs\Route */
-			$router = $this->_container->getRouterClass();
-			$path = $router::urlToPath($url, $config['defaultModule'], $config['defaultAction']);
+			$url = $this->getContainer()->getContext()->getUrl();
+			
+			$path = Libs\Route::urlToPath($url, $config['defaultModule'], $config['defaultAction']);
 			$params = Libs\Route::pathToParams($path);
 			
 			$state = Request::FIRST_REQUEST;
 			
 			// Views variables
 			/* @var $view View */
-			$view = $this->_container->getViewClass();
-			$view::setGlobal('layout', $config['defaultLayout']);
-			$view::setGlobal('message', $this->_container->getSession('message'));
+			$view = $this->getContainer()->getViewClass();
+			$this->viewSetGlobal('layout', $config['defaultLayout']);
+			$this->viewSetGlobal('message', $this->getContainer()->getSession('message'));
 			
 			/* @var $loader Libs\ClassLoader */
-			$loader = $this->_container->getClassLoader();
+			$loader = $this->getContainer()->getClassLoader();
 			if (!$loader::canLoadClass('Application\\modules\\'.$params['module'].'\\controllers\\'.$params['action']))
 			{
-				$this->_container->getRequest('errors', 'error404', array(), Request::FIRST_REQUEST)->execute();
+				$this->getContainer()->getNewRequest('errors', 'error404', array(), Request::FIRST_REQUEST)->execute();
 			}
 			
 			$this->duplicateContentPolicy($url, $path, $params);
-			$this->requestSecurityPolicy($this->_container->getContext());
+			$this->requestSecurityPolicy($this->getContainer()->getContext());
 		}
 		// Timezone
 		date_default_timezone_set($config['defaultTimezone']);
 		
-		$this->_container->request = $this->_container->getRequest($params['module'], $params['action'], $params['params'], $state);
+		$request = $this->getContainer()->getNewRequest($params['module'], $params['action'], $params['params'], $state);
 		
-		$this->_container->response->setBody($this->_container->request->execute());
+		$this->getContainer()->getResponse()->setBody($request->execute());
 		return $this;
 	}
 	
@@ -212,23 +215,25 @@ class Application
 	{
 		if ($response !== null)
 		{
-			$this->_container->response = $response;
+			$this->getContainer()->response = $response;
 		}
 		
 		/* @var $response Response */
-		$response = $this->_container->getResponse();
-		/* @var $view View */
-		$view = $this->_container->getViewClass();
-		if ($view::getGlobal('layout') !== false)
+		$response = $this->getContainer()->getResponse();
+		
+		if ($this->viewGetGlobal('layout') !== false)
 		{
-			$config = $this->_container->getConfig();
-			if ($view::getGlobal('layout') === null)
+			$config = $this->getContainer()->getConfig();
+			if ($this->viewGetGlobal('layout') === null)
 			{
-				$view::setGlobal('layout', $config['defaultLayout']);
+				$this->viewSetGlobal('layout', $config['defaultLayout']);
 			}
-			$view::setGlobal('contentForLayout', $response->getBody());
+			$this->viewSetGlobal('contentForLayout', $response->getBody());
 			$response->clearResponse();
-			$response->setBody($view::factory($config['defaultModule'], $view::getGlobal('layout')));
+			
+			$vue = $this->getContainer()->getNewView($config['defaultModule'], $this->viewGetGlobal('layout'));
+			
+			$response->setBody($vue);
 		}
 		$response->send();
 		echo $response;
@@ -236,7 +241,7 @@ class Application
 		if ($response->getStatus() == 200)
 		{
 			/* @var $context Context */
-			$context = $this->_container->getContext();
+			$context = $this->getContainer()->getContext();
 			$context->updateHistory(array(
 				'url' => $context->getUrl(),
 				'ipAddress' => $context->getIpAddress(),

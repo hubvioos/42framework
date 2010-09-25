@@ -17,13 +17,14 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 namespace Application\modules\errors\controllers;
+
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
 class error403 extends \Application\modules\errors\generic
 {
 	public function processAction ($request = null)
 	{
-		$this->_response->status(403)->setBody(\Framework\View::factory('errors', 'error403'));
+		$this->_response->status(403)->setBody($this->getContainer()->getNewView('errors', 'error403'));
 		return true;
 	}
 }

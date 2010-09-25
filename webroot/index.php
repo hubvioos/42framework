@@ -33,13 +33,16 @@ if (file_exists(APPLICATION_DIR.DS.'build'.DS.'config.php'))
 {
 	include APPLICATION_DIR.DS.'build'.DS.'config.php';
 }
-//require FRAMEWORK_DIR.DS.'Config.php';
+require FRAMEWORK_DIR.DS.'Config.php';
 require FRAMEWORK_DIR.DS.'BaseContainer.php';
 require FRAMEWORK_DIR.DS.'ApplicationContainer.php';
+require FRAMEWORK_DIR.DS.'FrameworkObject.php';
 require FRAMEWORK_DIR.DS.'Application.php';
 require FRAMEWORK_DIR.DS.'libs'.DS.'ClassLoader.php';
 
-$application = \Framework\Application::getInstance(new \Framework\ApplicationContainer($config, $autoload))
-			->bootstrap()
-			->run()
-			->render();
+$container = new \Framework\ApplicationContainer($config, $autoload);
+
+$container->getApplication()
+				->bootstrap()
+				->run()
+				->render();

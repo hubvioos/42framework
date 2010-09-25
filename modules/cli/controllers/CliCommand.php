@@ -17,6 +17,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 namespace Application\modules\cli\controllers;
+
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
 class CliException extends \Exception { }
@@ -32,7 +33,7 @@ class CliCommand extends \Framework\Controller
 	{
 		if ($request->getState() == \Framework\Request::CLI_STATE)
 		{
-			$this->_response = \Framework\Request::factory('errors', 'error403', array($request))->execute();
+			$this->_response = $this->getContainer()->getNewRequest('errors', 'error403', array($request))->execute();
 			return false;
 		}
 		return true;
@@ -41,6 +42,6 @@ class CliCommand extends \Framework\Controller
 	protected function _after(\Framework\Request $request, $actionResponse)
 	{
 		$this->setView(false);
-		\Framework\View::setGlobal('layout', false);
+		$this->getContainer()->getApplication()->viewSetGlobal('layout', false);
 	}
 }

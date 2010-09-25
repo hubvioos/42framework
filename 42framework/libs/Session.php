@@ -37,7 +37,7 @@ class Session extends \ArrayObject
 		{
 			$_SESSION[$namespace] = array();
 		}
-	
+		$this->_namespace = $namespace;
 		parent::__construct(&$_SESSION[$namespace]);
 	}
 	

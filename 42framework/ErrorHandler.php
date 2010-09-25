@@ -19,11 +19,11 @@
 namespace Framework;
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
-class ErrorHandler implements interfaces\iErrorHandler
+class ErrorHandler extends FrameworkObject implements interfaces\iErrorHandler
 {	
 	protected static $_instance;
 	
-	private $_error = null;
+	protected $_error = null;
 	
 	/**
 	 * @var \SplObjectStorage of \Framework\interfaces\iErrorHandlerListener
@@ -68,7 +68,7 @@ class ErrorHandler implements interfaces\iErrorHandler
 	{
 		if (error_reporting() === 0)
 		{
-			return;
+			return true;
 		}
 		throw new \ErrorException($errstr, 0, $errno, $errfile, $errline);
 	}
@@ -76,7 +76,7 @@ class ErrorHandler implements interfaces\iErrorHandler
 	/**
 	 * @return \Exception
 	 */
-	public function getError ()
+	public function getLastError ()
 	{
 		if ($this->_error === null)
 		{
@@ -102,7 +102,7 @@ class ErrorHandler implements interfaces\iErrorHandler
 		foreach ($this->_observers as $obs)
 		{
 			/* @var $obs interfaces\iErrorHandlerListener */
-			$obs->update($this);
+			$obs->update($this->_error);
 		}
 		return $this;
 	}

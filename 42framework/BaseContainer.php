@@ -27,39 +27,54 @@ class BaseContainerException extends \Exception { }
 
 class BaseContainer
 {
-	protected $container = array();
+	protected $_container = array();
 	
 	public function __set ($key, $value)
 	{
-		$this->container[$key] = $value;
+		$this->_container[$key] = $value;
 	}
 	
 	public function __get ($key)
 	{
-		if (!isset($this->container[$key]))
+		if (!isset($this->_container[$key]))
 		{
-			throw new BaseContainerException($key.' is not defined.');
+			throw new BaseContainerException($key . ' is not defined.');
 		}
-		return is_callable($this->container[$key]) ? $this->container[$key]($this) : $this->container[$key];
+		return is_callable($this->_container[$key]) ? $this->_container[$key]($this) : $this->_container[$key];
 	}
 	
 	public function __isset ($key)
 	{
-		return isset($this->container[$key]);
+		return isset($this->_container[$key]);
 	}
 	
 	public function __unset ($key)
 	{
-		unset($this->container[$key]);
+		unset($this->_container[$key]);
 	}
 	
-	public function __call($method, $arguments)
-    {
-        if (!preg_match('/^get(.+)$/', $method, $match))
-        {
-            throw new BaseContainerException('Call to undefined method : '.$method);
-        }
-        $key = lcfirst($match[1]);
-        return $this->$key;
-    }
+	public function __call ($method, $arguments)
+	{
+		if (!preg_match('/^get(.+)$/', $method, $match))
+		{
+			throw new BaseContainerException('Call to undefined method : ' . $method);
+		}
+		$key = lcfirst($match[1]);
+		return $this->$key;
+	}
+	
+	public function asUniqueInstance ($callable)
+	{
+		return function  ($c) use ($callable)
+		{
+			static $object = null;
+			
+			if ($object === null)
+			{
+				$object = $callable($c);
+			}
+			
+			return $object;
+		};
+	}
 }

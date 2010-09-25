@@ -21,7 +21,7 @@ defined('FRAMEWORK_DIR') or die('Invalid script access');
 
 class RequestException extends \Exception { }
 
-class Request
+class Request extends FrameworkObject
 {
 	protected $_module = null;
 
@@ -61,14 +61,14 @@ class Request
 		return new self($module, $action, $params, $state);
 	}
 	
-	public function getCurrent ()
+	public static function getCurrent ()
 	{
 		return self::$_current;
 	}
 	
 	public function execute ()
 	{
-		$module = Application::getInstance()->loadAction($this->_module, $this->_action);
+		$module = $this->getContainer()->getApplication()->loadAction($this->_module, $this->_action);
 		return $module->execute($this);
 	}
 	

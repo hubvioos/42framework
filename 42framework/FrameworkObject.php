@@ -19,36 +19,23 @@
 namespace Framework;
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
-abstract class Core
+abstract class FrameworkObject
 {
-	protected static $_instance = null;
-	
-	protected $_config = null;
-	
-	protected function __construct(array $config = array())
-	{
-		$this->_config = $config;
-	}
-	
-	public static function getInstance (array $config = array())
-	{
-		if (self::$_instance === null)
-		{
-			self::$_instance = new self($config);
-		}
-		return self::$_instance;
-	}
-	
-	protected function __clone () { }
-
-	abstract public function bootstrap ();
-	
-	abstract public function run();
+	/**
+	 * @var \Framework\ApplicationContainer
+	 */
+	protected static $_container = null;
 	
 	/**
-	 * Render the request (send headers and display the response)
-	 * 
-	 * @param Framework\Response $response (optional)
+	 * @return \Framework\ApplicationContainer
 	 */
-	abstract public function render($response = null);
+	protected function getContainer()
+	{
+		return self::$_container;
+	}
+	
+	protected function setContainer(ApplicationContainer $container)
+	{
+		self::$_container = $container;
+	}
 }
