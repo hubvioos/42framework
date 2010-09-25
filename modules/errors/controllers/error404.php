@@ -27,7 +27,9 @@ class error404 extends \Application\modules\errors\generic
 	{
 		$this->_response
 			->status(404)
-			->setBody(\Framework\View::factory('errors', 'error404', array('requestedUrl' => \Framework\Context::getInstance()->getUrl(true))));
+			->setBody($this->getContainer()->getNewView('errors', 
+														'error404', 
+														array('requestedUrl' => $this->getContainer()->getContext()->getUrl(true))));
 		
 		return true;
 	}

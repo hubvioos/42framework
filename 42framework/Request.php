@@ -21,7 +21,7 @@ defined('FRAMEWORK_DIR') or die('Invalid script access');
 
 class RequestException extends \Exception { }
 
-class Request
+class Request extends FrameworkObject
 {
 	protected $_module = null;
 
@@ -54,17 +54,21 @@ class Request
 
 	public static function factory ($module, $action, Array $params = array(), $state = self::DEFAULT_STATE)
 	{
+		if ($state === null)
+		{
+			$state = self::DEFAULT_STATE;
+		}
 		return new self($module, $action, $params, $state);
 	}
 	
-	public function getCurrent ()
+	public static function getCurrent ()
 	{
 		return self::$_current;
 	}
 	
 	public function execute ()
 	{
-		$module = Core::loadAction($this->_module, $this->_action);
+		$module = $this->getContainer()->getApplication()->loadAction($this->_module, $this->_action);
 		return $module->execute($this);
 	}
 	

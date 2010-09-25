@@ -17,19 +17,18 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 namespace Framework\ErrorHandlerListeners;
+
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
-class Html implements \Framework\interfaces\iErrorHandlerListener
+class Html extends \Framework\FrameworkObject implements \Framework\interfaces\iErrorHandlerListener
 {
 	const MAX_STRING_LEN = 16;
 	
 	/**
 	 * @param \Framework\interfaces\iErrorHandler $errorHandler
 	 */
-	public function update (\Framework\interfaces\iErrorHandler $errorHandler)
+	public function update (\Exception $e)
 	{
-		$e = $errorHandler->getError();
-		
 		$lines = array();
 		
 		$lines[] = '<strong>'.get_class($e).' with the following message :</strong><br />';
@@ -43,7 +42,7 @@ class Html implements \Framework\interfaces\iErrorHandlerListener
 		
 		$rc = implode('<br />'.PHP_EOL, $lines);
 		
-		$response = \Framework\Response::getInstance()->clearResponse()->status(500);
+		$response = $this->getContainer()->getNewResponse()->status(500);
 			
 		if (ini_get('display_errors'))
 		{
@@ -53,6 +52,7 @@ class Html implements \Framework\interfaces\iErrorHandlerListener
 		{
 			$response->setBody('Oops! An error occured!');
 		}
+		$this->getContainer()->getApplication()->viewSetGlobal('layout', false);
 		$response->stopProcess();
 	}
 	

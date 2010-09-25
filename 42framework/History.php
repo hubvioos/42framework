@@ -21,7 +21,7 @@ defined('FRAMEWORK_DIR') or die('Invalid script access');
 
 class HistoryException extends \Exception { }
 
-class History
+class History extends FrameworkObject
 {	
 	/**
 	 * @var $_history \Framework\Libs\Session
@@ -40,13 +40,7 @@ class History
 	 */
 	protected function __construct (\Framework\Libs\Session $session, $historySize)
 	{
-		if ($session->getNamespace() != 'history')
-		{
-			throw new HistoryException ('Session Namespace is not "history"');
-		}
-		
-		$this->_history = $session;
-		
+		$this->_history = $session;	
 		$this->_historySize = $historySize;
 	}
 	

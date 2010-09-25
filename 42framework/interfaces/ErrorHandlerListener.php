@@ -21,5 +21,5 @@ defined('FRAMEWORK_DIR') or die('Invalid script access');
 
 interface iErrorHandlerListener
 {
-	public function update(iErrorHandler $subject);
+	public function update(\Exception $subject);
 }

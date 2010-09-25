@@ -16,12 +16,14 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
+
 namespace Framework;
+
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
 class ContextException extends \Exception { }
 
-class Context
+class Context extends FrameworkObject
 {    
 	protected $_url = null;
 	
@@ -43,8 +45,6 @@ class Context
 	 * @var \Framework\History
 	 */
 	protected $_history = null;
-	
-	protected $_historySize = null;
 	
 	protected static $_isInit = null;
 
@@ -72,12 +72,12 @@ class Context
 	
 		$this->_userAgent = (!isset($_SERVER['HTTP_USER_AGENT'])) ? null : $_SERVER['HTTP_USER_AGENT'];
 	
-		$this->_acceptCharset = (!isset($_SERVER['HTTP_ACCEPT_CHARSET'])) ? Config::$config['defaultCharset'] : $this->_extractValue(
+		$this->_acceptCharset = (!isset($_SERVER['HTTP_ACCEPT_CHARSET'])) ? $this->getContainer()->config['defaultCharset'] : $this->_extractValue(
 			$_SERVER['HTTP_ACCEPT_CHARSET']);
 	
 		$this->_acceptEncoding = (!isset($_SERVER['HTTP_ACCEPT_ENCODING'])) ? null : $this->_extractValue($_SERVER['HTTP_ACCEPT_ENCODING']);
 	
-		$this->_acceptLanguage = (!isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) ? Config::$config['defaultLanguage'] : $this->_extractValue(
+		$this->_acceptLanguage = (!isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) ? $this->getContainer()->config['defaultLanguage'] : $this->_extractValue(
 			$_SERVER['HTTP_ACCEPT_LANGUAGE']);
 	
 		$this->_isSecure = (!empty($_SERVER['HTTPS']) && filter_var($_SERVER['HTTPS'], FILTER_VALIDATE_BOOLEAN));
@@ -177,7 +177,7 @@ class Context
 		{
 			return $this->_url;
 		}
-		return Config::$config['siteUrl'] . $this->_url;
+		return $this->getContainer()->config['siteUrl'] . $this->_url;
 	}
 	
 	public function getIpAddress ()

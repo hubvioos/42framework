@@ -16,12 +16,14 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
+
 namespace Framework;
+
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
 class ResponseException extends \Exception { }
 
-class Response
+class Response extends FrameworkObject
 {
 	/**
 	 * Contains the response
@@ -34,33 +36,6 @@ class Response
 	protected $cookies = array();
 
 	protected $headers = array();
-
-	protected static $instance = null;
-	
-
-	protected function __construct () { }
-
-	protected function __clone () { }
-
-	/**
-	 * @return \Framework\Response
-	 */
-	public static function getInstance ()
-	{
-		if (self::$instance == null)
-		{
-			self::$instance = new self();
-		}
-		return self::$instance;
-	}
-	
-	/**
-	 * @return \Framework\Response
-	 */
-	public function factory()
-	{
-		return new Response();
-	}
 	
 	/**
 	 * @return \Framework\Response
@@ -146,7 +121,7 @@ class Response
 	
 	public function stopProcess()
 	{
-		Core::getInstance()->render($this);
+		$this->getContainer()->getApplication()->render($this);
 	}
 
 	/**

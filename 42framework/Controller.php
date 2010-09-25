@@ -16,12 +16,14 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
+
 namespace Framework;
+
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
 class ControllerException extends \Exception { }
 
-class Controller
+class Controller extends FrameworkObject
 {	
 	/**
 	 * the view corresponding to the current action
@@ -72,7 +74,7 @@ class Controller
 				{
 					$this->setView($this->_request->getAction());
 				}
-				$this->_response = View::factory($this->_request->getModule(), $this->_view, $this->_vars);
+				$this->_response = $this->getContainer()->getNewView($this->_request->getModule(), $this->_view, $this->_vars);
 			}
 			else 
 			{
@@ -103,13 +105,13 @@ class Controller
 	
 	public function setLayout($layout)
 	{
-		View::setGlobal('layout', $layout);
+		$view = $this->getContainer()->getApplication()->viewSetGlobal('layout', $layout);
 		return $this;
 	}
 	
 	public function setMessage($message, $category = 'notice')
 	{
-		$session = Libs\Session::getInstance('message');
+		$session = $this->getContainer()->getSession('message');
 		Libs\Message::add($session, $category, $message);
 	}
 
@@ -140,7 +142,7 @@ class Controller
 	 */
 	public function setGlobal($var, $value)
 	{
-		View::setGlobal($var, $value);
+		$this->getContainer()->getApplication()->viewSetGlobal($var, $value);
 		return $this;
 	}
 	

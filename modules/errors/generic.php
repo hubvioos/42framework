@@ -17,6 +17,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 namespace Application\modules\errors;
+
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
 abstract class generic extends \Framework\Controller
@@ -25,9 +26,7 @@ abstract class generic extends \Framework\Controller
 	
 	public function _before(\Framework\Request $request = null)
 	{
-		$this->_response = \Framework\Response::getInstance()
-							->clearResponse()
-							->reset();
+		$this->_response = $this->getContainer()->getNewResponse();
 		return true;
 	}
 	

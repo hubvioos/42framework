@@ -27,5 +27,5 @@ interface iErrorHandler
 	/**
 	 * @return \Exception
 	 */
-	public function getError();
+	public function getLastError();
 }

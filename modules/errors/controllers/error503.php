@@ -23,7 +23,7 @@ class error503 extends \Application\modules\errors\generic
 {
 	public function processAction ($request = null)
 	{
-		$this->_response->status(503)->setBody(\Framework\View::factory('errors', 'error503'));				
+		$this->_response->status(503)->setBody($this->getContainer()->getNewView('errors', 'error503'));				
 		return true;
 	}
 }

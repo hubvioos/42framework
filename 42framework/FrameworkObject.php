@@ -19,35 +19,23 @@
 namespace Framework;
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
-class ConfigException extends \Exception { }
-
-class Config extends \ArrayObject
+abstract class FrameworkObject
 {
-	public function __construct(array $config = array(), $configPath = null)
+	/**
+	 * @var \Framework\ApplicationContainer
+	 */
+	protected static $_container = null;
+	
+	/**
+	 * @return \Framework\ApplicationContainer
+	 */
+	protected function getContainer()
 	{
-		if (empty($config))
-		{
-			if ($configPath === null)
-			{
-				throw new ConfigException('configPath is not defined! Unable to load any configuration.');
-			}
-			require $configPath;
-		}
-		parent::__construct($config);
+		return self::$_container;
 	}
 	
-	public function toArray()
+	protected function setContainer(ApplicationContainer $container)
 	{
-		return $this->getArrayCopy();
-	}
-	
-	public function __get($offset)
-	{
-		return $this->offsetGet($offset);
-	}
-	
-	public function __set($offset, $value)
-	{
-		$this->offsetSet($offset, $value);
+		self::$_container = $container;
 	}
 }
