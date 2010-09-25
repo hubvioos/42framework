@@ -25,6 +25,8 @@ class ApplicationContainerException extends \Exception { }
  * @method \Framework\Config getConfig()
  * @method \Framework\ErrorHandler getErrorHandler()
  * @method \Framework\Libs\ClassLoader getClassLoader()
+ * @method \Framework\Libs\Message getMessage()
+ * @method \Framework\Libs\Route getRoute()
  * @method array getAutoload()
  * @method \Framework\Context getContext()
  * @method \Framework\History getHistory()
@@ -54,7 +56,7 @@ class ApplicationContainer extends BaseContainer
 		$this->errorHandler = $this->asUniqueInstance(
 			function ($c)
 			{
-				$errorHandler = \Framework\ErrorHandler::getInstance();
+				$errorHandler = new \Framework\ErrorHandler();
 				foreach ($c->config['errorHandlerListeners'] as $lis)
 				{
 					$errorHandler->attach(new $lis());
@@ -64,16 +66,36 @@ class ApplicationContainer extends BaseContainer
 			}
 		);
 		
-		$this->context = function ($c)
-		{
-			return \Framework\Context::getInstance($c->getHistory());
-		};
+		$this->context = $this->asUniqueInstance(
+			function ($c)
+			{
+				return new \Framework\Context($c->getHistory());
+			}
+		);
 		
-		$this->history = function ($c)
-		{
-			/* @var $c ApplicationContainer */
-			return \Framework\History::getInstance($c->getSession('history'), $c->config['historySize']);
-		};
+		$this->history = $this->asUniqueInstance(
+			function ($c)
+			{
+				/* @var $c ApplicationContainer */
+				return new \Framework\History($c->getSession('history'), $c->config['historySize']);
+			}
+		);
+		
+		$this->message = $this->asUniqueInstance(
+			function ($c)
+			{
+				/* @var $c ApplicationContainer */
+				return new \Framework\Libs\Message($c->getSession('message'));
+			}
+		);
+		
+		$this->route = $this->asUniqueInstance(
+			function ($c)
+			{
+				/* @var $c ApplicationContainer */
+				return new \Framework\Libs\Route($c->config['routes']);
+			}
+		);
 		
 		$responseFunc = function ($c)
 		{
@@ -87,10 +109,12 @@ class ApplicationContainer extends BaseContainer
 			return 'Framework\\View';
 		};
 		
-		$this->application = function ($c)
-		{
-			return \Framework\Application::getInstance($c);
-		};
+		$this->application = $this->asUniqueInstance(
+			function ($c)
+			{
+				return new \Framework\Application($c);
+			}
+		);
 	}
 	
 	public function getSession($namespace = 'default')
@@ -114,7 +138,7 @@ class ApplicationContainer extends BaseContainer
 	 */
 	public function getNewRequest($module, $action, $params = array(), $state = null)
 	{
-		return Request::factory($module, $action, $params, $state);
+		return new Request($module, $action, $params, $state);
 	}
 	
 	public function getCurrentRequest()

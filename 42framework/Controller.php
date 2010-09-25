@@ -111,8 +111,7 @@ class Controller extends FrameworkObject
 	
 	public function setMessage($message, $category = 'notice')
 	{
-		$session = $this->getContainer()->getSession('message');
-		Libs\Message::add($session, $category, $message);
+		$this->getContainer()->getMessage()->set($message, $category);
 	}
 
 	/**

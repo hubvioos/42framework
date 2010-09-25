@@ -24,46 +24,17 @@ defined('FRAMEWORK_DIR') or die('Invalid script access');
 class ApplicationException extends \Exception { }
 
 class Application extends FrameworkObject
-{
-	/**
-	 * @var Framework\Application
-	 */
-	protected static $_instance = null;
-	
-	protected function __construct(ApplicationContainer $container)
+{	
+	public function __construct(ApplicationContainer $container)
 	{
 		$this->setContainer($container);
 	}
-	
-	/**
-	 * Returns the unique instance of Framework\Application
-	 * 
-	 * @return Framework\Application
-	 */
-	public static function getInstance (ApplicationContainer $container = null)
-	{
-		if (self::$_instance === null)
-		{
-			if ($container === null)
-			{
-				throw new ApplicationException('Invalid argument : $container is null');
-			}
-			self::$_instance = new self($container);
-		}
-		return self::$_instance;
-	}
-	
-	protected function __clone () { }
-
 
 	public function bootstrap ()
 	{
 		$this->getContainer()->getClassLoader();
 		$this->getContainer()->getErrorHandler();
-		
-		$config = $this->getContainer()->getConfig();
-		Libs\Route::init($config['routes']);
-		
+		$this->getContainer()->getRoute();
 		return $this;
 	}
 	
@@ -79,10 +50,11 @@ class Application extends FrameworkObject
 		    $this->getContainer()->getNewResponse()->redirect($this->getContainer()->config['siteUrl'], 301, true);
 		}
 		// Avoid duplicate content of the routes.
-		else if ($url != Libs\Route::pathToUrl($path)
+		else if ($url != $this->getContainer()->getRoute()->pathToUrl($path)
 			&& $url != '')
 		{
-		    $this->getContainer()->getNewResponse()->redirect($this->getContainer()->config['siteUrl'] . Libs\Route::pathToUrl($path), 301, true);
+		    $this->getContainer()->getNewResponse()
+		    		->redirect($this->getContainer()->config['siteUrl'] . $this->getContainer()->getRoute()->pathToUrl($path), 301, true);
 		}
 						
 		// Avoid duplicate content with just a "/" after the URL
@@ -106,11 +78,9 @@ class Application extends FrameworkObject
 			&& $previousUserAgent != $context->getUserAgent()
 			)
 		{
-			Libs\Session::destroyAll();
-			
-			Libs\Message::add($this->getContainer()->getSession('message'),'warning',
-				'It seems that your session has been stolen, we destroyed it for security reasons. Check your environment security.');
-			
+			$this->getContainer()->getSession()->destroyAll();
+			$this->getContainer()->getMessage()
+				->set('It seems that your session has been stolen, we destroyed it for security reasons. Check your environment security.', 'warning');
 			$this->getContainer()->getNewResponse()->redirect($this->getContainer()->config['siteUrl'], 301, true);
 		}
 	}
@@ -176,8 +146,8 @@ class Application extends FrameworkObject
 		{
 			$url = $this->getContainer()->getContext()->getUrl();
 			
-			$path = Libs\Route::urlToPath($url, $config['defaultModule'], $config['defaultAction']);
-			$params = Libs\Route::pathToParams($path);
+			$path = $this->getContainer()->getRoute()->urlToPath($url, $config['defaultModule'], $config['defaultAction']);
+			$params = $this->getContainer()->getRoute()->pathToParams($path);
 			
 			$state = Request::FIRST_REQUEST;
 			
@@ -185,7 +155,7 @@ class Application extends FrameworkObject
 			/* @var $view View */
 			$view = $this->getContainer()->getViewClass();
 			$this->viewSetGlobal('layout', $config['defaultLayout']);
-			$this->viewSetGlobal('message', $this->getContainer()->getSession('message'));
+			$this->viewSetGlobal('messages', $this->getContainer()->getMessage()->getAll());
 			
 			/* @var $loader Libs\ClassLoader */
 			$loader = $this->getContainer()->getClassLoader();

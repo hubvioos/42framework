@@ -8,8 +8,6 @@
 - Améliorer le ClassLoader
 - Améliorer le module CLI (méthode pour l'aide par exemple)
 
-- Création de la classe Application
-
 - Création des classes de Cache
 
 - Utiliser des injections (Session, BDDs, Cache, etc.)

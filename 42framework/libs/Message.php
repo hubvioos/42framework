@@ -23,43 +23,43 @@ class MessageException extends \Exception { }
 
 class Message
 {	
-	public static function add (Session $session, $category, $value)
+	protected $_session = null;
+	
+	public function __construct(Session $session)
 	{
-		if ($session->getNamespace() != 'message')
-		{
-			throw new MessageException ('Session Namespace is not "message"');
-		}
-		
-		$session[$category] = $value;
+		$this->_session = $session;
 	}
 	
-	public static function get (Session $session, $category)
+	public function set ($value, $category = 'notice')
 	{
-		if ($session->getNamespace() != 'message')
-		{
-			throw new MessageException ('Session Namespace is not "message"');
-		}
-		
-		return $session[$category];
+		$this->_session[$category][] = $value;
 	}
 	
-	public static function clearCategory (Session $session, $category)
+	/**
+	 * @param string $category
+	 * @return array
+	 */
+	public function get ($category = 'notice')
 	{
-		if ($session->getNamespace() != 'message')
+		if (isset($this->_session[$category]))
 		{
-			throw new MessageException ('Session Namespace is not "message"');
+			return $this->_session[$category];
 		}
-		
-		unset($session[$category]);
+		return array();
 	}
 	
-	public static function clearAll (Session $session)
+	public function getAll()
 	{
-		if ($session->getNamespace() != 'message')
-		{
-			throw new MessageException ('hSession Namespace is not "message"');
-		}
-		
-		$session->destroy();
+		return $this->_session;
+	}
+	
+	public function clear ($category = 'notice')
+	{
+		unset($this->_session[$category]);
+	}
+	
+	public function clearAll ()
+	{
+		$this->_session->destroy();
 	}
 }

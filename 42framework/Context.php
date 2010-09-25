@@ -46,11 +46,7 @@ class Context extends FrameworkObject
 	 */
 	protected $_history = null;
 	
-	protected static $_isInit = null;
-
-	protected static $_instance = null;
-	
-	protected function __construct ($history)
+	public function __construct (History $history)
 	{		
 		if (isset($_SERVER['HTTP_X_FORWARDED_FOR']))
 		{
@@ -88,24 +84,6 @@ class Context extends FrameworkObject
 				
 		$this->_history = $history;
 	}
-	
-	protected function __clone () { }
-
-	/**
-	 * @return \Framework\Context
-	 */
-	public static function getInstance (History $history = null)
-	{
-		if (self::$_instance === null)
-		{
-			if ($history === null)
-			{
-				throw new ContextException('Invalid params');
-			}
-			self::$_instance = new Context($history);
-    	}
-    	return self::$_instance;
-    }
 
 	protected function _extractValue ($str)
 	{

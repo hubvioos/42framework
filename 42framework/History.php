@@ -30,32 +30,14 @@ class History extends FrameworkObject
 	
 	protected $_historySize = null;
 	
-	protected static $_instance = null;
-
-	protected function __clone () { }
-	
 	/**
 	 * @param \Framework\Libs\Session $session
 	 * @param integer $historySize
 	 */
-	protected function __construct (\Framework\Libs\Session $session, $historySize)
+	public function __construct (\Framework\Libs\Session $session, $historySize)
 	{
 		$this->_history = $session;	
 		$this->_historySize = $historySize;
-	}
-	
-	/**
-	 * @param Session $session
-	 * @param unknown_type $historySize
-	 * @return \Framework\History
-	 */
-	public static function getInstance (Libs\Session $session, $historySize)
-	{
-		if (self::$_instance === null)
-		{
-			self::$_instance = new self($session, $historySize);
-		}
-		return self::$_instance;
 	}
 	
 	public function update (Array $values = array())

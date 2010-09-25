@@ -23,22 +23,27 @@ class RouteException extends \Exception { }
 
 class Route
 {
-	protected static $routes = array();
+	protected static $_routes = array();
 	
 	const INT_PARAM         = '\d+';
 	const ALPHANUM_PARAM    = '\w+';
 	const WORD_PARAM        = '[a-zA-Z]+';
 	
-	public static function init ($routes)
+	public function __construct ($routes)
 	{
 		if (!is_array($routes))
 		{
 			$routes = array();
 		}
-		self::$routes = $routes;
+		self::$_routes = $routes;
 	}
 	
-	public static function pathToParams($path)
+	public function getRoutes()
+	{
+		return self::$_routes;
+	}
+	
+	public function pathToParams($path)
 	{
 		$params = array();
 		
@@ -51,7 +56,7 @@ class Route
 		return $params;
 	}
 	
-	public static function paramsToPath($params)
+	public function paramsToPath($params)
 	{
 		$path .= $params['module'] .'/'.$params['action'];
 
@@ -63,7 +68,7 @@ class Route
 		return $path;
 	}
 	
-	public static function urlToPath($url, $defaultModule, $defaultAction) 
+	public function urlToPath($url, $defaultModule, $defaultAction) 
 	{
 	    if (!is_string($url) || !is_string($defaultModule) || !is_string($defaultAction))
 		{
@@ -91,7 +96,7 @@ class Route
 		 * Change URL into path
 		 *
 		 */
-		foreach(Route::$routes as $routeUrl => $routeParams)
+		foreach(self::$_routes as $routeUrl => $routeParams)
 		{
 		    // Check if route is dynamic
 		    if (strpos($routeUrl, '<') !== false)
@@ -158,7 +163,7 @@ class Route
 		return $path;
 	}
 	
-	public static function pathToUrl($path)
+	public function pathToUrl($path)
 	{	
 	    $url = $path;
 	    
@@ -169,9 +174,9 @@ class Route
 			$url = rtrim($url, '/');
 		}
 		
-        $pathParams = Route::pathToParams($url);
+        $pathParams = $this->pathToParams($url);
 
-		foreach(self::$routes as $routeUrl => $routeParams)
+		foreach(self::$_routes as $routeUrl => $routeParams)
 		{
 		    $regex = $routeParams['module'] . '/' . $routeParams['action'];
 		    
@@ -232,13 +237,13 @@ class Route
 		return $url;
 	}	
 	
-	public static function paramsToUrl($params) 
+	public function paramsToUrl($params) 
 	{
-		return self::pathToUrl(self::paramsToPath($params));
+		return $this->pathToUrl($this->paramsToPath($params));
 	}
 	
-	public static function urlToParams($url)
+	public function urlToParams($url)
 	{
-		return self::pathToParams(self::urlToPath($url));
+		return $this->pathToParams($this->urlToPath($url));
 	}
 }

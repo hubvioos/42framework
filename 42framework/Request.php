@@ -41,24 +41,17 @@ class Request extends FrameworkObject
 		Constructeur de la classe, partie importante pour l'exécution de la page.
 		Cette méthode s'occupe de déterminer le module et l'action à appeler, en faisant appel à Route.
 	*/
-	protected function __construct ($module, $action, $params, $state)
-	{
-		$this->_module = $module;
-		$this->_action = $action;
-		$this->_params = $params;
-		$this->_state = $state;
-		self::$_current = $this;
-	}
-
-	protected function __clone () { }
-
-	public static function factory ($module, $action, Array $params = array(), $state = self::DEFAULT_STATE)
+	public function __construct ($module, $action, Array $params = array(), $state = self::DEFAULT_STATE)
 	{
 		if ($state === null)
 		{
 			$state = self::DEFAULT_STATE;
 		}
-		return new self($module, $action, $params, $state);
+		$this->_module = $module;
+		$this->_action = $action;
+		$this->_params = $params;
+		$this->_state = $state;
+		self::$_current = $this;
 	}
 	
 	public static function getCurrent ()

@@ -21,8 +21,6 @@ defined('FRAMEWORK_DIR') or die('Invalid script access');
 
 class ErrorHandler extends FrameworkObject implements interfaces\iErrorHandler
 {	
-	protected static $_instance;
-	
 	protected $_error = null;
 	
 	/**
@@ -30,24 +28,10 @@ class ErrorHandler extends FrameworkObject implements interfaces\iErrorHandler
 	 */
 	protected $_observers;
 	
-	protected function __construct ()
+	public function __construct ()
 	{
 		$this->_observers = new \SplObjectStorage();
 	}
-	
-	/**
-	 * @return \Framework\ErrorHandler
-	 */
-	public static function getInstance ()
-	{
-		if (self::$_instance === null)
-		{
-			self::$_instance = new ErrorHandler();
-		}
-		return self::$_instance;
-	}
-	
-	protected function __clone () { }
 	
 	public function start ($errorReporting, $displayError)
 	{

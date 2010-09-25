@@ -31,20 +31,13 @@ class ExternalRequest
 		Constructeur de la classe, partie importante pour l'exécution de la page.
 		Cette méthode s'occupe de déterminer le module et l'action à appeler, en faisant appel à Route.
 	*/
-	protected function __construct ($_url, $_params = null)
+	public function __construct ($_url, $_params = null)
 	{
 		$this->_url = $_url;
 		if ($_params !== null)
 		{
 			$this->_params = $_params;
 		}
-	}
-
-	protected function __clone () { }
-
-	public static function factory ($_url, $_params = null)
-	{
-		return new ExternalRequest($_url, $_params);
 	}
 	
 	public function execute ()
