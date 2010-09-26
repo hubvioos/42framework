@@ -24,10 +24,8 @@ class ApplicationContainerException extends \Exception { }
 /**
  * @method \Framework\Config getConfig()
  * @method \Framework\ErrorHandler getErrorHandler()
- * @method \Framework\Libs\ClassLoader getClassLoader()
  * @method \Framework\Libs\Message getMessage()
  * @method \Framework\Libs\Route getRoute()
- * @method array getAutoload()
  * @method \Framework\Context getContext()
  * @method \Framework\History getHistory()
  * @method \Framework\Response getResponse() Returns the main instance of Response
@@ -37,21 +35,9 @@ class ApplicationContainerException extends \Exception { }
  */
 class ApplicationContainer extends BaseContainer
 {
-	public function __construct (array $config = array(), array $autoload = array())
+	public function __construct (array $config = array())
 	{
 		$this->config = new Config($config, FRAMEWORK_DIR.DS.'config'.DS.'config.php');
-		$this->autoload = $autoload;
-		
-		$this->classLoader = $this->asUniqueInstance(
-			function ($c)
-			{
-				/* @var $loader Libs\ClassLoader */
-				$loader = '\\Framework\\Libs\\ClassLoader';
-				/* @var $c ApplicationContainer */
-				$loader::init($c->getAutoload(), FRAMEWORK_DIR.DS.'config'.DS.'autoload.php');
-				return $loader;
-			}
-		);
 		
 		$this->errorHandler = $this->asUniqueInstance(
 			function ($c)
@@ -69,6 +55,7 @@ class ApplicationContainer extends BaseContainer
 		$this->context = $this->asUniqueInstance(
 			function ($c)
 			{
+				/* @var $c ApplicationContainer */
 				return new \Framework\Context($c->getHistory());
 			}
 		);
@@ -146,8 +133,61 @@ class ApplicationContainer extends BaseContainer
 		return Request::getCurrent();
 	}
 	
+	public function getDoctrineClassLoader($ns = null, $includePath = null)
+	{
+		return new \Doctrine\Common\ClassLoader($ns, $includePath);
+	}
+	
+	public function getStaticClassLoader($autoload = array(), $autoloadPath = null)
+	{
+		return new Libs\StaticClassLoader($autoload, $autoloadPath);
+	}
+	
+	public function classExists($className)
+	{
+		return \Doctrine\Common\ClassLoader::classExists($className);
+	}
+	
+	public function getClassLoader($className)
+	{
+		return \Doctrine\Common\ClassLoader::getClassLoader($className);
+	}
+	
 	public function getNewView($module, $file, $vars = false)
 	{
 		return new View($module, $file, $vars);
+	}
+	
+	/**
+	 * Load the action $action, from the module $module. Shortcut for ClassLoader::loadController()
+	 * 
+	 * @param string $module
+	 * @param string $action
+	 * @return Framework\Controller
+	 */
+	public function getAction($module, $action)
+	{
+		$controller = 'Application\\modules\\'.$module.'\\controllers\\'.$action;
+		return new $controller;
+	}
+	
+	/**
+	 * Load the model $model, from the module $module. Shortcut for ClassLoader::loadModel()
+	 * 
+	 * @param string $module
+	 * @param string $model
+	 * @return Framework\Model
+	 */
+	public function getModel($module, $model)
+	{	
+		$model = 'Application\\modules\\'.$module.'\\models\\'.$model;
+		
+		static $models = array();
+		
+		if (!isset($models[$model]))
+		{
+			$models[$model] = new $model;
+		}
+		return $models[$model];
 	}
 }

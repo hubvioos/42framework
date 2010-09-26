@@ -32,7 +32,6 @@ class Application extends FrameworkObject
 
 	public function bootstrap ()
 	{
-		$this->getContainer()->getClassLoader();
 		$this->getContainer()->getErrorHandler();
 		$this->getContainer()->getRoute();
 		return $this;
@@ -100,34 +99,6 @@ class Application extends FrameworkObject
 	}
 	
 	/**
-	 * Load the action $action, from the module $module. Shortcut for ClassLoader::loadController()
-	 * 
-	 * @param string $module
-	 * @param string $action
-	 * @return Framework\Controller
-	 */
-	public function loadAction($module, $action)
-	{
-		/* @var $loader Libs\ClassLoader */
-		$loader = $this->getContainer()->getClassLoader();
-		return $loader::loadController($module, $action);
-	}
-	
-	/**
-	 * Load the model $model, from the module $module. Shortcut for ClassLoader::loadModel()
-	 * 
-	 * @param string $module
-	 * @param string $model
-	 * @return Framework\Model
-	 */
-	public function loadModel($module, $model)
-	{
-		/* @var $loader Libs\ClassLoader */
-		$loader = $this->getContainer()->getClassLoader();
-		return $loader::loadModel($module, $model);
-	}
-	
-	/**
 	 * Main execution method
 	 * 
 	 * @return Framework\Core
@@ -157,9 +128,7 @@ class Application extends FrameworkObject
 			$this->viewSetGlobal('layout', $config['defaultLayout']);
 			$this->viewSetGlobal('messages', $this->getContainer()->getMessage()->getAll());
 			
-			/* @var $loader Libs\ClassLoader */
-			$loader = $this->getContainer()->getClassLoader();
-			if (!$loader::canLoadClass('Application\\modules\\'.$params['module'].'\\controllers\\'.$params['action']))
+			if (!$this->getContainer()->classExists('Application\\modules\\'.$params['module'].'\\controllers\\'.$params['action']))
 			{
 				$this->getContainer()->getNewRequest('errors', 'error404', array(), Request::FIRST_REQUEST)->execute();
 			}

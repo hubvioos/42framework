@@ -33,14 +33,20 @@ if (file_exists(APPLICATION_DIR.DS.'build'.DS.'config.php'))
 {
 	include APPLICATION_DIR.DS.'build'.DS.'config.php';
 }
-require FRAMEWORK_DIR.DS.'Config.php';
+/*require FRAMEWORK_DIR.DS.'Config.php';
 require FRAMEWORK_DIR.DS.'BaseContainer.php';
 require FRAMEWORK_DIR.DS.'ApplicationContainer.php';
 require FRAMEWORK_DIR.DS.'FrameworkObject.php';
 require FRAMEWORK_DIR.DS.'Application.php';
 require FRAMEWORK_DIR.DS.'libs'.DS.'ClassLoader.php';
+*/
+require VENDORS_DIR.DS.'Doctrine'.DS.'Common'.DS.'ClassLoader.php';
+require FRAMEWORK_DIR.DS.'libs'.DS.'StaticClassLoader.php';
 
-$container = new \Framework\ApplicationContainer($config, $autoload);
+$loader = new \Framework\Libs\StaticClassLoader($autoload, FRAMEWORK_DIR.DS.'config'.DS.'autoload.php');
+$loader->register();
+
+$container = new \Framework\ApplicationContainer($config);
 
 $container->getApplication()
 				->bootstrap()
