@@ -1,19 +1,21 @@
-- Création du Libs\Logger
+ROADMAP :
+0.6 :
+- Améliorer le ClassLoader
 
+0.7 :
 - Gestion des filtres
 
+0.8 :
 - Améliorer le Model
 - Intégrer un ORM ou quelquechose dans le genre (Doctrine)
 
-- Améliorer le ClassLoader
-- Améliorer le module CLI (méthode pour l'aide par exemple)
-
+0.9 :
 - Création des classes de Cache
+- Utiliser des injections selon la config (Session, BDDs, Cache, etc.)
+- Création du Libs\Logger
 
-- Utiliser des injections (Session, BDDs, Cache, etc.)
-
+1.0 :
+- Améliorer le module CLI (méthode pour l'aide par exemple)
 - Créations des commandes pour compiler les routes
-
-- Améliorer le modèle objet
-
 - Ecriture des jeux de tests (PHPUnit)
+- Ecriture de la documentation
