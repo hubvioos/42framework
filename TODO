@@ -1,9 +1,7 @@
 ROADMAP :
-0.6 :
-- Améliorer le ClassLoader
-
 0.7 :
 - Gestion des filtres
+- Gestionnaire d'évènements
 
 0.8 :
 - Améliorer le Model

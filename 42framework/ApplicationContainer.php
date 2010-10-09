@@ -153,6 +153,11 @@ class ApplicationContainer extends BaseContainer
 		return \Doctrine\Common\ClassLoader::getClassLoader($className);
 	}
 	
+	public function getFilterChain($filters = array())
+	{
+		return new FilterChain($filters);
+	}
+	
 	public function getNewView($module, $file, $vars = false)
 	{
 		return new View($module, $file, $vars);

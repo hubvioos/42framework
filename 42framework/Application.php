@@ -25,6 +25,8 @@ class ApplicationException extends \Exception { }
 
 class Application extends FrameworkObject
 {	
+	protected $filterChain = null;
+	
 	public function __construct(ApplicationContainer $container)
 	{
 		$this->setContainer($container);
@@ -34,6 +36,7 @@ class Application extends FrameworkObject
 	{
 		$this->getContainer()->getErrorHandler();
 		$this->getContainer()->getRoute();
+		$this->filterChain = $this->getContainer()->getFilterChain($this->getContainer()->config['applicationFilters']);
 		return $this;
 	}
 	
@@ -151,7 +154,7 @@ class Application extends FrameworkObject
 	 * @param Framework\Response $response (optional)
 	 */
 	public function render($response = null)
-	{
+        {
 		if ($response !== null)
 		{
 			$this->getContainer()->response = $response;
