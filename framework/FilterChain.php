@@ -21,44 +21,41 @@ defined('FRAMEWORK_DIR') or die('Invalid script access');
 
 class FilterChain
 {
-    /**
-     * @var SplObjectStorage
-     */
+	/**
+	 * @var SplObjectStorage
+	 */
 	protected $_filters = null;
-    
-    public function __construct($filters = array())
-    {
-        $this->_filters = new SplObjectStorage();
-        foreach ($filters as $filter)
-        {
-        	$this->addFilter($filter);
-        }
-        $this->_filters->rewind();
-    }
-    
-    public function addFilter(Filter &$filter)
-    {
-        $this->_filters->attach($filter);
-    }
-    
-	public function removeFilter(Filter &$filter)
-    {
-        $this->_filters->detach($filter);
-    }
-    
-    public function execute(Request &$request, Response &$response)
-    {
-        static $started = false;
-        
-        if (!$started)
-        {
-        	$this->_filters->rewind();
-        }
-        else 
-        {
-        	$this->_filters->next();
-        }
-        $this->_filters->current()->execute($request, $response, $this);
-    }
-    
+	
+	public function __construct ($filters = array())
+	{
+		$this->_filters = new \SplObjectStorage();
+		foreach ($filters as $filter)
+		{
+			$this->addFilter($filter);
+		}
+	}
+	
+	public function addFilter (Filter &$filter)
+	{
+		$this->_filters->attach($filter);
+		$this->_filters->rewind();
+	}
+	
+	public function removeFilter (Filter &$filter)
+	{
+		$this->_filters->detach($filter);
+		$this->_filters->rewind();
+	}
+	
+	public function execute (HttpRequest &$request, HttpResponse &$response)
+	{
+		if ($this->_filters->valid())
+		{
+			/* @var $current Filter */
+			$current = $this->_filters->current();
+			$this->_filters->next();
+			$current->execute($request, $response, $this);
+		}
+	}
+
 }

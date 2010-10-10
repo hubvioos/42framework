@@ -1,6 +1,14 @@
 ROADMAP :
 0.7 :
 - Gestion des filtres
+	Requete -> AppFilterChain
+							-> Execution
+										-> ActionFilterChain
+															-> Execution
+																		-> ModelFilterChain
+																							-> Execution
+																										-> ViewFilterChain
+																															-> Execution
 - Gestionnaire d'évènements
 
 0.8 :

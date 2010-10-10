@@ -25,11 +25,11 @@ class error404 extends \Application\modules\errors\generic
 {
 	public function processAction ($request = null)
 	{
-		$this->_response
+		$this->_httpResponse
 			->status(404)
-			->setBody($this->getContainer()->getNewView('errors', 
-														'error404', 
-														array('requestedUrl' => $this->getContainer()->getContext()->getUrl(true))));
+			->set($this->getContainer()->getNewView('errors', 
+													'error404', 
+													array('requestedUrl' => $this->_httpRequest->getUrl(true))));
 		
 		return true;
 	}

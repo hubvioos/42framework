@@ -16,19 +16,22 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
-namespace Framework;
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
-class Filter
-{   
-    public function execute(Request &$request, Response &$response, FilterChain &$filterChain)
-    {
-        $this->_before($request, $response);
-        $filterChain->execute($request, $response);
-        $this->_after($request, $response);
-    }
-        
-    public function _before(Request &$request, Response &$response) { }
-
-    public function _after(Request &$request, Response &$response) { }
-}
+$config = array(
+    'errorReporting' => E_ALL|E_STRICT,
+	'displayErrors' => 1,
+	'defaultModule' => 'website',
+    'defaultAction' => 'index',
+	'defaultLayout' => false,
+	'defaultCharset' => 'utf-8',
+	'defaultLanguage' => 'fr',
+	'defaultTimezone' => 'Europe/Paris',
+	'viewExtension' => '.php',
+	'siteUrl' => 'http://localhost/',
+	'routes' => array(),
+	'historySize' => 2,
+	'errorHandlerListeners' => array('Framework\\ErrorHandlerListeners\\Html'),
+	'viewExtension' => '.php',
+	'applicationFilters' => array('Framework\\filters\\ApplicationFilter', 'Framework\\filters\\SecurityFilter', 'Framework\\filters\\ExecFilter')
+	);

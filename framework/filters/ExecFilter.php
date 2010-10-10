@@ -16,21 +16,34 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
+
+namespace Framework\filters;
+
+use Framework;
+
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
-$config = array(
-    'errorReporting' => E_ALL|E_STRICT,
-	'displayErrors' => 1,
-	'defaultModule' => 'website',
-    'defaultAction' => 'index',
-	'defaultLayout' => false,
-	'defaultCharset' => 'utf-8',
-	'defaultLanguage' => 'fr',
-	'defaultTimezone' => 'Europe/Paris',
-	'viewExtension' => '.php',
-	'siteUrl' => 'http://localhost/',
-	'routes' => array(),
-	'historySize' => 2,
-	'errorHandlerListeners' => array('Framework\\ErrorHandlerListeners\\Html'),
-	'viewExtension' => '.php'
-	);
+class ExecFilterException extends \Exception { }
+
+class ExecFilter extends \Framework\Filter
+{
+	/**
+	 * Main execution method
+	 * 
+	 * @return Framework\Core
+	 */
+	public function _before(\Framework\HttpRequest &$request, \Framework\HttpResponse &$response)
+	{
+		$response->set($request->getRequest()->execute());
+	}
+	
+	/**
+	 * Render the request (send headers and display the response)
+	 * 
+	 * @param Framework\Response $response (optional)
+	 */
+	public function _after(\Framework\HttpRequest &$request, \Framework\HttpResponse &$response)
+    {
+		
+	}
+}

@@ -21,48 +21,23 @@ namespace Framework;
 
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
-class ResponseException extends \Exception { }
+class HttpResponseException extends \Exception { }
 
-class Response extends FrameworkObject
+class HttpResponse extends Response
 {
-	/**
-	 * Contains the response
-	 * @var mixed (Framework\View or string)
-	 */
-	protected $body = '';
-	
-	protected $status = '200 OK';
-
 	protected $cookies = array();
 
 	protected $headers = array();
 	
-	/**
-	 * @return \Framework\Response
-	 */
-	public function clearResponse ()
+	public function __construct()
 	{
-		$this->setBody('');
-		return $this;
+		$this->reset();
 	}
 	
-	public function getBody ()
+	public function clear()
 	{
-		return $this->body;
-	}
-	
-	/**
-	 * @return \Framework\Response
-	 */
-	public function setBody ($value)
-	{
-		$this->body = $value;
+		$this->set('');
 		return $this;
-	}
-
-	public function getStatus ()
-	{
-		return $this->status;
 	}
 
 	public function getCookies ()
@@ -80,15 +55,15 @@ class Response extends FrameworkObject
 	 */
 	public function reset ()
 	{
-		return $this->resetStatus()->resetCookies()->resetHeaders();
+		return $this->clear()->resetStatus()->resetCookies()->resetHeaders();
 	}
 
 	/**
 	 * @return \Framework\Response
 	 */
-	public function resetStatus ()
+	public function resetStatus()
 	{
-		$this->status = '200 OK';
+		$this->status(200);
 		return $this;
 	}
 
@@ -109,19 +84,10 @@ class Response extends FrameworkObject
 		$this->cookies = array();
 		return $this;
 	}
-
-	/**
-	 * @return \Framework\Response
-	 */
-	protected function setStatus ($status)
-	{
-		$this->status = $status;
-		return $this;
-	}
 	
 	public function stopProcess()
 	{
-		$this->getContainer()->getApplication()->render($this);
+		$this->getContainer()->getCore()->render($this);
 	}
 
 	/**
@@ -131,7 +97,7 @@ class Response extends FrameworkObject
 	{
 		if (!is_string($name))
 		{
-			throw new ResponseException('Invalid header type.');
+			throw new HttpResponseException('Invalid header type.');
 		}
 		$this->headers[$name] = $value;
 		return $this;
@@ -147,7 +113,7 @@ class Response extends FrameworkObject
 	}
 
 	/**
-	 * @return \Framework\Response
+	 * @return \Framework\HttpResponse
 	 */
 	public function status ($status)
 	{
@@ -250,7 +216,7 @@ class Response extends FrameworkObject
 			case 509:
 				return $this->setStatus('509 Bandwidth Limit Exceeded');
 			default:
-				throw new ResponseException('Status "'.$status.'" is invalid');
+				throw new HttpResponseException('Status "'.$status.'" is invalid');
 		}
 	}
 
@@ -281,7 +247,7 @@ class Response extends FrameworkObject
 	{
 		if (headers_sent())
 		{
-			throw new ResponseException('Http header was already sent');
+			throw new HttpResponseException('Http header was already sent');
 		}
 		else
 		{
@@ -314,7 +280,7 @@ class Response extends FrameworkObject
 
 	public function getHeader ($name)
 	{
-		return (isset($this->headers[$name]) == false ? null : $this->headers[$name]);
+		return (isset($this->headers[$name]) == false) ? null : $this->headers[$name];
 	}
 	
 	public function __toString()
@@ -324,10 +290,19 @@ class Response extends FrameworkObject
 	
 	public function render()
 	{
-		if ($this->body instanceof View)
+		if ($this->response instanceof Response)
 		{
-			return $this->body->render();
+			$this->set($this->response->get());
 		}
-		return $this->body;
+		if ($this->response instanceof View)
+		{
+			return $this->get()->render();
+		}
+		$return = $this->get();
+		if ($return === null)
+		{
+			return '';
+		}
+		return $return;
 	}
 }

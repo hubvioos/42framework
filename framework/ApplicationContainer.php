@@ -26,12 +26,13 @@ class ApplicationContainerException extends \Exception { }
  * @method \Framework\ErrorHandler getErrorHandler()
  * @method \Framework\Libs\Message getMessage()
  * @method \Framework\Libs\Route getRoute()
- * @method \Framework\Context getContext()
+ * @method \Framework\HttpRequest getHttpRequest()
  * @method \Framework\History getHistory()
- * @method \Framework\Response getResponse() Returns the main instance of Response
- * @method \Framework\Response getNewResponse()
+ * @method \Framework\HttpResponse getHttpResponse()
+ * @method \Framework\Response getResponse()
  * @method string getViewClass()
- * @method \Framework\Application getApplication()
+ * @method \Framework\Core getCore()
+ * @method \Framework\filters\ApplicationFilter getApplicationFilter()
  */
 class ApplicationContainer extends BaseContainer
 {
@@ -52,11 +53,11 @@ class ApplicationContainer extends BaseContainer
 			}
 		);
 		
-		$this->context = $this->asUniqueInstance(
+		$this->httpRequest = $this->asUniqueInstance(
 			function ($c)
 			{
 				/* @var $c ApplicationContainer */
-				return new \Framework\Context($c->getHistory());
+				return new \Framework\HttpRequest($c->getHistory());
 			}
 		);
 		
@@ -84,24 +85,36 @@ class ApplicationContainer extends BaseContainer
 			}
 		);
 		
-		$responseFunc = function ($c)
+		$this->httpResponse = $this->asUniqueInstance(
+			function ($c)
+			{
+				/* @var $c ApplicationContainer */
+				return new \Framework\HttpResponse();
+			}
+		);
+		
+		$this->response = function ($c)
 		{
 			return new \Framework\Response();
 		};
-		$this->response = $this->asUniqueInstance($responseFunc);
-		$this->newResponse = $responseFunc;
 		
 		$this->viewClass = function ($c)
 		{
 			return 'Framework\\View';
 		};
 		
-		$this->application = $this->asUniqueInstance(
+		$this->core = $this->asUniqueInstance(
 			function ($c)
 			{
-				return new \Framework\Application($c);
+				/* @var $c ApplicationContainer */
+				return new Core($c);
 			}
 		);
+		
+		$this->applicationFilter = function ($c)
+		{
+			return new \Framework\filters\ApplicationFilter();
+		};
 	}
 	
 	public function getSession($namespace = 'default')

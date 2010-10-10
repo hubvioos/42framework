@@ -42,17 +42,17 @@ class Html extends \Framework\FrameworkObject implements \Framework\interfaces\i
 		
 		$rc = implode('<br />'.PHP_EOL, $lines);
 		
-		$response = $this->getContainer()->getNewResponse()->status(500);
+		$response = $this->getContainer()->getHttpResponse()->status(500);
 			
 		if (ini_get('display_errors'))
 		{
-			$response->setBody($rc);
+			$response->set($rc);
 		}
 		else
 		{
-			$response->setBody('Oops! An error occured!');
+			$response->set('Oops! An error occured!');
 		}
-		$this->getContainer()->getApplication()->viewSetGlobal('layout', false);
+		$this->getContainer()->getCore()->viewSetGlobal('layout', false);
 		$response->stopProcess();
 	}
 	

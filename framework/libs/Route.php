@@ -88,8 +88,7 @@ class Route
 		 */
 		if ($path === '')
 		{
-		    $path = $defaultPath;
-			return $path;
+		    return $defaultPath;
 		}
 		
 		/*
