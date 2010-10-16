@@ -19,11 +19,18 @@
 namespace Framework;
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
-interface Filter
+class ViewFilter extends FrameworkObject
 {
-	public function execute ();
+	public function execute (&$view, ViewFilterChain &$filterChain)
+	{
+		$this->_before($view);
+		$filterChain->execute($view);
+		$this->_after($view);
+	}
 	
-	public function _before ();
+	public function _before (&$view)
+	{}
 	
-	public function _after ();
+	public function _after (&$view)
+	{}
 }

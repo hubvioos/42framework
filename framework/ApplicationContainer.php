@@ -166,9 +166,20 @@ class ApplicationContainer extends BaseContainer
 		return \Doctrine\Common\ClassLoader::getClassLoader($className);
 	}
 	
-	public function getFilterChain($filters = array())
+	/**
+	 * @return \Framework\AppFilterChain
+	 */
+	public function getAppFilterChain($filters = array())
 	{
-		return new FilterChain($filters);
+		return new AppFilterChain($filters);
+	}
+	
+	/**
+	 * @return \Framework\ViewFilterChain
+	 */
+	public function getViewFilterChain($filters = array())
+	{
+		return new ViewFilterChain($filters);
 	}
 	
 	public function getNewView($module, $file, $vars = false)

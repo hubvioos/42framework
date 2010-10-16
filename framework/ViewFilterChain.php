@@ -19,11 +19,17 @@
 namespace Framework;
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
-interface Filter
+class ViewFilterChain extends FilterChain
 {
-	public function execute ();
-	
-	public function _before ();
-	
-	public function _after ();
+	public function execute (&$view)
+	{
+		if ($this->_filters->valid())
+		{
+			/* @var $current Filter */
+			$current = $this->_filters->current();
+			$this->_filters->next();
+			$current->execute($view, $this);
+		}
+	}
+
 }

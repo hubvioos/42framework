@@ -33,5 +33,6 @@ $config = array(
 	'historySize' => 2,
 	'errorHandlerListeners' => array('Framework\\ErrorHandlerListeners\\Html'),
 	'viewExtension' => '.php',
-	'applicationFilters' => array('Framework\\filters\\ApplicationFilter', 'Framework\\filters\\SecurityFilter', 'Framework\\filters\\ExecFilter')
+	'applicationFilters' => array('Framework\\filters\\ApplicationFilter', 'Framework\\filters\\SecurityFilter', 'Framework\\filters\\ExecFilter'),
+	'viewFilters' => array('Framework\\filters\\RenderFilter')
 	);

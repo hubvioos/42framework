@@ -25,7 +25,7 @@ defined('FRAMEWORK_DIR') or die('Invalid script access');
 
 class SecurityFilterException extends \Exception { }
 
-class SecurityFilter extends \Framework\Filter
+class SecurityFilter extends \Framework\AppFilter
 {	
 	/**
 	 * Main execution method

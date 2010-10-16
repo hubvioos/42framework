@@ -16,14 +16,25 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
-namespace Framework;
+
+namespace Framework\filters;
+
+use Framework;
+
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
-interface Filter
+class RenderFilter extends \Framework\ViewFilter
 {
-	public function execute ();
-	
-	public function _before ();
-	
-	public function _after ();
+	/**
+	 * Main execution method
+	 * 
+	 * @return Framework\Core
+	 */
+	public function _before(&$view)
+	{
+		if ($view instanceof \Framework\View)
+		{
+			$view->render();
+		}
+	}
 }

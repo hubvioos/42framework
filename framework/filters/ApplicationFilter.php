@@ -19,11 +19,13 @@
 
 namespace Framework\filters;
 
+use Framework;
+
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
 class ApplicationFilterException extends \Exception { }
 
-class ApplicationFilter extends \Framework\Filter
+class ApplicationFilter extends \Framework\AppFilter
 {	
 	public function duplicateContentPolicy ($url, $path, $params)
 	{
@@ -102,9 +104,9 @@ class ApplicationFilter extends \Framework\Filter
 	 */
 	public function _after(\Framework\HttpRequest &$request, \Framework\HttpResponse &$response)
     {
-		if ($this->getContainer()->getCore()->viewGetGlobal('layout') !== false)
+		$config = $this->getContainer()->getConfig();
+    	if ($this->getContainer()->getCore()->viewGetGlobal('layout') !== false)
 		{
-			$config = $this->getContainer()->getConfig();
 			if ($this->getContainer()->getCore()->viewGetGlobal('layout') === null)
 			{
 				$this->getContainer()->getCore()->viewSetGlobal('layout', $config['defaultLayout']);
@@ -114,8 +116,25 @@ class ApplicationFilter extends \Framework\Filter
 			
 			$response->set($this->getContainer()->getNewView($config['defaultModule'], $this->getContainer()->getCore()->viewGetGlobal('layout')));
 		}
+		
 		$response->send();
-		echo $response;
+		
+		if (isset($config['viewFilters']))
+		{
+			$viewFilters = array();
+			foreach ($config['viewFilters'] as $filter)
+			{
+				$viewFilters[] = new $filter;
+			}
+			
+			$view = $response->get();
+			$this->getContainer()->getViewFilterChain($viewFilters)->execute($view);
+			echo $view;
+		}
+		else 
+		{
+			echo $response;
+		}
 		
 		if ($response->getStatus() == 200)
 		{

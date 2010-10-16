@@ -31,6 +31,8 @@ class View extends FrameworkObject
 	// variables supplèmentaires
 	protected $_vars = array();
 	
+	protected $_renderedView = null;
+	
 	protected static $_globalsVars = array();
 
 	// on définit l'adresse du fichier de vue à inclure et on récupère les variables supplémentaires
@@ -91,12 +93,27 @@ class View extends FrameworkObject
 	// effectue le rendu de la vue
 	public function render ()
 	{
-		extract(self::$_globalsVars);
-		extract($this->_vars);
-		
-		ob_start();
-		include $this->_file;
-		return ob_get_clean();
+		if ($this->_renderedView === null)
+		{
+			extract(self::$_globalsVars);
+			extract($this->_vars);
+			
+			ob_start();
+			include $this->_file;
+			$this->_renderedView = ob_get_clean();
+		}
+		return $this->_renderedView;
+	}
+	
+	public function getRenderedView()
+	{
+		return $this->_renderedView;
+	}
+	
+	public function setRenderedView($view)
+	{
+		$this->_renderedView = $view;
+		return $this;
 	}
 
 	// effectue le rendu de la vue et le retourne

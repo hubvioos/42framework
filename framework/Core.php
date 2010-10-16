@@ -43,7 +43,7 @@ class Core extends FrameworkObject
 		{
 			$appFilters[] = new $filter;
 		}
-		$this->_filterChain = $this->getContainer()->getFilterChain($appFilters);
+		$this->_filterChain = $this->getContainer()->getAppFilterChain($appFilters);
 		return $this;
 	}
 	

@@ -19,11 +19,18 @@
 namespace Framework;
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
-interface Filter
+class AppFilter extends FrameworkObject
 {
-	public function execute ();
+	public function execute (HttpRequest &$request, HttpResponse &$response, AppFilterChain &$filterChain)
+	{
+		$this->_before($request, $response);
+		$filterChain->execute($request, $response);
+		$this->_after($request, $response);
+	}
 	
-	public function _before ();
+	public function _before (HttpRequest &$request, HttpResponse &$response)
+	{}
 	
-	public function _after ();
+	public function _after (HttpRequest &$request, HttpResponse &$response)
+	{}
 }

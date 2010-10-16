@@ -19,7 +19,7 @@
 namespace Framework;
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
-class FilterChain
+abstract class FilterChain
 {
 	/**
 	 * @var SplObjectStorage
@@ -35,27 +35,15 @@ class FilterChain
 		}
 	}
 	
-	public function addFilter (Filter &$filter)
+	public function addFilter (/*Filter */&$filter)
 	{
 		$this->_filters->attach($filter);
 		$this->_filters->rewind();
 	}
 	
-	public function removeFilter (Filter &$filter)
+	public function removeFilter (/*Filter */&$filter)
 	{
 		$this->_filters->detach($filter);
 		$this->_filters->rewind();
 	}
-	
-	public function execute (HttpRequest &$request, HttpResponse &$response)
-	{
-		if ($this->_filters->valid())
-		{
-			/* @var $current Filter */
-			$current = $this->_filters->current();
-			$this->_filters->next();
-			$current->execute($request, $response, $this);
-		}
-	}
-
 }

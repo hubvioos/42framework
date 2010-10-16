@@ -33,7 +33,7 @@ class CliCommand extends \Framework\Controller
 	{
 		if ($request->getState() != \Framework\Request::CLI_STATE)
 		{
-			$this->getContainer()->getNewRequest('errors', 'error403', array($request))->execute();
+			//$this->getContainer()->getNewRequest('errors', 'error403', array($request))->execute();
 		}
 	}
 	

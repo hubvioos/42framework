@@ -25,7 +25,7 @@ defined('FRAMEWORK_DIR') or die('Invalid script access');
 
 class ExecFilterException extends \Exception { }
 
-class ExecFilter extends \Framework\Filter
+class ExecFilter extends \Framework\AppFilter
 {
 	/**
 	 * Main execution method
@@ -34,7 +34,7 @@ class ExecFilter extends \Framework\Filter
 	 */
 	public function _before(\Framework\HttpRequest &$request, \Framework\HttpResponse &$response)
 	{
-		$response->set($request->getRequest()->execute());
+		$response->set($request->getRequest()->execute()->get());
 	}
 	
 	/**
