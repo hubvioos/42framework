@@ -16,14 +16,21 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
-namespace Framework;
+namespace framework\filters;
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
-interface Filter
+class Filter extends \framework\core\FrameworkObject
 {
-	public function execute ();
+	public function execute (&$request, &$response, FilterChain &$filterChain)
+	{
+		$this->_before($request, $response);
+		$filterChain->execute($request, $response);
+		$this->_after($request, $response);
+	}
 	
-	public function _before ();
+	public function _before (&$request, &$response)
+	{}
 	
-	public function _after ();
+	public function _after (&$request, &$response)
+	{}
 }

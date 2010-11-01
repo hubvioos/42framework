@@ -17,33 +17,19 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-namespace Framework\filters;
-
-use Framework;
+namespace framework\filters\appFilters;
 
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
-class ExecFilterException extends \Exception { }
-
-class ExecFilter extends \Framework\AppFilter
+class ExecFilter extends \framework\filters\Filter
 {
 	/**
 	 * Main execution method
 	 * 
 	 * @return Framework\Core
 	 */
-	public function _before(\Framework\HttpRequest &$request, \Framework\HttpResponse &$response)
+	public function _before(&$request, &$response)
 	{
 		$response->set($request->getRequest()->execute()->get());
-	}
-	
-	/**
-	 * Render the request (send headers and display the response)
-	 * 
-	 * @param Framework\Response $response (optional)
-	 */
-	public function _after(\Framework\HttpRequest &$request, \Framework\HttpResponse &$response)
-    {
-		
 	}
 }

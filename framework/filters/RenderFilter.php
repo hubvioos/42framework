@@ -17,22 +17,21 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-namespace Framework\filters;
-
-use Framework;
+namespace framework\filters\viewFilters;
 
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
-class RenderFilter extends \Framework\ViewFilter
+class RenderFilter extends \framework\filters\Filter
 {
 	/**
 	 * Main execution method
 	 * 
 	 * @return Framework\Core
 	 */
-	public function _before(&$view)
+	public function _before(&$request, &$response)
 	{
-		if ($view instanceof \Framework\View)
+		$view = $response->get();
+		if ($view instanceof \Framework\core\View)
 		{
 			$view->render();
 		}

@@ -16,10 +16,10 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
-namespace Framework;
+namespace framework\filters;
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
-abstract class FilterChain
+class FilterChain
 {
 	/**
 	 * @var SplObjectStorage
@@ -35,15 +35,26 @@ abstract class FilterChain
 		}
 	}
 	
-	public function addFilter (/*Filter */&$filter)
+	public function addFilter (Filter &$filter)
 	{
 		$this->_filters->attach($filter);
 		$this->_filters->rewind();
 	}
 	
-	public function removeFilter (/*Filter */&$filter)
+	public function removeFilter (Filter &$filter)
 	{
 		$this->_filters->detach($filter);
 		$this->_filters->rewind();
+	}
+	
+	public function execute (&$request, &$response)
+	{
+		if ($this->_filters->valid())
+		{
+			/* @var $current Filter */
+			$current = $this->_filters->current();
+			$this->_filters->next();
+			$current->execute($request, $response, $this);
+		}
 	}
 }

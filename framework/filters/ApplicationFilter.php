@@ -17,15 +17,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-namespace Framework\filters;
-
-use Framework;
+namespace framework\filters\appFilters;
 
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
-class ApplicationFilterException extends \Exception { }
-
-class ApplicationFilter extends \Framework\AppFilter
+class ApplicationFilter extends \framework\filters\Filter
 {	
 	public function duplicateContentPolicy ($url, $path, $params)
 	{
@@ -58,7 +54,7 @@ class ApplicationFilter extends \Framework\AppFilter
 	 * 
 	 * @return Framework\Core
 	 */
-	public function _before(\Framework\HttpRequest &$request, \Framework\HttpResponse &$response)
+	public function _before(&$request, &$response)
 	{
 		$config = $this->getContainer()->getConfig();
 		if (PHP_SAPI === 'cli')
@@ -67,7 +63,7 @@ class ApplicationFilter extends \Framework\AppFilter
 			$params = \Application\modules\cli\CliUtils::extractParams();
 			$params['module'] = 'cli';
 			
-			$state = \Framework\Request::CLI_STATE;
+			$state = \Framework\core\Request::CLI_STATE;
 		}
 		else
 		{
@@ -79,7 +75,7 @@ class ApplicationFilter extends \Framework\AppFilter
 			
 			$this->duplicateContentPolicy($url, $path, $params);
 			
-			$state = \Framework\Request::FIRST_REQUEST;
+			$state = \Framework\core\Request::FIRST_REQUEST;
 			
 			// Views variables
 			/* @var $view View */
@@ -87,7 +83,13 @@ class ApplicationFilter extends \Framework\AppFilter
 			$this->getContainer()->getCore()->viewSetGlobal('layout', $config['defaultLayout']);
 			$this->getContainer()->getCore()->viewSetGlobal('messages', $this->getContainer()->getMessage()->getAll());
 			
-			if (!$this->getContainer()->getCore()->classExists('Application\\modules\\'.$params['module'].'\\controllers\\'.$params['action']))
+			/*if (!$this->getContainer()->getCore()->classExists('Application\\modules\\'.$params['module'].'\\controllers\\'.$params['action']))
+			{
+				$params['module'] = 'errors';
+				$params['action'] = 'error404';
+				$params['params'] = array();
+			}*/
+			if (!class_exists('application\\modules\\'.$params['module'].'\\controllers\\'.$params['action']))
 			{
 				$params['module'] = 'errors';
 				$params['action'] = 'error404';
@@ -102,9 +104,9 @@ class ApplicationFilter extends \Framework\AppFilter
 	 * 
 	 * @param Framework\Response $response (optional)
 	 */
-	public function _after(\Framework\HttpRequest &$request, \Framework\HttpResponse &$response)
+	public function _after(&$request, &$response)
     {
-		$config = $this->getContainer()->getConfig();
+    	$config = $this->getContainer()->getConfig();
     	if ($this->getContainer()->getCore()->viewGetGlobal('layout') !== false)
 		{
 			if ($this->getContainer()->getCore()->viewGetGlobal('layout') === null)
@@ -127,14 +129,9 @@ class ApplicationFilter extends \Framework\AppFilter
 				$viewFilters[] = new $filter;
 			}
 			
-			$view = $response->get();
-			$this->getContainer()->getViewFilterChain($viewFilters)->execute($view);
-			echo $view;
+			$this->getContainer()->getFilterChain($viewFilters)->execute($request, $response);
 		}
-		else 
-		{
-			echo $response;
-		}
+		echo $response;
 		
 		if ($response->getStatus() == 200)
 		{
