@@ -115,6 +115,14 @@ class ApplicationContainer extends BaseContainer
 		{
 			return new \Framework\filters\ApplicationFilter();
 		};
+		
+		$this->eventManager = $this->asUniqueInstance(
+			function ($c)
+			{
+				/* @var $c ApplicationContainer */
+				return new \framework\events\EventManager($c->config['events']);
+			}
+		);
 	}
 	
 	public function getSession($namespace = 'default')

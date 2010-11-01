@@ -35,6 +35,7 @@ class Core extends FrameworkObject
 	public function bootstrap ()
 	{
 		$this->getContainer()->getErrorHandler();
+		$this->getContainer()->getEventManager();
 		$this->getContainer()->getRoute();
 		// Timezone
 		date_default_timezone_set($this->getContainer()->config['defaultTimezone']);
