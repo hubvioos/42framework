@@ -20,14 +20,14 @@ namespace framework\errorHandler\listeners;
 
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
-class Html extends \framework\core\FrameworkObject implements \SplObserver
+class Html extends \framework\core\FrameworkObject implements \framework\errorHandler\interfaces\iErrorHandlerListener
 {
 	const MAX_STRING_LEN = 16;
 	
 	/**
-	 * @param \SplSubject $errorHandler
+	 * @param \framework\errorHandler\ErrorHandler $errorHandler
 	 */
-	public function update (\SplSubject $errorHandler)
+	public function update (\framework\errorHandler\ErrorHandler $errorHandler)
 	{
 		$e = $errorHandler->getLastError();
 		

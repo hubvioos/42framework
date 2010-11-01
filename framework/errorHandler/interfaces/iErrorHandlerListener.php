@@ -16,22 +16,13 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
-
-namespace framework\filters\appFilters;
-
+namespace framework\errorHandler\interfaces;
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
-class ExecFilter extends \framework\filters\Filter
-{
+interface iErrorHandlerListener
+{	
 	/**
-	 * Main execution method
-	 * 
-	 * @param \Framework\core\HttpRequest $request
-	 * @param \Framework\core\HttpResponse $response
-	 * @return Framework\Core
+	 * @param \framework\errorHandler\ErrorHandler $errorHandler
 	 */
-	public function _before(&$request, &$response)
-	{
-		$response->set($request->getRequest()->execute()->get());
-	}
+	public function update (\framework\errorHandler\ErrorHandler $errorHandler);
 }

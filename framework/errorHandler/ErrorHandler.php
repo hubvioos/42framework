@@ -19,7 +19,7 @@
 namespace framework\errorHandler;
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
-class ErrorHandler extends \framework\core\FrameworkObject implements \SplSubject
+class ErrorHandler extends \framework\core\FrameworkObject
 {	
 	/**
 	 * @var \Exception
@@ -88,39 +88,33 @@ class ErrorHandler extends \framework\core\FrameworkObject implements \SplSubjec
 	}
 	
 	/**
-	 * (non-PHPdoc)
-	 * @see SplSubject::attach()
-	 * @param \SplObserver $obs
+	 * @param \framework\errorHandler\interfaces\iErrorHandlerListener $obs
 	 * @return \framework\errorHandler\ErrorHandler
 	 */
-	public function attach (\SplObserver $obs)
+	public function attach (\framework\errorHandler\interfaces\iErrorHandlerListener $obs)
 	{
 		$this->_observers->attach($obs);
 		return $this;
 	}
 	
 	/**
-	 * (non-PHPdoc)
-	 * @see SplSubject::detach()
-	 * @param \SplObserver $obs
+	 * @param \framework\errorHandler\interfaces\iErrorHandlerListener $obs
 	 * @return \framework\errorHandler\ErrorHandler
 	 */
-	public function detach (\SplObserver $obs)
+	public function detach (\framework\errorHandler\interfaces\iErrorHandlerListener $obs)
 	{
 		$this->_observers->detach($obs);
 		return $this;
 	}
 	
 	/**
-	 * (non-PHPdoc)
-	 * @see SplSubject::notify()
 	 * @return \framework\errorHandler\ErrorHandler
 	 */
 	public function notify ()
 	{
 		foreach ($this->_observers as $obs)
 		{
-			/* @var $obs \SplObserver */
+			/* @var $obs interfaces\iErrorHandlerListener */
 			$obs->update($this);
 		}
 		return $this;

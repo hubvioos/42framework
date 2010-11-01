@@ -52,6 +52,8 @@ class ApplicationFilter extends \framework\filters\Filter
 	/**
 	 * Main execution method
 	 * 
+	 * @param \Framework\core\HttpRequest $request
+	 * @param \Framework\core\HttpResponse $response
 	 * @return Framework\Core
 	 */
 	public function _before(&$request, &$response)
@@ -102,7 +104,8 @@ class ApplicationFilter extends \framework\filters\Filter
 	/**
 	 * Render the request (send headers and display the response)
 	 * 
-	 * @param Framework\Response $response (optional)
+	 * @param \Framework\core\HttpRequest $request
+	 * @param \Framework\core\HttpResponse $response
 	 */
 	public function _after(&$request, &$response)
     {

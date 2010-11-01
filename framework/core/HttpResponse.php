@@ -111,7 +111,7 @@ class HttpResponse extends \framework\core\Response
 	}
 
 	/**
-	 * @return \Framework\HttpResponse
+	 * @return \framework\core\HttpResponse
 	 */
 	public function status ($status)
 	{

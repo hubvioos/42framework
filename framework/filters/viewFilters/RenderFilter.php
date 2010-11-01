@@ -26,6 +26,8 @@ class RenderFilter extends \framework\filters\Filter
 	/**
 	 * Main execution method
 	 * 
+	 * @param \Framework\core\HttpRequest $request
+	 * @param \Framework\core\HttpResponse $response
 	 * @return Framework\Core
 	 */
 	public function _before(&$request, &$response)
