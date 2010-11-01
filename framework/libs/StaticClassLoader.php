@@ -16,10 +16,10 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
-namespace Framework\Libs;
+namespace framework\libs;
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
-class StaticClassLoader extends \Doctrine\Common\ClassLoader
+class StaticClassLoader extends \framework\libs\ClassLoader
 {
 	protected $_autoload;
 

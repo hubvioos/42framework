@@ -16,10 +16,8 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
-namespace Framework\Libs;
+namespace framework\libs;
 defined('FRAMEWORK_DIR') or die('Invalid script access');
-
-class RouteException extends \Exception { }
 
 class Route
 {
@@ -72,7 +70,7 @@ class Route
 	{
 	    if (!is_string($url) || !is_string($defaultModule) || !is_string($defaultAction))
 		{
-			throw new RouteException(__METHOD__ . ' : Invalid params');
+			throw new \InvalidArgumentException(__METHOD__ . ' : Invalid params');
 		}
 		
 	    $path = rtrim($url, '/');

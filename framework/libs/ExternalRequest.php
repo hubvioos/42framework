@@ -16,10 +16,8 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
-namespace Framework\Libs;
+namespace framework\Libs;
 defined('FRAMEWORK_DIR') or die('Invalid script access');
-
-class ExternalRequestException extends \Exception { }
 
 class ExternalRequest
 {
@@ -54,7 +52,7 @@ class ExternalRequest
 		$output = curl_exec($c);
 		if($output === false)
 		{
-			trigger_error('Erreur curl : '.curl_error($c), E_USER_WARNING);
+			throw new \RuntimeException('Erreur curl : '.curl_error($c));
 		}
 		curl_close($c);
 		return $output;
