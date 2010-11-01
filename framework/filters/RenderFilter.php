@@ -16,15 +16,24 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
-namespace Application\modules\errors\controllers;
+
+namespace framework\filters\viewFilters;
 
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
-class error403 extends \Application\modules\errors\generic
+class RenderFilter extends \framework\filters\Filter
 {
-	public function processAction ($request = null)
+	/**
+	 * Main execution method
+	 * 
+	 * @return Framework\Core
+	 */
+	public function _before(&$request, &$response)
 	{
-		$this->_httpResponse->status(403)->set($this->getContainer()->getNewView('errors', 'error403'));
-		return true;
+		$view = $response->get();
+		if ($view instanceof \Framework\core\View)
+		{
+			$view->render();
+		}
 	}
 }

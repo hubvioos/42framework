@@ -1,9 +1,15 @@
 ROADMAP :
-0.6 :
-- Améliorer le ClassLoader
-
 0.7 :
 - Gestion des filtres
+	Requete -> AppFilterChain
+							-> Execution
+										-> ActionFilterChain
+															-> Execution
+																		-> ModelFilterChain
+																							-> Execution
+																										-> ViewFilterChain
+																															-> Execution
+- Gestionnaire d'évènements
 
 0.8 :
 - Améliorer le Model

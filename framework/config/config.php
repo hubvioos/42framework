@@ -16,15 +16,23 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
-namespace Application\modules\errors\controllers;
-
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
-class error403 extends \Application\modules\errors\generic
-{
-	public function processAction ($request = null)
-	{
-		$this->_httpResponse->status(403)->set($this->getContainer()->getNewView('errors', 'error403'));
-		return true;
-	}
-}
+$config = array(
+    'errorReporting' => E_ALL|E_STRICT,
+	'displayErrors' => 1,
+	'defaultModule' => 'website',
+    'defaultAction' => 'index',
+	'defaultLayout' => false,
+	'defaultCharset' => 'utf-8',
+	'defaultLanguage' => 'fr',
+	'defaultTimezone' => 'Europe/Paris',
+	'viewExtension' => '.php',
+	'siteUrl' => 'http://localhost/',
+	'routes' => array(),
+	'historySize' => 2,
+	'errorHandlerListeners' => array('Framework\\ErrorHandlerListeners\\Html'),
+	'viewExtension' => '.php',
+	'applicationFilters' => array('Framework\\filters\\ApplicationFilter', 'Framework\\filters\\SecurityFilter', 'Framework\\filters\\ExecFilter'),
+	'viewFilters' => array('Framework\\filters\\RenderFilter')
+	);

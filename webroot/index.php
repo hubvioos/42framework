@@ -16,10 +16,11 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
+use Doctrine\Common;
 define('DS', DIRECTORY_SEPARATOR);
 define('WEBROOT', __DIR__);
 define('APPLICATION_DIR', dirname(WEBROOT));
-define('FRAMEWORK_DIR', APPLICATION_DIR.DS.'42framework');
+define('FRAMEWORK_DIR', APPLICATION_DIR.DS.'framework');
 define('MODULES_DIR', APPLICATION_DIR.DS.'modules');
 define('VENDORS_DIR', APPLICATION_DIR.DS.'vendors');
 
@@ -43,12 +44,15 @@ require FRAMEWORK_DIR.DS.'libs'.DS.'ClassLoader.php';
 require VENDORS_DIR.DS.'Doctrine'.DS.'Common'.DS.'ClassLoader.php';
 require FRAMEWORK_DIR.DS.'libs'.DS.'StaticClassLoader.php';
 
+/*$loader = new \Doctrine\Common\ClassLoader(null, APPLICATION_DIR);
+$loader->setNamespaceSeparator('\\');
+$loader->setFileExtension('.php');
+$loader->register();*/
 $loader = new \Framework\Libs\StaticClassLoader($autoload, FRAMEWORK_DIR.DS.'config'.DS.'autoload.php');
 $loader->register();
 
 $container = new \Framework\ApplicationContainer($config);
 
-$container->getApplication()
+$container->getCore()
 				->bootstrap()
-				->run()
-				->render();
+				->run();

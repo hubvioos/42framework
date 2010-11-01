@@ -18,20 +18,21 @@
  */
 namespace Application\modules\errors;
 
+use Framework;
+
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
 abstract class generic extends \Framework\Controller
 {
 	protected $_response = null;
 	
-	public function _before(\Framework\Request $request = null)
+	public function _before(\Framework\Request &$request, \Framework\Response &$response)
 	{
-		$this->_response = $this->getContainer()->getNewResponse();
-		return true;
+		$this->_httpResponse->reset();
 	}
 	
-	public function _after (\Framework\Request $request, $actionResponse)
+	public function _after (\Framework\Request &$request, \Framework\Response &$response)
 	{
-		$this->_response->stopProcess();
+		$this->_httpResponse->stopProcess();
 	}
 }

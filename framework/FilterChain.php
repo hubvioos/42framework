@@ -16,21 +16,45 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
+namespace framework\filters;
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
-$config = array(
-    'errorReporting' => E_ALL|E_STRICT,
-	'displayErrors' => 1,
-	'defaultModule' => 'website',
-    'defaultAction' => 'index',
-	'defaultLayout' => false,
-	'defaultCharset' => 'utf-8',
-	'defaultLanguage' => 'fr',
-	'defaultTimezone' => 'Europe/Paris',
-	'viewExtension' => '.php',
-	'siteUrl' => 'http://localhost/',
-	'routes' => array(),
-	'historySize' => 2,
-	'errorHandlerListeners' => array('Framework\\ErrorHandlerListeners\\Html'),
-	'viewExtension' => '.php'
-	);
+class FilterChain
+{
+	/**
+	 * @var SplObjectStorage
+	 */
+	protected $_filters = null;
+	
+	public function __construct ($filters = array())
+	{
+		$this->_filters = new \SplObjectStorage();
+		foreach ($filters as $filter)
+		{
+			$this->addFilter($filter);
+		}
+	}
+	
+	public function addFilter (Filter &$filter)
+	{
+		$this->_filters->attach($filter);
+		$this->_filters->rewind();
+	}
+	
+	public function removeFilter (Filter &$filter)
+	{
+		$this->_filters->detach($filter);
+		$this->_filters->rewind();
+	}
+	
+	public function execute (&$request, &$response)
+	{
+		if ($this->_filters->valid())
+		{
+			/* @var $current Filter */
+			$current = $this->_filters->current();
+			$this->_filters->next();
+			$current->execute($request, $response, $this);
+		}
+	}
+}

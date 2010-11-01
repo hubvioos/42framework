@@ -62,7 +62,9 @@ class Request extends FrameworkObject
 	public function execute ()
 	{
 		$module = $this->getContainer()->getAction($this->_module, $this->_action);
-		return $module->execute($this);
+		$request = $this->getContainer()->getHttpRequest();
+		$response = $this->getContainer()->getHttpResponse();
+		return $module->execute($this, $request, $response);
 	}
 	
 	/**

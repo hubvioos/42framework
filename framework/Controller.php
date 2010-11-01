@@ -53,20 +53,26 @@ class Controller extends FrameworkObject
 	 */
 	protected $_response = null;
 	
+	protected $_httpRequest = null;
+	
+	protected $_httpResponse = null;
+	
 	/**
 	 * Executes the action corresponding to the current request
 	 * 
 	 * @param Framework\Request $request
 	 */
-	public function execute(Request $request)
+	public function execute(Request $request, HttpRequest &$httpRequest, HttpResponse &$httpResponse)
 	{
+		$this->_httpRequest = $httpRequest;
+		$this->_httpResponse = $httpResponse;
 		$this->_request = $request;
-		$beforeResponse = $this->_before($this->_request);
-		if ($beforeResponse === true)
+		$this->_response = $this->getContainer()->getResponse();
+		$this->_before($this->_request, $this->_response);
+		if ($this->_response->getStatus() !== Response::ERROR)
 		{
-			$actionResponse = null;
-			$actionResponse = call_user_func_array(array($this, 'processAction'), $this->_request->getParams());
-			$actionResponse = $this->_after($this->_request, $actionResponse);
+			call_user_func_array(array($this, 'processAction'), $this->_request->getParams());
+			$this->_after($this->_request, $this->_response);
 			
 			if ($this->_view !== false)
 			{
@@ -74,20 +80,8 @@ class Controller extends FrameworkObject
 				{
 					$this->setView($this->_request->getAction());
 				}
-				$this->_response = $this->getContainer()->getNewView($this->_request->getModule(), $this->_view, $this->_vars);
+				$this->_response->set($this->getContainer()->getNewView($this->_request->getModule(), $this->_view, $this->_vars));
 			}
-			else 
-			{
-				if ($actionResponse === null)
-				{
-					$actionResponse = '';
-				}
-				$this->_response = $actionResponse;
-			}
-		}
-		elseif ($this->_response === null)
-		{
-			$this->_response = '';
 		}
 		return $this->_response;
 	}
@@ -105,7 +99,7 @@ class Controller extends FrameworkObject
 	
 	public function setLayout($layout)
 	{
-		$view = $this->getContainer()->getApplication()->viewSetGlobal('layout', $layout);
+		$view = $this->getContainer()->getCore()->viewSetGlobal('layout', $layout);
 		return $this;
 	}
 	
@@ -141,7 +135,7 @@ class Controller extends FrameworkObject
 	 */
 	public function setGlobal($var, $value)
 	{
-		$this->getContainer()->getApplication()->viewSetGlobal($var, $value);
+		$this->getContainer()->getCore()->viewSetGlobal($var, $value);
 		return $this;
 	}
 	
@@ -151,10 +145,7 @@ class Controller extends FrameworkObject
 	 * @param Framework\Request $request
 	 * @return mixed (boolean or Framework\Response)
 	 */
-	protected function _before(Request $request)
-	{
-		return true;
-	}
+	protected function _before(Request &$request, Response &$response) { }
 	
 	/**
 	 * Filter executed after the action
@@ -163,8 +154,15 @@ class Controller extends FrameworkObject
 	 * @param mixed $actionResponse
 	 * @return mixed
 	 */
-	protected function _after(Request $request, $actionResponse)
+	protected function _after(Request &$request, Response &$response) { }
+	
+	public function getHttpRequest()
 	{
-		return $actionResponse;
+		return $this->_httpRequest;
+	}
+	
+	public function getHttpResponse()
+	{
+		return $this->_httpResponse;
 	}
 }

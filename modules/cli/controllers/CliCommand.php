@@ -29,19 +29,17 @@ class CliCommand extends \Framework\Controller
 	 * 
 	 * @param Framework\Request $request
 	 */
-	protected function _before(\Framework\Request $request)
+	protected function _before(\Framework\Request &$request, \Framework\Response &$response)
 	{
-		if ($request->getState() == \Framework\Request::CLI_STATE)
+		if ($request->getState() != \Framework\Request::CLI_STATE)
 		{
-			$this->_response = $this->getContainer()->getNewRequest('errors', 'error403', array($request))->execute();
-			return false;
+			//$this->getContainer()->getNewRequest('errors', 'error403', array($request))->execute();
 		}
-		return true;
 	}
 	
-	protected function _after(\Framework\Request $request, $actionResponse)
+	protected function _after(\Framework\Request &$request, \Framework\Response &$response)
 	{
 		$this->setView(false);
-		$this->getContainer()->getApplication()->viewSetGlobal('layout', false);
+		$this->setGlobal('layout', false);
 	}
 }

@@ -21,9 +21,9 @@ namespace Framework;
 
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
-class ContextException extends \Exception { }
+class HttpRequestException extends \Exception { }
 
-class Context extends FrameworkObject
+class HttpRequest extends FrameworkObject
 {    
 	protected $_url = null;
 	
@@ -40,6 +40,10 @@ class Context extends FrameworkObject
 	protected $_isAjax = false;
 	
 	protected $_isSecure = false;
+	
+	protected $_isCli = false;
+	
+	protected $_request = null;
 	
 	/**
 	 * @var \Framework\History
@@ -191,5 +195,25 @@ class Context extends FrameworkObject
 	public function isAjax ()
 	{
 		return $this->_isAjax;
+	}
+	
+	public function getRequest()
+	{
+		return $this->_request;
+	}
+	
+	public function setRequest(Request $request)
+	{
+		$this->_request = $request;
+	}
+	
+	public function isCli()
+	{
+		return $this->_isCli;
+	}
+	
+	public function setCli($isCli)
+	{
+		$this->_isCli = $isCli;
 	}
 }
