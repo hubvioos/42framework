@@ -1,12 +1,6 @@
 ROADMAP :
-0.6 :
-- Améliorer le ClassLoader
-
-0.7 :
-- Gestion des filtres
-
 0.8 :
-- Améliorer le Model
+- Améliorer la couche Model
 - Intégrer un ORM ou quelquechose dans le genre (Doctrine)
 
 0.9 :
