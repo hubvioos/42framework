@@ -1,5 +1,5 @@
 *~
-build/*
+application/build/*
 */*.orig
 doc/*
 .project

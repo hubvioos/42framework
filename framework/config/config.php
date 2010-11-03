@@ -31,8 +31,9 @@ $config = array(
 	'siteUrl' => 'http://localhost/',
 	'routes' => array(),
 	'historySize' => 2,
-	'errorHandlerListeners' => array('Framework\\ErrorHandlerListeners\\Html'),
+	'errorHandlerListeners' => array('framework\\errorHandler\\listeners\\Html'),
 	'viewExtension' => '.php',
-	'applicationFilters' => array('Framework\\filters\\ApplicationFilter', 'Framework\\filters\\SecurityFilter', 'Framework\\filters\\ExecFilter'),
-	'viewFilters' => array('Framework\\filters\\RenderFilter')
+	'applicationFilters' => array('framework\\filters\\appFilters\\ApplicationFilter', 'framework\\filters\\appFilters\\SecurityFilter', 'framework\\filters\\appFilters\\ExecFilter'),
+	'viewFilters' => array('framework\\filters\\viewFilters\\RenderFilter'),
+	'events' => array()
 	);
