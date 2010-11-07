@@ -38,4 +38,30 @@ abstract class FrameworkObject
 	{
 		self::$_container = $container;
 	}
+	
+	/**
+	 * Set a global variable for the view. Shortcut for View::setGlobal()
+	 * 
+	 * @param mixed $var
+	 * @param mixed $value
+	 */
+	public function viewSetGlobal($var, $value)
+	{
+		$view = $this->getContainer()->getViewClass();
+		/* @var $view View */
+		$view::setGlobal($var, $value);
+		return $this;
+	}
+	
+	/**
+	 * Get a global variable from the view. Shortcut for View::getGlobal()
+	 * 
+	 * @param mixed $var
+	 */
+	public function viewGetGlobal($var)
+	{
+		$view = $this->getContainer()->getViewClass();
+		/* @var $view View */
+		return $view::getGlobal($var);
+	}
 }

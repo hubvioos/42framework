@@ -99,7 +99,7 @@ class Controller extends \framework\core\FrameworkObject
 	
 	public function setLayout($layout)
 	{
-		$view = $this->getContainer()->getCore()->viewSetGlobal('layout', $layout);
+		$view = $this->viewSetGlobal('layout', $layout);
 		return $this;
 	}
 	
@@ -124,18 +124,6 @@ class Controller extends \framework\core\FrameworkObject
 		{
 			$this->_vars[$var] = $value;
 		}
-		return $this;
-	}
-	
-	/**
-	 * Sets a global variable for the view. Shortcut for View::setGlobal()
-	 * 
-	 * @param mixed $var
-	 * @param mixed $value
-	 */
-	public function setGlobal($var, $value)
-	{
-		$this->getContainer()->getCore()->viewSetGlobal($var, $value);
 		return $this;
 	}
 	

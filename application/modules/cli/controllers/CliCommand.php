@@ -38,6 +38,6 @@ class CliCommand extends \framework\core\Controller
 	protected function _after(\framework\core\Request &$request, \framework\core\Response &$response)
 	{
 		$this->setView(false);
-		$this->setGlobal('layout', false);
+		$this->viewSetGlobal('layout', false);
 	}
 }

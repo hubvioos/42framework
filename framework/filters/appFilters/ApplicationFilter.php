@@ -82,8 +82,7 @@ class ApplicationFilter extends \framework\filters\Filter
 			// Views variables
 			/* @var $view View */
 			$view = $this->getContainer()->getViewClass();
-			$this->getContainer()->getCore()->viewSetGlobal('layout', $config['defaultLayout']);
-			$this->getContainer()->getCore()->viewSetGlobal('messages', $this->getContainer()->getMessage()->getAll());
+			$this->viewSetGlobal('messages', $this->getContainer()->getMessage()->getAll());
 			
 			/*if (!$this->getContainer()->getCore()->classExists('Application\\modules\\'.$params['module'].'\\controllers\\'.$params['action']))
 			{
@@ -110,16 +109,18 @@ class ApplicationFilter extends \framework\filters\Filter
 	public function _after(&$request, &$response)
     {
     	$config = $this->getContainer()->getConfig();
-    	if ($this->getContainer()->getCore()->viewGetGlobal('layout') !== false)
+    	
+    	if ($this->viewGetGlobal('layout') === null)
 		{
-			if ($this->getContainer()->getCore()->viewGetGlobal('layout') === null)
-			{
-				$this->getContainer()->getCore()->viewSetGlobal('layout', $config['defaultLayout']);
-			}
-			$this->getContainer()->getCore()->viewSetGlobal('contentForLayout', $response->get());
+			$this->viewSetGlobal('layout', $config['defaultLayout']);
+		}
+		
+    	if ($this->viewGetGlobal('layout') !== false)
+		{
+			$this->viewSetGlobal('contentForLayout', $response->get());
 			$response->clear();
 			
-			$response->set($this->getContainer()->getNewView($config['defaultModule'], $this->getContainer()->getCore()->viewGetGlobal('layout')));
+			$response->set($this->getContainer()->getNewView($config['defaultModule'], $this->viewGetGlobal('layout')));
 		}
 		
 		$response->send();

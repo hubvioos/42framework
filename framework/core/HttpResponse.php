@@ -85,7 +85,9 @@ class HttpResponse extends \framework\core\Response
 	
 	public function stopProcess()
 	{
-		$this->getContainer()->getCore()->render($this);
+		$appFilter = $this->getContainer()->getApplicationFilter();
+		$request = $this->getContainer()->getHttpRequest();
+		$appFilter->_after($request, $this);
 	}
 
 	/**

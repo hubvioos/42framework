@@ -19,7 +19,7 @@
 namespace framework\filters;
 defined('FRAMEWORK_DIR') or die('Invalid script access');
 
-class Filter extends \framework\core\FrameworkObject
+abstract class Filter extends \framework\core\FrameworkObject
 {
 	public function execute (&$request, &$response, FilterChain &$filterChain)
 	{

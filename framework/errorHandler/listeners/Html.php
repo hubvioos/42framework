@@ -54,7 +54,7 @@ class Html extends \framework\core\FrameworkObject implements \framework\errorHa
 		{
 			$response->set('Oops! An error occured!');
 		}
-		$this->getContainer()->getCore()->viewSetGlobal('layout', false);
+		$this->viewSetGlobal('layout', false);
 		$response->stopProcess();
 	}
 	

@@ -56,30 +56,6 @@ class Core extends \framework\core\FrameworkObject
 	}
 	
 	/**
-	 * @param string $key
-	 * @param mixed $value
-	 * @return \framework\core\Core
-	 */
-	public function viewSetGlobal($key, $value)
-	{
-		$view = $this->getContainer()->getViewClass();
-		/* @var $view View */
-		$view::setGlobal($key, $value);
-		return $this;
-	}
-	
-	/**
-	 * @param string $key
-	 * @return mixed
-	 */
-	public function viewGetGlobal($key)
-	{
-		$view = $this->getContainer()->getViewClass();
-		/* @var $view View */
-		return $view::getGlobal($key);
-	}
-	
-	/**
 	 * Main execution method
 	 * 
 	 * @return \framework\core\Core
@@ -90,15 +66,5 @@ class Core extends \framework\core\FrameworkObject
 		$response = $this->getContainer()->getHttpResponse();
 		$this->_filterChain->execute($request, $response);
 		return $this;
-	}
-	
-	/**
-	 * @param \framework\core\HttpResponse $response
-	 */
-	public function render(HttpResponse $response)
-	{
-		$appFilter = $this->getContainer()->getApplicationFilter();
-		$request = $this->getContainer()->getHttpRequest();
-		$appFilter->_after($request, $response);
 	}
 }
