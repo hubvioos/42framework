@@ -1,15 +1,19 @@
 ROADMAP :
 0.8 :
-- Améliorer la couche Model
-- Intégrer un ORM ou quelquechose dans le genre (Doctrine)
-
-0.9 :
 - Création des classes de Cache
 - Utiliser des injections selon la config (Session, BDDs, Cache, etc.)
 - Création du Libs\Logger
 
 1.0 :
-- Améliorer le module CLI (méthode pour l'aide par exemple)
-- Créations des commandes pour compiler les routes
 - Ecriture des jeux de tests (PHPUnit)
 - Ecriture de la documentation
+
+Versions suivantes :
+- Améliorer la couche Model
+- Intégrer un ORM ou quelquechose dans le genre (Doctrine)
+
+
+En parallèle :
+- Améliorer le module CLI
+	-> Aide
+	-> Commandes pour compiler les routes
