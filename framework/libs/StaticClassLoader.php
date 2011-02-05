@@ -23,12 +23,15 @@ class StaticClassLoader extends \framework\libs\ClassLoader
 {
 	protected $_autoload;
 
-	public function __construct(Array $autoload = array(), $autoloadPath = null)
+	public function __construct($autoloadPath = null)
 	{
-		if (empty($autoload) && $autoloadPath !== null)
+		$autoload = array();
+		
+		if ($autoloadPath !== null && file_exists($autoloadPath))
 		{
 			require $autoloadPath;
 		}
+		
 		$this->_autoload = $autoload;
 	}
 	

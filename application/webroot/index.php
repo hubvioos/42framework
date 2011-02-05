@@ -24,26 +24,25 @@ define('FRAMEWORK_DIR', dirname(APPLICATION_DIR).DS.'framework');
 define('MODULES_DIR', APPLICATION_DIR.DS.'modules');
 define('VENDORS_DIR', dirname(APPLICATION_DIR).DS.'vendors');
 
-$autoload = array();
-$config = array();
-if (file_exists(APPLICATION_DIR.DS.'build'.DS.'autoload.php'))
-{
-	include APPLICATION_DIR.DS.'build'.DS.'autoload.php';
-}
-if (file_exists(APPLICATION_DIR.DS.'build'.DS.'config.php'))
-{
-	include APPLICATION_DIR.DS.'build'.DS.'config.php';
-}
 
 require FRAMEWORK_DIR.DS.'libs'.DS.'ClassLoader.php';
 require FRAMEWORK_DIR.DS.'libs'.DS.'StaticClassLoader.php';
 
-$loader = new \framework\libs\StaticClassLoader($autoload, FRAMEWORK_DIR.DS.'config'.DS.'autoload.php');
+$loader = new \framework\libs\StaticClassLoader(APPLICATION_DIR.DS.'build'.DS.'autoload.php');
+$loader->register();
+$loader = new \framework\libs\StaticClassLoader(FRAMEWORK_DIR.DS.'config'.DS.'autoload.php');
 $loader->register();
 $loader = new \framework\libs\ClassLoader('framework', FRAMEWORK_DIR);
 $loader->register();
 $loader = new \framework\libs\ClassLoader('application', APPLICATION_DIR);
 $loader->register();
+
+
+$config = array();
+if (file_exists(APPLICATION_DIR.DS.'build'.DS.'config.php'))
+{
+	include APPLICATION_DIR.DS.'build'.DS.'config.php';
+}
 
 $container = new \framework\core\ApplicationContainer($config);
 
