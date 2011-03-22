@@ -1,4 +1,4 @@
-<?php
+<?php defined('FRAMEWORK_DIR') or die('Invalid script access');
 /**
  * Copyright (C) 2010 - Kévin O'NEILL, François KLINGLER - <contact@42framework.com>
  * 
@@ -17,20 +17,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 namespace application\modules\errors\controllers;
-use Framework;
-
-defined('FRAMEWORK_DIR') or die('Invalid script access');
 
 class error404 extends \application\modules\errors\generic
 {
 	public function processAction ($request = null)
 	{
-		$this->_httpResponse
-			->status(404)
-			->set($this->getContainer()->getNewView('errors', 
-													'error404', 
-													array('requestedUrl' => $this->_httpRequest->getUrl(true))));
-		
-		return true;
+		$this->getComponent('httpResponse')->status(404)->set(
+				$this->createView('errors', 'error404', array('requestedUrl' => $this->_httpRequest->getUrl(true))));		
 	}
 }

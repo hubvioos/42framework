@@ -1,4 +1,4 @@
-<?php
+<?php defined('FRAMEWORK_DIR') or die('Invalid script access');
 /**
  * Copyright (C) 2010 - Kévin O'NEILL, François KLINGLER - <contact@42framework.com>
  * 
@@ -18,8 +18,6 @@
  */
 
 namespace framework\events;
-
-defined('FRAMEWORK_DIR') or die('Invalid script access');
 
 class EventManager
 {
@@ -65,16 +63,20 @@ class EventManager
         if ($listener === null)
         {
             unset($this->_listeners[$eventName]);
-            return;
+            return true;
         }
-        foreach ($this->_listeners[$eventName] as $id => $lis)
+        
+		$ok = false;
+		
+		foreach ($this->_listeners[$eventName] as $id => $lis)
         {
         	if ($listener === $lis)
         	{
         		unset($this->_listeners[$eventName][$id]);
+				$ok = true;
         	}
         }
-        return $this;
+        return $ok;
     }
 
     /**

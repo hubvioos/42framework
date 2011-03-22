@@ -1,4 +1,4 @@
-<?php
+<?php defined('FRAMEWORK_DIR') or die('Invalid script access');
 /**
  * Copyright (C) 2010 - Kévin O'NEILL, François KLINGLER - <contact@42framework.com>
  * 
@@ -16,8 +16,8 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
+
 namespace framework\filters;
-defined('FRAMEWORK_DIR') or die('Invalid script access');
 
 class FilterChain
 {
@@ -26,25 +26,34 @@ class FilterChain
 	 */
 	protected $_filters = null;
 	
-	public function __construct ($filters = array())
+	public function __construct (Array $filters = array())
 	{
 		$this->_filters = new \SplObjectStorage();
+		
+		if (!empty ($filters))
+		{
+			$this->init($filters);
+		}
+	}
+	
+	public function init (Array $filters = array())
+	{
 		foreach ($filters as $filter)
 		{
 			$this->addFilter($filter);
 		}
+		$this->_filters->rewind();
 	}
-	
+
+
 	public function addFilter (Filter &$filter)
 	{
 		$this->_filters->attach($filter);
-		$this->_filters->rewind();
 	}
 	
 	public function removeFilter (Filter &$filter)
 	{
 		$this->_filters->detach($filter);
-		$this->_filters->rewind();
 	}
 	
 	public function execute (&$request, &$response)

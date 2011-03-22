@@ -1,4 +1,4 @@
-<?php
+<?php defined('FRAMEWORK_DIR') or die('Invalid script access');
 /**
  * Copyright (C) 2010 - Kévin O'NEILL, François KLINGLER - <contact@42framework.com>
  * 
@@ -19,9 +19,7 @@
 
 namespace framework\core;
 
-defined('FRAMEWORK_DIR') or die('Invalid script access');
-
-class HttpRequest extends \framework\core\Request
+class HttpRequest
 {    
 	protected $_url = null;
 	

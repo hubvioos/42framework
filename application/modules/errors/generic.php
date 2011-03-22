@@ -1,4 +1,5 @@
-<?php
+<?php defined('FRAMEWORK_DIR') or die('Invalid script access');
+
 /**
  * Copyright (C) 2010 - Kévin O'NEILL, François KLINGLER - <contact@42framework.com>
  * 
@@ -18,21 +19,17 @@
  */
 namespace application\modules\errors;
 
-use Framework;
-
-defined('FRAMEWORK_DIR') or die('Invalid script access');
-
 abstract class generic extends \framework\core\Controller
 {
 	protected $_response = null;
 	
 	public function _before(\Framework\core\Request &$request, \Framework\core\Response &$response)
 	{
-		$this->_httpResponse->reset();
+		$this->getContainer()->getHttpResponse()->reset();
 	}
 	
 	public function _after (\Framework\core\Request &$request, \Framework\core\Response &$response)
 	{
-		$this->_httpResponse->stopProcess();
+		$this->getContainer()->getHttpResponse()->stopProcess();
 	}
 }

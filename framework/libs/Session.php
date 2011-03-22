@@ -1,4 +1,4 @@
-<?php
+<?php defined('FRAMEWORK_DIR') or die('Invalid script access');
 /**
  * Copyright (C) 2010 - Kévin O'NEILL, François KLINGLER - <contact@42framework.com>
  * 
@@ -16,20 +16,18 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
-namespace framework\libs;
-defined('FRAMEWORK_DIR') or die('Invalid script access');
 
-class Session extends \ArrayObject
+namespace framework\libs;
+
+class Session extends \framework\libs\Registry
 {
-	protected $_session = null;
-	
 	protected $_namespace = null;
 	
 	protected static $_isStarted = false;
 	
 	public function __construct ($namespace = 'default')
 	{	
-		$this->start();
+		$this->init();
 			
 		if (!isset($_SESSION[$namespace]) || !is_array($_SESSION[$namespace]))
 		{
@@ -39,7 +37,7 @@ class Session extends \ArrayObject
 		parent::__construct(&$_SESSION[$namespace]);
 	}
 	
-	public function start ()
+	public function init ()
 	{
 		if (!self::$_isStarted)
 		{

@@ -1,4 +1,4 @@
-<?php
+<?php defined('FRAMEWORK_DIR') or die('Invalid script access');
 /**
  * Copyright (C) 2010 - Kévin O'NEILL, François KLINGLER - <contact@42framework.com>
  * 
@@ -18,13 +18,11 @@
  */
 namespace application\modules\errors\controllers;
 
-defined('FRAMEWORK_DIR') or die('Invalid script access');
-
 class error403 extends \application\modules\errors\generic
 {
 	public function processAction ($request = null)
 	{
-		$this->_httpResponse->status(403)->set($this->getContainer()->getNewView('errors', 'error403'));
-		return true;
+		$this->getComponent('httpResponse')->status(403)->set(
+				$this->createView('errors', 'error403'));
 	}
 }

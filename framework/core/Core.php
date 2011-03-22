@@ -1,4 +1,4 @@
-<?php
+<?php defined('FRAMEWORK_DIR') or die('Invalid script access');
 /**
  * Copyright (C) 2010 - Kévin O'NEILL, François KLINGLER - <contact@42framework.com>
  * 
@@ -19,8 +19,6 @@
 
 namespace framework\core;
 
-defined('FRAMEWORK_DIR') or die('Invalid script access');
-
 class Core extends \framework\core\FrameworkObject
 {	
 	/**
@@ -28,30 +26,39 @@ class Core extends \framework\core\FrameworkObject
 	 */
 	protected $_filterChain = null;
 	
-	/**
-	 * @param \framework\ApplicationContainer $container
-	 */
-	public function __construct(ApplicationContainer $container)
+	
+	public function __construct (\framework\core\ComponentsContainer $container)
 	{
 		$this->setContainer($container);
 	}
 
 	/**
+	 * Initializes the framework
+	 * 
 	 * @return \framework\core\Core
 	 */
 	public function bootstrap ()
 	{
-		$this->getContainer()->getErrorHandler();
-		$this->getContainer()->getEventManager();
-		$this->getContainer()->getRoute();
+		$this->getComponent('errorHandler')->init();
+		$this->getContainer('session')->init();
+		$this->getComponent('eventManager');
+		$this->getComponent('router');
+		
 		// Timezone
-		date_default_timezone_set($this->getContainer()->config['defaultTimezone']);
-		$appFilters = array();
-		foreach ($this->getContainer()->config['applicationFilters'] as $filter)
+		date_default_timezone_set($this->getConfig('defaultTimezone'));
+		
+		$this->_filterChain = $this->getComponent('filterChain');
+		
+		$this->_filterChain->addFilter(new \framework\filters\appFilters\ApplicationFilter());
+		$this->_filterChain->addFilter(new \framework\filters\appFilters\SecurityFilter());
+		
+		foreach ($this->getConfig('applicationFilters') as $filter)
 		{
-			$appFilters[] = new $filter;
+			$this->_filterChain->addFilter(new $filter);
 		}
-		$this->_filterChain = $this->getContainer()->getFilterChain($appFilters);
+		
+		$this->_filterChain->addFilter(new \framework\filters\appFilters\ExecFilter());
+		
 		return $this;
 	}
 	
@@ -62,8 +69,8 @@ class Core extends \framework\core\FrameworkObject
 	 */
 	public function run()
 	{
-		$request = $this->getContainer()->getHttpRequest();
-		$response = $this->getContainer()->getHttpResponse();
+		$request = $this->getComponent('httpRequest');
+		$response = $this->getComponent('httpResponse');
 		$this->_filterChain->execute($request, $response);
 		return $this;
 	}

@@ -1,4 +1,4 @@
-<?php
+<?php defined('FRAMEWORK_DIR') or die('Invalid script access');
 /**
  * Copyright (C) 2010 - Kévin O'NEILL, François KLINGLER - <contact@42framework.com>
  * 
@@ -16,7 +16,6 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
-defined('FRAMEWORK_DIR') or die('Invalid script access');
 
 $config = array(
     'errorReporting' => E_ALL|E_STRICT,
@@ -33,7 +32,7 @@ $config = array(
 	'historySize' => 2,
 	'errorHandlerListeners' => array('framework\\errorHandler\\listeners\\Html'),
 	'viewExtension' => '.php',
-	'applicationFilters' => array('framework\\filters\\appFilters\\ApplicationFilter', 'framework\\filters\\appFilters\\SecurityFilter', 'framework\\filters\\appFilters\\ExecFilter'),
-	'viewFilters' => array('framework\\filters\\viewFilters\\RenderFilter'),
+	'applicationFilters' => array(),
+	'viewFilters' => array(),
 	'events' => array()
 	);

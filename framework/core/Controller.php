@@ -1,4 +1,4 @@
-<?php
+<?php defined('FRAMEWORK_DIR') or die('Invalid script access');
 /**
  * Copyright (C) 2010 - Kévin O'NEILL, François KLINGLER - <contact@42framework.com>
  * 
@@ -18,8 +18,6 @@
  */
 
 namespace framework\core;
-
-defined('FRAMEWORK_DIR') or die('Invalid script access');
 
 class ControllerException extends \Exception { }
 
@@ -53,36 +51,55 @@ class Controller extends \framework\core\FrameworkObject
 	 */
 	protected $_response = null;
 	
-	protected $_httpRequest = null;
 	
-	protected $_httpResponse = null;
+	/* Controller parameters */
+	protected $usesView = true;
+	protected $usesLayout = true;
+	protected $isInternal = false;
 	
 	/**
 	 * Executes the action corresponding to the current request
 	 * 
 	 * @param Framework\Request $request
 	 */
-	public function execute(HttpRequest &$httpRequest, HttpResponse &$httpResponse)
+	public function execute(Request &$request, Response &$response)
 	{
-		$this->_httpRequest = $httpRequest;
-		$this->_httpResponse = $httpResponse;
-		$this->_request = $httpRequest->getRequest();
-		$this->_response = $this->getContainer()->getResponse();
-		$this->_before($this->_request, $this->_response);
-		if ($this->_response->getStatus() !== \framework\core\Response::ERROR)
+		$this->_request = $request;
+		$this->_response = $response;
+		
+		if ($this->isInternal && $this->_request->getState() == \framework\core\Request::FIRST_REQUEST)
 		{
-			call_user_func_array(array($this, 'processAction'), $this->_request->getParams());
-			$this->_after($this->_request, $this->_response);
-			
-			if ($this->_view !== false)
+			$this->_response->setStatus(\framework\core\Response::OUTSIDE_ACCESS_FORBIDDEN);
+		}
+		else
+		{
+			if ($this->_before($this->_request, $this->_response) !== false
+				&& call_user_func_array(array($this, 'processAction'), $this->_request->getParams()) !== false
+				&& $this->_after($this->_request, $this->_response) !== false
+				)
 			{
-				if ($this->_view === null)
+				if ($this->usesView)
 				{
-					$this->setView($this->_request->getAction());
+					if ($this->usesLayout = false)
+					{
+						$this->setLayout(false);
+					}
+					
+					if ($this->_view === null)
+					{
+						$this->setView($this->_request->getAction());
+					}
+					$this->_response->set($this->getContainer()->getNewView($this->_request->getModule(), $this->_view, $this->_vars));
 				}
-				$this->_response->set($this->getContainer()->getNewView($this->_request->getModule(), $this->_view, $this->_vars));
+				
+				$this->_response->setStatus(\framework\core\Response::SUCCESS);
+			}
+			else
+			{
+				$this->_response->setStatus(\framework\core\Response::ERROR);
 			}
 		}
+		
 		return $this->_response;
 	}
 
@@ -144,13 +161,18 @@ class Controller extends \framework\core\FrameworkObject
 	 */
 	protected function _after(Request &$request, Response &$response) { }
 	
-	public function getHttpRequest()
+	public function getRequest()
 	{
-		return $this->_httpRequest;
+		return $this->_request;
 	}
 	
-	public function getHttpResponse()
+	public function setResponse(Response $response)
 	{
-		return $this->_httpResponse;
+		$this->_response = $response;
+	}
+	
+	public function getResponse()
+	{
+		return $this->_response;
 	}
 }

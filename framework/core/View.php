@@ -1,4 +1,4 @@
-<?php
+<?php defined('FRAMEWORK_DIR') or die('Invalid script access');
 /**
  * Copyright (C) 2010 - Kévin O'NEILL, François KLINGLER - <contact@42framework.com>
  * 
@@ -19,21 +19,16 @@
 
 namespace framework\core;
 
-defined('FRAMEWORK_DIR') or die('Invalid script access');
-
 class View extends \framework\core\FrameworkObject
 {
-	// adresse du fichier de vue à inclure
 	protected $_file;
 
-	// variables supplèmentaires
 	protected $_vars = array();
 	
 	protected $_renderedView = null;
 	
 	protected static $_globalsVars = array();
 
-	// on définit l'adresse du fichier de vue à inclure et on récupère les variables supplémentaires
 	public function __construct ($module, $file, $vars = false)
 	{
 		$config = $this->getContainer()->getConfig();
@@ -58,7 +53,6 @@ class View extends \framework\core\FrameworkObject
 		}
 	}
 
-	// assigne une variable supplémentaire au tableau vars
 	public function __set ($name, $value)
 	{
 		$this->_vars[$name] = $value;
@@ -73,7 +67,6 @@ class View extends \framework\core\FrameworkObject
 		return $this->_vars[$name];
 	}
 	
-	// assigne une variable supplémentaire au tableau vars
 	public static function setGlobal ($name, $value)
 	{
 		self::$_globalsVars[$name] = $value;
@@ -88,7 +81,6 @@ class View extends \framework\core\FrameworkObject
 		return self::$_globalsVars[$name];
 	}
 
-	// effectue le rendu de la vue
 	public function render ()
 	{
 		if ($this->_renderedView === null)
@@ -114,7 +106,6 @@ class View extends \framework\core\FrameworkObject
 		return $this;
 	}
 
-	// effectue le rendu de la vue et le retourne
 	public function __toString ()
 	{
 		return $this->render();

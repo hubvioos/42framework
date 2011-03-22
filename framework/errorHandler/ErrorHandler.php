@@ -1,4 +1,4 @@
-<?php
+<?php defined('FRAMEWORK_DIR') or die('Invalid script access');
 /**
  * Copyright (C) 2010 - Kévin O'NEILL, François KLINGLER - <contact@42framework.com>
  * 
@@ -16,10 +16,10 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
-namespace framework\errorHandler;
-defined('FRAMEWORK_DIR') or die('Invalid script access');
 
-class ErrorHandler extends \framework\core\FrameworkObject
+namespace framework\errorHandler;
+
+class ErrorHandler
 {	
 	/**
 	 * @var \Exception
@@ -41,7 +41,7 @@ class ErrorHandler extends \framework\core\FrameworkObject
 	 * @param integer $displayError
 	 * @return \framework\errorHandler\ErrorHandler
 	 */
-	public function start ($errorReporting, $displayError)
+	public function init ($errorReporting, $displayError)
 	{
 		error_reporting($errorReporting);
 		ini_set('display_errors', $displayError);

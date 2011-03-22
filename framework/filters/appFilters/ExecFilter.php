@@ -1,4 +1,4 @@
-<?php
+<?php defined('FRAMEWORK_DIR') or die('Invalid script access');
 /**
  * Copyright (C) 2010 - Kévin O'NEILL, François KLINGLER - <contact@42framework.com>
  * 
@@ -16,10 +16,7 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
-
 namespace framework\filters\appFilters;
-
-defined('FRAMEWORK_DIR') or die('Invalid script access');
 
 class ExecFilter extends \framework\filters\Filter
 {
@@ -30,8 +27,17 @@ class ExecFilter extends \framework\filters\Filter
 	 * @param \Framework\core\HttpResponse $response
 	 * @return Framework\Core
 	 */
-	public function _before(&$request, &$response)
+	public function _before(&$httpRequest, &$httpResponse)
 	{
-		$response->set($request->getRequest()->execute()->get());
+		$response = $request->getRequest()->execute();
+		
+		if ($response->getStatus() == \framework\core\Response::SUCCESS)
+		{
+			$httpResponse->set($response->get);
+		}
+		else
+		{
+			$this->createRequest('errors', 'error404')->execute();
+		}
 	}
 }

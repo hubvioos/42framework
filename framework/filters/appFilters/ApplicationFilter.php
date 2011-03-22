@@ -1,4 +1,4 @@
-<?php
+<?php defined('FRAMEWORK_DIR') or die('Invalid script access');
 /**
  * Copyright (C) 2010 - Kévin O'NEILL, François KLINGLER - <contact@42framework.com>
  * 
@@ -16,10 +16,7 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
-
 namespace framework\filters\appFilters;
-
-defined('FRAMEWORK_DIR') or die('Invalid script access');
 
 class ApplicationFilter extends \framework\filters\Filter
 {	
@@ -27,25 +24,25 @@ class ApplicationFilter extends \framework\filters\Filter
 	{
 		// Redirect to root if we use the default module and action.
 		if ($url != '' 
-		    && $params['module'] == $this->getContainer()->config['defaultModule']
-		    && $params['action'] == $this->getContainer()->config['defaultAction']
+		    && $params['module'] == $this->getConfig('defaultModule')
+		    && $params['action'] == $this->getConfig('defaultAction')
 		    && empty($params['params'])
 		    )
 		{
-		    $this->getContainer()->getHttpResponse()->redirect($this->getContainer()->config['siteUrl'], 301, true);
+		    $this->getComponent('httpResponse')->redirect($this->getConfig('siteUrl'), 301, true);
 		}
 		// Avoid duplicate content of the routes.
-		else if ($url != $this->getContainer()->getRoute()->pathToUrl($path)
+		else if ($url != $this->getComponent('route')->pathToUrl($path)
 			&& $url != '')
 		{
-		    $this->getContainer()->getHttpResponse()
-		    		->redirect($this->getContainer()->config['siteUrl'] . $this->getContainer()->getRoute()->pathToUrl($path), 301, true);
+		    $this->getComponent('httpResponse')
+		    		->redirect($this->getConfig('siteUrl') . $this->getComponent('route')->pathToUrl($path), 301, true);
 		}
 						
 		// Avoid duplicate content with just a "/" after the URL
 		if(strrchr($url, '/') === '/')
 		{
-		    $this->getContainer()->getHttpResponse()->redirect($this->getContainer()->config['siteUrl'] . rtrim($url, '/'), 301, true);  
+		    $this->getComponent('httpResponse')->redirect($this->getConfig('siteUrl') . rtrim($url, '/'), 301, true);  
 		}
 	}
 	
@@ -58,38 +55,30 @@ class ApplicationFilter extends \framework\filters\Filter
 	 */
 	public function _before(&$request, &$response)
 	{
-		$config = $this->getContainer()->getConfig();
+		$config = $this->getConfig();
 		if (PHP_SAPI === 'cli')
 		{
 			$request->setCli(true);
-			$params = \Application\modules\cli\CliUtils::extractParams();
+			$params = \application\modules\cli\CliUtils::extractParams();
 			$params['module'] = 'cli';
 			
-			$state = \Framework\core\Request::CLI_STATE;
+			$state = \framework\core\Request::CLI_STATE;
 		}
 		else
 		{
 			$url = $request->getUrl();
 			
-			$path = $this->getContainer()->getRoute()->urlToPath($url, $config['defaultModule'], $config['defaultAction']);
+			$path = $this->getComponent('route')->urlToPath($url, $config['defaultModule'], $config['defaultAction']);
 			
-			$params = $this->getContainer()->getRoute()->pathToParams($path);
+			$params = $this->getComponent('route')->pathToParams($path);
 			
 			$this->duplicateContentPolicy($url, $path, $params);
 			
 			$state = \Framework\core\Request::FIRST_REQUEST;
 			
 			// Views variables
-			/* @var $view View */
-			$view = $this->getContainer()->getViewClass();
-			$this->viewSetGlobal('messages', $this->getContainer()->getMessage()->getAll());
+			$this->viewSetGlobal('messages', $this->getComponent('message')->getAll());
 			
-			/*if (!$this->getContainer()->getCore()->classExists('Application\\modules\\'.$params['module'].'\\controllers\\'.$params['action']))
-			{
-				$params['module'] = 'errors';
-				$params['action'] = 'error404';
-				$params['params'] = array();
-			}*/
 			if (!class_exists('application\\modules\\'.$params['module'].'\\controllers\\'.$params['action']))
 			{
 				$params['module'] = 'errors';
@@ -97,7 +86,7 @@ class ApplicationFilter extends \framework\filters\Filter
 				$params['params'] = array();
 			}
 		}
-		$request->setRequest($this->getContainer()->getNewRequest($params['module'], $params['action'], $params['params'], $state));
+		$request->setRequest($this->createRequest($params['module'], $params['action'], $params['params'], $state));
 	}
 	
 	/**
@@ -108,7 +97,7 @@ class ApplicationFilter extends \framework\filters\Filter
 	 */
 	public function _after(&$request, &$response)
     {
-    	$config = $this->getContainer()->getConfig();
+    	$config = $this->getConfig();
     	
     	if ($this->viewGetGlobal('layout') === null)
 		{
@@ -120,20 +109,23 @@ class ApplicationFilter extends \framework\filters\Filter
 			$this->viewSetGlobal('contentForLayout', $response->get());
 			$response->clear();
 			
-			$response->set($this->getContainer()->getNewView($config['defaultModule'], $this->viewGetGlobal('layout')));
+			$response->set($this->createView($config['defaultModule'], $this->viewGetGlobal('layout')));
 		}
 		
 		$response->send();
 		
 		if (isset($config['viewFilters']))
 		{
-			$viewFilters = array();
+			$filterChain = $this->getComponent('filterChain');
+
 			foreach ($config['viewFilters'] as $filter)
 			{
-				$viewFilters[] = new $filter;
+				$filterChain->addFilter(new $filter);
 			}
+
+			$filterChain->addFilter(new \framework\filters\viewFilters\RenderFilter());
 			
-			$this->getContainer()->getFilterChain($viewFilters)->execute($request, $response);
+			$filterChain->execute($request, $response);
 		}
 		echo $response;
 		

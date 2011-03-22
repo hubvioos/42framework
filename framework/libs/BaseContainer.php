@@ -1,4 +1,4 @@
-<?php
+<?php defined('FRAMEWORK_DIR') or die('Invalid script access');
 /**
  * Copyright (C) 2010 - Kévin O'NEILL, François KLINGLER - <contact@42framework.com>
  * 
@@ -20,8 +20,8 @@
  * Inspired by Pimple (Copyright (c) 2009 Fabien Potencier) : http://github.com/fabpot/Pimple
  * and by the Symfony Service Container component (Copyright (c) 2008-2009 Fabien Potencier) : http://github.com/fabpot/dependency-injection
  */
+
 namespace framework\libs;
-defined('FRAMEWORK_DIR') or die('Invalid script access');
 
 class BaseContainer
 {
@@ -53,17 +53,24 @@ class BaseContainer
 	
 	public function __call ($method, $arguments)
 	{
+		$match = null;
+		
 		if (!preg_match('/^get(.+)$/', $method, $match))
 		{
 			throw new \BadMethodCallException('Call to undefined method : ' . $method);
 		}
-		$key = lcfirst($match[1]);
-		return $this->$key;
+		$key = \lcfirst($match[1]);
+		return $this->{$key};
+	}
+	
+	public function get($key)
+	{
+		return $this->{$key};
 	}
 	
 	public function asUniqueInstance ($callable)
 	{
-		return function  ($c) use ($callable)
+		return function ($c) use ($callable)
 		{
 			static $object = null;
 			

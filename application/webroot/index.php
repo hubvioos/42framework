@@ -22,30 +22,58 @@ define('WEBROOT', __DIR__);
 define('APPLICATION_DIR', dirname(WEBROOT));
 define('FRAMEWORK_DIR', dirname(APPLICATION_DIR).DS.'framework');
 define('MODULES_DIR', APPLICATION_DIR.DS.'modules');
+define('CACHE_DIR', APPLICATION_DIR.DS.'cache');
+define('LOG_DIR', APPLICATION_DIR.DS.'log');
 define('VENDORS_DIR', dirname(APPLICATION_DIR).DS.'vendors');
 
+$autoload = array();
+$config = array();
+
+if (file_exists(CACHE_DIR.DS.'autoload.php'))
+{
+	include CACHE_DIR.DS.'autoload.php';
+}
+
+if (file_exists(CACHE_DIR.DS.'config.php'))
+{
+	include CACHE_DIR.DS.'config.php';
+}
+else
+{
+	include FRAMEWORK_DIR.DS.'config'.DS.'config.php';
+}
 
 require FRAMEWORK_DIR.DS.'libs'.DS.'ClassLoader.php';
 require FRAMEWORK_DIR.DS.'libs'.DS.'StaticClassLoader.php';
 
-$loader = new \framework\libs\StaticClassLoader(APPLICATION_DIR.DS.'build'.DS.'autoload.php');
-$loader->register();
-$loader = new \framework\libs\StaticClassLoader(FRAMEWORK_DIR.DS.'config'.DS.'autoload.php');
-$loader->register();
+if ($config['environment'] == 'prod')
+{
+	$loader = new \framework\libs\StaticClassLoader($autoload);
+	$loader->register();
+}
+
 $loader = new \framework\libs\ClassLoader('framework', FRAMEWORK_DIR);
 $loader->register();
 $loader = new \framework\libs\ClassLoader('application', APPLICATION_DIR);
 $loader->register();
 
-
-$config = array();
-if (file_exists(APPLICATION_DIR.DS.'build'.DS.'config.php'))
+if ($config['environment'] == 'test' || $config['environment'] == 'dev')
 {
-	include APPLICATION_DIR.DS.'build'.DS.'config.php';
+	$loader = new \framework\libs\StaticClassLoader($autoload);
+	$loader->register();
+	
+	$vendorsAutoload = array();
+	
+	include FRAMEWORK_DIR.DS.'config'.DS.'vendorsAutoload.php';
+	
+	$loader = new \framework\libs\StaticClassLoader($vendorsAutoload);
+	$loader->register();
 }
 
-$container = new \framework\core\ApplicationContainer($config);
+$config = new \framework\libs\Registry($config);
+$container = new \framework\core\ComponentsContainer($config);
 
-$container->getCore()
-				->bootstrap()
-				->run();
+$core = $container->get('core');
+
+$core	->bootstrap()
+		->run();
