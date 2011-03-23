@@ -46,7 +46,7 @@ else
 require FRAMEWORK_DIR.DS.'libs'.DS.'ClassLoader.php';
 require FRAMEWORK_DIR.DS.'libs'.DS.'StaticClassLoader.php';
 
-if ($config['environment'] == 'prod')
+if ($config['environment'] == 'production')
 {
 	$loader = new \framework\libs\StaticClassLoader($autoload);
 	$loader->register();
