@@ -1,4 +1,4 @@
-<?php defined('FRAMEWORK_DIR') or die('Invalid script access');
+<?php 
 /**
  * Copyright (C) 2010 - Kévin O'NEILL, François KLINGLER - <contact@42framework.com>
  * 

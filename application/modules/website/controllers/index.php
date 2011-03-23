@@ -1,4 +1,4 @@
-<?php defined('FRAMEWORK_DIR') or die('Invalid script access');
+<?php 
 namespace application\modules\website\controllers;
 
 class Index extends \framework\core\Controller

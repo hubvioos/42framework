@@ -1,5 +1,5 @@
 <?php
-defined('FRAMEWORK_DIR') or die('Invalid script access');
+
 
 $config = array(
     'siteUrl' => 'http://localhost/42framework/',
