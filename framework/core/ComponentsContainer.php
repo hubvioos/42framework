@@ -197,7 +197,7 @@ class ComponentsContainer extends \framework\libs\BaseContainer
 				$driverImpl = $config->newDefaultAnnotationDriver(MODULES_DIR);
 				$config->setMetadataDriverImpl($driverImpl);
 				
-				$config->setProxyDir(APPLICATION_DIR.DS.'build');
+				$config->setProxyDir(BUILD_DIR);
 				$config->setProxyNamespace('application\proxies');
 
 				if ($c->config['environment'] == 'development')
