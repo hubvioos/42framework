@@ -74,7 +74,7 @@ class ApplicationFilter extends \framework\filters\Filter
 			
 			$this->duplicateContentPolicy($url, $path, $params);
 			
-			$state = \Framework\core\Request::FIRST_REQUEST;
+			$state = \framework\core\Request::FIRST_REQUEST;
 			
 			// Views variables
 			$this->viewSetGlobal('messages', $this->getComponent('message')->getAll());

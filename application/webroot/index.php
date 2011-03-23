@@ -22,21 +22,21 @@ define('WEBROOT', __DIR__);
 define('APPLICATION_DIR', dirname(WEBROOT));
 define('FRAMEWORK_DIR', dirname(APPLICATION_DIR).DS.'framework');
 define('MODULES_DIR', APPLICATION_DIR.DS.'modules');
-define('CACHE_DIR', APPLICATION_DIR.DS.'cache');
+define('BUILD_DIR', APPLICATION_DIR.DS.'build');
 define('LOG_DIR', APPLICATION_DIR.DS.'log');
 define('VENDORS_DIR', dirname(APPLICATION_DIR).DS.'vendors');
 
 $autoload = array();
 $config = array();
 
-if (file_exists(CACHE_DIR.DS.'autoload.php'))
+if (file_exists(BUILD_DIR.DS.'autoload.php'))
 {
-	include CACHE_DIR.DS.'autoload.php';
+	include BUILD_DIR.DS.'autoload.php';
 }
 
-if (file_exists(CACHE_DIR.DS.'config.php'))
+if (file_exists(BUILD_DIR.DS.'config.php'))
 {
-	include CACHE_DIR.DS.'config.php';
+	include BUILD_DIR.DS.'config.php';
 }
 else
 {
@@ -51,16 +51,16 @@ if ($config['environment'] == 'prod')
 	$loader = new \framework\libs\StaticClassLoader($autoload);
 	$loader->register();
 }
-
-$loader = new \framework\libs\ClassLoader('framework', FRAMEWORK_DIR);
-$loader->register();
-$loader = new \framework\libs\ClassLoader('application', APPLICATION_DIR);
-$loader->register();
-
-if ($config['environment'] == 'test' || $config['environment'] == 'dev')
+else
 {
+	$loader = new \framework\libs\ClassLoader('framework', FRAMEWORK_DIR);
+	$loader->register();
+	$loader = new \framework\libs\ClassLoader('application', APPLICATION_DIR);
+	$loader->register();
+
 	$loader = new \framework\libs\StaticClassLoader($autoload);
 	$loader->register();
+	
 	
 	$vendorsAutoload = array();
 	

@@ -39,10 +39,7 @@ class Core extends \framework\core\FrameworkObject
 	 */
 	public function bootstrap ()
 	{
-		$this->getComponent('errorHandler')->init();
-		$this->getContainer('session')->init();
-		$this->getComponent('eventManager');
-		$this->getComponent('router');
+		$this->getComponent('errorHandler');
 		
 		// Timezone
 		date_default_timezone_set($this->getConfig('defaultTimezone'));
@@ -59,6 +56,8 @@ class Core extends \framework\core\FrameworkObject
 		
 		$this->_filterChain->addFilter(new \framework\filters\appFilters\ExecFilter());
 		
+		$this->_filterChain->init();
+		
 		return $this;
 	}
 	
@@ -72,6 +71,7 @@ class Core extends \framework\core\FrameworkObject
 		$request = $this->getComponent('httpRequest');
 		$response = $this->getComponent('httpResponse');
 		$this->_filterChain->execute($request, $response);
+		
 		return $this;
 	}
 }

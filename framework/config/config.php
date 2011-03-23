@@ -18,6 +18,7 @@
  */
 
 $config = array(
+	'environment' => 'dev',
     'errorReporting' => E_ALL|E_STRICT,
 	'displayErrors' => 1,
 	'defaultModule' => 'website',

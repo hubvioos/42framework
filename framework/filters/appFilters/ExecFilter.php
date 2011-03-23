@@ -29,11 +29,11 @@ class ExecFilter extends \framework\filters\Filter
 	 */
 	public function _before(&$httpRequest, &$httpResponse)
 	{
-		$response = $request->getRequest()->execute();
+		$response = $httpRequest->getRequest()->execute();
 		
 		if ($response->getStatus() == \framework\core\Response::SUCCESS)
 		{
-			$httpResponse->set($response->get);
+			$httpResponse->set($response->get());
 		}
 		else
 		{

@@ -89,7 +89,7 @@ class Controller extends \framework\core\FrameworkObject
 					{
 						$this->setView($this->_request->getAction());
 					}
-					$this->_response->set($this->getContainer()->getNewView($this->_request->getModule(), $this->_view, $this->_vars));
+					$this->_response->set($this->createView($this->_request->getModule(), $this->_view, $this->_vars));
 				}
 				
 				$this->_response->setStatus(\framework\core\Response::SUCCESS);

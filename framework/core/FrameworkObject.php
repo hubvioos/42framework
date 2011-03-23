@@ -81,9 +81,8 @@ abstract class FrameworkObject
 	 */
 	public function viewSetGlobal($var, $value)
 	{
-		$view = $this->getComponent('viewClass');
 		/* @var $view View */
-		$view::setGlobal($var, $value);
+		\framework\core\View::setGlobal($var, $value);
 		return $this;
 	}
 	
@@ -94,9 +93,8 @@ abstract class FrameworkObject
 	 */
 	public function viewGetGlobal($var)
 	{
-		$view = $this->getComponent('viewClass');
 		/* @var $view View */
-		return $view::getGlobal($var);
+		return \framework\core\View::getGlobal($var);
 	}
 	
 	public function raiseEvent($name, $params = null)

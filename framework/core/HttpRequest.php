@@ -19,7 +19,7 @@
 
 namespace framework\core;
 
-class HttpRequest
+class HttpRequest extends \framework\core\FrameworkObject
 {    
 	protected $_url = null;
 	
@@ -68,12 +68,12 @@ class HttpRequest
 	
 		$this->_userAgent = (!isset($_SERVER['HTTP_USER_AGENT'])) ? null : $_SERVER['HTTP_USER_AGENT'];
 	
-		$this->_acceptCharset = (!isset($_SERVER['HTTP_ACCEPT_CHARSET'])) ? $this->getContainer()->config['defaultCharset'] : $this->_extractValue(
+		$this->_acceptCharset = (!isset($_SERVER['HTTP_ACCEPT_CHARSET'])) ? $this->getConfig('defaultCharset') : $this->_extractValue(
 			$_SERVER['HTTP_ACCEPT_CHARSET']);
 	
 		$this->_acceptEncoding = (!isset($_SERVER['HTTP_ACCEPT_ENCODING'])) ? null : $this->_extractValue($_SERVER['HTTP_ACCEPT_ENCODING']);
 	
-		$this->_acceptLanguage = (!isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) ? $this->getContainer()->config['defaultLanguage'] : $this->_extractValue(
+		$this->_acceptLanguage = (!isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) ? $this->getConfig('defaultLanguage') : $this->_extractValue(
 			$_SERVER['HTTP_ACCEPT_LANGUAGE']);
 	
 		$this->_isSecure = (!empty($_SERVER['HTTPS']) && filter_var($_SERVER['HTTPS'], FILTER_VALIDATE_BOOLEAN));
@@ -155,7 +155,7 @@ class HttpRequest
 		{
 			return $this->_url;
 		}
-		return $this->getContainer()->config['siteUrl'] . $this->_url;
+		return $this->getConfig('siteUrl') . $this->_url;
 	}
 	
 	public function getIpAddress ()

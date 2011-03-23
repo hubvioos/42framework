@@ -81,7 +81,7 @@ class Response extends \framework\core\FrameworkObject
 	/**
 	 * @return \Framework\Response
 	 */
-	protected function setStatus ($status)
+	public function setStatus ($status)
 	{
 		$this->_status = $status;
 		return $this;

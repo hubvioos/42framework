@@ -91,7 +91,7 @@ class ComponentsContainer extends \framework\libs\BaseContainer
 			$module = $args[0];
 			$action = $args[1];
 			
-			$controller = 'application\\modules\\'.$module.'\\actions\\'.$action;
+			$controller = 'application\\modules\\'.$module.'\\controllers\\'.$action;
 			return new $controller;
 		};
 		
@@ -117,7 +117,7 @@ class ComponentsContainer extends \framework\libs\BaseContainer
 			function ($c, $args)
 			{
 				/* @var $c ApplicationContainer */
-				return new \framework\libs\EventManager($c->config['events']);
+				return new \framework\libs\EventManager($c->config->get('events'));
 			}
 		);
 		
