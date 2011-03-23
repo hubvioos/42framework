@@ -1,4 +1,4 @@
-<?php 
+<?php
 /**
  * Copyright (C) 2010 - Kévin O'NEILL, François KLINGLER - <contact@42framework.com>
  * 
@@ -34,11 +34,7 @@ class BaseContainer
 	
 	public function __get ($key)
 	{
-		if (!isset($this->_container[$key]))
-		{
-			throw new \InvalidArgumentException($key . ' is not defined.');
-		}
-		return is_callable($this->_container[$key]) ? $this->_container[$key]($this) : $this->_container[$key];
+		return $this->get($key);
 	}
 	
 	public function __isset ($key)
@@ -59,24 +55,49 @@ class BaseContainer
 		{
 			throw new \BadMethodCallException('Call to undefined method : ' . $method);
 		}
+		
 		$key = \lcfirst($match[1]);
-		return $this->{$key};
+		
+		array_unshift($arguments,$key);
+		
+		return call_user_func_array(array($this,'get'),$arguments);
 	}
 	
-	public function get($key)
+	public function get()
 	{
-		return $this->{$key};
+		$arguments = func_get_args();
+		
+		if (!isset($arguments[0]))
+		{
+			throw new \InvalidArgumentException('You have to specify a component name');	
+		}
+		
+		$key = array_shift($arguments);
+		
+		if (!isset($this->_container[$key]))
+		{
+			throw new \InvalidArgumentException($key . ' is not defined.');
+		}
+		
+		if (is_callable($this->_container[$key]))
+		{
+			return $this->_container[$key]($this, $arguments);
+		}
+		else
+		{
+			return $this->_container[$key];
+		}
 	}
 	
 	public function asUniqueInstance ($callable)
 	{
-		return function ($c) use ($callable)
+		return function ($c, $arguments) use ($callable)
 		{
 			static $object = null;
 			
 			if ($object === null)
 			{
-				$object = $callable($c);
+				$object = $callable($c, $arguments);
 			}
 			
 			return $object;
