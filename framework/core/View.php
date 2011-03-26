@@ -110,4 +110,17 @@ class View extends \framework\core\FrameworkObject
 	{
 		return $this->render();
 	}
+	
+	public function getLink($module, $action, $params = array ())
+	{
+		return $this->getConfig('siteUrl').$this->getComponent('route')->paramsToUrl(
+				array('module' => $module, 
+				'action' => $action, 
+				'params' => $params));
+	}
+	
+	public function setTilte($title)
+	{
+		self::setGlobal('title', $title);
+	}
 }
