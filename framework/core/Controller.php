@@ -116,7 +116,7 @@ class Controller extends \framework\core\FrameworkObject
 	
 	public function setLayout($layout)
 	{
-		$view = $this->viewSetGlobal('layout', $layout);
+		$this->viewSetGlobal('layout', $layout);
 		return $this;
 	}
 	

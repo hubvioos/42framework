@@ -31,7 +31,7 @@ class View extends \framework\core\FrameworkObject
 
 	public function __construct ($module, $file, $vars = false)
 	{
-		$config = $this->getContainer()->getConfig();
+		$config = $this->getConfig();
 		$this->_file = MODULES_DIR.DS.$module.DS.'views'.DS.$file.$config['viewExtension'];
 		
 		if (!file_exists($this->_file))
@@ -43,7 +43,7 @@ class View extends \framework\core\FrameworkObject
 			}
 			else
 			{
-				throw new \RuntimeException($this->_file.' : View not found.');
+				throw new \RuntimeException('View not found : '.$this->_file);
 			}
 		}
 		
