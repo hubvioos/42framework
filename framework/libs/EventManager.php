@@ -1,4 +1,4 @@
-<?php
+<?php 
 /**
  * Copyright (C) 2010 - Kévin O'NEILL, François KLINGLER - <contact@42framework.com>
  * 
@@ -17,9 +17,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-namespace framework\events;
-
-defined('FRAMEWORK_DIR') or die('Invalid script access');
+namespace framework\libs;
 
 class EventManager
 {
@@ -65,16 +63,20 @@ class EventManager
         if ($listener === null)
         {
             unset($this->_listeners[$eventName]);
-            return;
+            return true;
         }
-        foreach ($this->_listeners[$eventName] as $id => $lis)
+        
+		$ok = false;
+		
+		foreach ($this->_listeners[$eventName] as $id => $lis)
         {
         	if ($listener === $lis)
         	{
         		unset($this->_listeners[$eventName][$id]);
+				$ok = true;
         	}
         }
-        return $this;
+        return $ok;
     }
 
     /**

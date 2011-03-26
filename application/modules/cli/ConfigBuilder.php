@@ -1,4 +1,4 @@
-<?php
+<?php 
 /**
  * Copyright (C) 2010 - Kévin O'NEILL, François KLINGLER - <contact@42framework.com>
  * 
@@ -18,8 +18,6 @@
  */
 namespace application\modules\cli;
 use TheSeer\Tools;
-
-defined('FRAMEWORK_DIR') or die('Invalid script access');
 
 class ConfigBuilder extends \application\modules\cli\AutoloadBuilder
 {

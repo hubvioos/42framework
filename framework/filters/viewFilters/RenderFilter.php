@@ -1,4 +1,4 @@
-<?php
+<?php 
 /**
  * Copyright (C) 2010 - Kévin O'NEILL, François KLINGLER - <contact@42framework.com>
  * 
@@ -16,10 +16,7 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
-
 namespace framework\filters\viewFilters;
-
-defined('FRAMEWORK_DIR') or die('Invalid script access');
 
 class RenderFilter extends \framework\filters\Filter
 {

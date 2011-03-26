@@ -1,4 +1,4 @@
-<?php
+<?php 
 /**
  * Copyright (C) 2010 - Kévin O'NEILL, François KLINGLER - <contact@42framework.com>
  * 
@@ -17,7 +17,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 namespace application\modules\cli\controllers;
-defined('FRAMEWORK_DIR') or die('Invalid script access');
 
 class CompileAutoload extends \application\modules\cli\controllers\CliCommand
 {

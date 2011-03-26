@@ -20,8 +20,8 @@
  * Inspired by Pimple (Copyright (c) 2009 Fabien Potencier) : http://github.com/fabpot/Pimple
  * and by the Symfony Service Container component (Copyright (c) 2008-2009 Fabien Potencier) : http://github.com/fabpot/dependency-injection
  */
+
 namespace framework\libs;
-defined('FRAMEWORK_DIR') or die('Invalid script access');
 
 class BaseContainer
 {
@@ -34,11 +34,7 @@ class BaseContainer
 	
 	public function __get ($key)
 	{
-		if (!isset($this->_container[$key]))
-		{
-			throw new \InvalidArgumentException($key . ' is not defined.');
-		}
-		return is_callable($this->_container[$key]) ? $this->_container[$key]($this) : $this->_container[$key];
+		return $this->get($key);
 	}
 	
 	public function __isset ($key)
@@ -53,23 +49,55 @@ class BaseContainer
 	
 	public function __call ($method, $arguments)
 	{
+		$match = null;
+		
 		if (!preg_match('/^get(.+)$/', $method, $match))
 		{
 			throw new \BadMethodCallException('Call to undefined method : ' . $method);
 		}
-		$key = lcfirst($match[1]);
-		return $this->$key;
+		
+		$key = \lcfirst($match[1]);
+		
+		array_unshift($arguments,$key);
+		
+		return call_user_func_array(array($this,'get'),$arguments);
+	}
+	
+	public function get()
+	{
+		$arguments = func_get_args();
+		
+		if (!isset($arguments[0]))
+		{
+			throw new \InvalidArgumentException('You have to specify a component name');	
+		}
+		
+		$key = array_shift($arguments);
+		
+		if (!isset($this->_container[$key]))
+		{
+			throw new \InvalidArgumentException($key . ' is not defined.');
+		}
+		
+		if (is_callable($this->_container[$key]))
+		{
+			return $this->_container[$key]($this, $arguments);
+		}
+		else
+		{
+			return $this->_container[$key];
+		}
 	}
 	
 	public function asUniqueInstance ($callable)
 	{
-		return function  ($c) use ($callable)
+		return function ($c, $arguments) use ($callable)
 		{
 			static $object = null;
 			
 			if ($object === null)
 			{
-				$object = $callable($c);
+				$object = $callable($c, $arguments);
 			}
 			
 			return $object;

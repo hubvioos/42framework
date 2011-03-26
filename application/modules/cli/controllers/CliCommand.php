@@ -1,4 +1,4 @@
-<?php
+<?php 
 /**
  * Copyright (C) 2010 - Kévin O'NEILL, François KLINGLER - <contact@42framework.com>
  * 
@@ -18,26 +18,16 @@
  */
 namespace application\modules\cli\controllers;
 
-defined('FRAMEWORK_DIR') or die('Invalid script access');
-
 class CliCommand extends \framework\core\Controller
 {
-	/**
-	 * Executes the action corresponding to the current request
-	 * 
-	 * @param Framework\Request $request
-	 */
+	protected $usesView = false;
+	protected $usesLayout = false;
+
 	protected function _before(\framework\core\Request &$request, \framework\core\Response &$response)
 	{
 		if ($request->getState() != \framework\core\Request::CLI_STATE)
 		{
 			//$this->getContainer()->getNewRequest('errors', 'error403', array($request))->execute();
 		}
-	}
-	
-	protected function _after(\framework\core\Request &$request, \framework\core\Response &$response)
-	{
-		$this->setView(false);
-		$this->viewSetGlobal('layout', false);
 	}
 }

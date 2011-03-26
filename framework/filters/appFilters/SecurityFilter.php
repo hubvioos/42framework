@@ -1,4 +1,4 @@
-<?php
+<?php 
 /**
  * Copyright (C) 2010 - Kévin O'NEILL, François KLINGLER - <contact@42framework.com>
  * 
@@ -16,12 +16,7 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
-
 namespace framework\filters\appFilters;
-
-defined('FRAMEWORK_DIR') or die('Invalid script access');
-
-class SecurityFilterException extends \Exception { }
 
 class SecurityFilter extends \framework\filters\Filter
 {	
@@ -45,11 +40,11 @@ class SecurityFilter extends \framework\filters\Filter
 				&& $previousUserAgent != $request->getUserAgent()
 				)
 			{
-				$this->getContainer()->getSession()->destroyAll();
-				$this->getContainer()->getMessage()
+				$this->getComponent('session')->destroyAll();
+				$this->getComponent('message')
 					->set('It seems that your session has been stolen, we destroyed it for security reasons. 
 						Check your environment security.', 'warning');
-				$this->getContainer()->getNewResponse()->redirect($this->getContainer()->config['siteUrl'], 301, true);
+				$this->getResponse()->redirect($this->getConfig('siteUrl'), 301, true);
 			}
 		}
 	}	

@@ -1,4 +1,4 @@
-<?php
+<?php 
 /**
  * Copyright (C) 2010 - Kévin O'NEILL, François KLINGLER - <contact@42framework.com>
  * 
@@ -19,20 +19,19 @@
 
 namespace framework\core;
 
-defined('FRAMEWORK_DIR') or die('Invalid script access');
-
 class Response extends \framework\core\FrameworkObject
 {
 	const SUCCESS = 1;
 	const ERROR = 2;
+	const OUTSIDE_ACCESS_FORBIDDEN = 3;
 	
 	/**
 	 * Contains the response
 	 * @var mixed
 	 */
-	protected $response = null;
+	protected $_response = null;
 	
-	protected $status = null;
+	protected $_status = null;
 	
 	/**
 	 * @return \Framework\Response
@@ -45,7 +44,7 @@ class Response extends \framework\core\FrameworkObject
 	
 	public function get ()
 	{
-		return $this->response;
+		return $this->_response;
 	}
 	
 	/**
@@ -53,13 +52,13 @@ class Response extends \framework\core\FrameworkObject
 	 */
 	public function set ($value)
 	{
-		$this->response = $value;
+		$this->_response = $value;
 		return $this;
 	}
 
 	public function getStatus ()
 	{
-		return $this->status;
+		return $this->_status;
 	}
 
 	/**
@@ -67,7 +66,7 @@ class Response extends \framework\core\FrameworkObject
 	 */
 	public function resetStatus ()
 	{
-		$this->status = null;
+		$this->_status = null;
 		return $this;
 	}
 	
@@ -82,9 +81,9 @@ class Response extends \framework\core\FrameworkObject
 	/**
 	 * @return \Framework\Response
 	 */
-	protected function setStatus ($status)
+	public function setStatus ($status)
 	{
-		$this->status = $status;
+		$this->_status = $status;
 		return $this;
 	}
 }

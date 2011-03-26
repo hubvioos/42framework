@@ -1,4 +1,4 @@
-<?php
+<?php 
 /**
  * Copyright (C) 2010 - Kévin O'NEILL, François KLINGLER - <contact@42framework.com>
  * 
@@ -16,8 +16,8 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
+
 namespace framework\libs;
-defined('FRAMEWORK_DIR') or die('Invalid script access');
 
 class History
 {	
@@ -42,7 +42,7 @@ class History
 	{
 		$size = sizeof($this->_history);
 		
-		foreach ($this->_history as $key => $value)
+		foreach ($this->_history as $key)
 		{			
 			if (!($key == 0 && $size >= $this->_historySize))
 			{				
@@ -52,9 +52,19 @@ class History
 		$this->_history[0] = $values;
 	}
 	
-	public function get ()
+	public function get ($offset = null)
 	{
-		return $this->_history;
+		if ($offset === null)
+		{
+			return $this->_history;
+		}
+		
+		if (isset ($this->_history[$offset]))
+		{
+			return $this->_history[$offset];
+		}
+		
+		return null;
 	}
 	
 	public function getPrevious ()

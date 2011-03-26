@@ -1,4 +1,4 @@
-<?php
+<?php 
 /**
  * Copyright (C) 2010 - Kévin O'NEILL, François KLINGLER - <contact@42framework.com>
  * 
@@ -17,7 +17,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 namespace framework\core;
-defined('FRAMEWORK_DIR') or die('Invalid script access');
 
 class Request extends \framework\core\FrameworkObject
 {
@@ -35,10 +34,6 @@ class Request extends \framework\core\FrameworkObject
 	
     protected static $_current = null;
 
-	/*
-		Constructeur de la classe, partie importante pour l'exécution de la page.
-		Cette méthode s'occupe de déterminer le module et l'action à appeler, en faisant appel à Route.
-	*/
 	public function __construct ($module, $action, Array $params = array(), $state = self::DEFAULT_STATE)
 	{
 		if ($state === null)
@@ -60,9 +55,8 @@ class Request extends \framework\core\FrameworkObject
 	public function execute ()
 	{
 		$module = $this->getContainer()->getAction($this->_module, $this->_action);
-		$request = $this->getContainer()->getHttpRequest();
-		$response = $this->getContainer()->getHttpResponse();
-		return $module->execute($request, $response);
+		$response = $this->getContainer()->getResponse();
+		return $module->execute($this, $response);
 	}
 	
 	/**

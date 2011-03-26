@@ -1,4 +1,4 @@
-<?php
+<?php 
 /**
  * Copyright (C) 2010 - Kévin O'NEILL, François KLINGLER - <contact@42framework.com>
  * 
@@ -18,8 +18,6 @@
  */
 
 namespace framework\core;
-
-defined('FRAMEWORK_DIR') or die('Invalid script access');
 
 class HttpResponse extends \framework\core\Response
 {
@@ -290,11 +288,7 @@ class HttpResponse extends \framework\core\Response
 	
 	public function render()
 	{
-		if ($this->response instanceof \framework\core\Response)
-		{
-			$this->set($this->response->get());
-		}
-		if ($this->response instanceof \framework\core\View)
+		if ($this->get() instanceof \framework\core\View)
 		{
 			return $this->get()->render();
 		}
