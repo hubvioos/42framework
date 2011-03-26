@@ -80,7 +80,7 @@ class Controller extends \framework\core\FrameworkObject
 			{
 				if ($this->usesView)
 				{
-					if ($this->usesLayout = false)
+					if ($this->usesLayout == false)
 					{
 						$this->setLayout(false);
 					}
