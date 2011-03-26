@@ -170,5 +170,47 @@ class ComponentsContainer extends \framework\libs\BaseContainer
 			
 			return new \framework\libs\Session($namespace);
 		};
+		
+		
+		/*
+		 * Doctrine
+		 * 
+		 */
+		
+		$this->entityManager = $this->asUniqueInstance(
+			function ($c, $args)
+			{
+				if ($c->config['environment'] == 'development')
+				{
+					$cache = new \Doctrine\Common\Cache\ArrayCache;
+				}
+				else 
+				{
+					$cache = new \Doctrine\Common\Cache\ApcCache;
+				}
+
+				$config = new \Doctrine\ORM\Configuration;
+				
+				$config->setMetadataCacheImpl($cache);
+				$config->setQueryCacheImpl($cache);
+				
+				$driverImpl = $config->newDefaultAnnotationDriver(MODULES_DIR);
+				$config->setMetadataDriverImpl($driverImpl);
+				
+				$config->setProxyDir(BUILD_DIR);
+				$config->setProxyNamespace('application\proxies');
+
+				if ($c->config['environment'] == 'development')
+				{
+					$config->setAutoGenerateProxyClasses(true);
+				}
+				else
+				{
+					$config->setAutoGenerateProxyClasses(false);
+				}
+
+				return \Doctrine\ORM\EntityManager::create($c->config['dbConnectionParams'], $config);
+			}
+		);
 	}
 }

@@ -18,7 +18,7 @@
  */
 
 $config = array(
-	'environment' => 'dev',
+	'environment' => 'development',
     'errorReporting' => E_ALL|E_STRICT,
 	'displayErrors' => 1,
 	'defaultModule' => 'website',
@@ -35,5 +35,9 @@ $config = array(
 	'viewExtension' => '.php',
 	'applicationFilters' => array(),
 	'viewFilters' => array(),
-	'events' => array()
-	);
+	'events' => array(),
+	'dbConnectionParams' => array(
+		'driver' => 'pdo_sqlite',
+		'path' => APPLICATION_DIR.DS.'database'.DS.'db.sqlite'
+	)
+);
