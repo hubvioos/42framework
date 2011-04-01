@@ -41,6 +41,10 @@ if (file_exists(BUILD_DIR.DS.'config.php'))
 else
 {
 	include FRAMEWORK_DIR.DS.'config'.DS.'config.php';
+	$frameworkConfig = $config;
+	$config = array();
+	include APPLICATION_DIR.DS.'config'.DS.'config.php';
+	$config = \array_merge($frameworkConfig, $config);
 }
 
 require FRAMEWORK_DIR.DS.'libs'.DS.'ClassLoader.php';

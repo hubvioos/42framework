@@ -18,7 +18,7 @@
  */
 
 
-$autoload = array(
+$vendorsAutoload = array(
          'theseer\\tools\\autoloadbuilder' => VENDORS_DIR.DS.'theseer'.DS.'autoload'.DS.'autoloadbuilder.php',
          'theseer\\tools\\autoloadbuilderexception' => VENDORS_DIR.DS.'theseer'.DS.'autoload'.DS.'autoloadbuilder.php',
          'theseer\\tools\\autoloadbuildercli' => VENDORS_DIR.DS.'theseer'.DS.'autoload'.DS.'autoloadbuildercli.php',
