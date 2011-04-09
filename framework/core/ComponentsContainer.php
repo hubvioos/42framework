@@ -184,7 +184,7 @@ class ComponentsContainer extends \framework\libs\BaseContainer
 				{
 					$cache = new \Doctrine\Common\Cache\ArrayCache;
 				}
-				else 
+				else
 				{
 					$cache = new \Doctrine\Common\Cache\ApcCache;
 				}
@@ -209,7 +209,7 @@ class ComponentsContainer extends \framework\libs\BaseContainer
 					$config->setAutoGenerateProxyClasses(false);
 				}
 
-				return \Doctrine\ORM\EntityManager::create($c->config['dbConnectionParams'], $config);
+				return \Doctrine\ORM\EntityManager::create($c->config->get('dbConnectionParams',true), $config);
 			}
 		);
 	}
