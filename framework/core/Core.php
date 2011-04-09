@@ -48,6 +48,7 @@ class Core extends \framework\core\FrameworkObject
 		
 		$this->_filterChain->addFilter(new \framework\filters\appFilters\ApplicationFilter());
 		$this->_filterChain->addFilter(new \framework\filters\appFilters\SecurityFilter());
+		$this->_filterChain->addFilter(new \framework\filters\appFilters\DoctrineFilter());
 		
 		foreach ($this->getConfig('applicationFilters') as $filter)
 		{

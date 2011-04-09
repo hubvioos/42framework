@@ -26,6 +26,7 @@ namespace framework\libs;
 class BaseContainer
 {
 	protected $_container = array();
+	protected $_accessCounter = array();
 	
 	public function __set ($key, $value)
 	{
@@ -79,6 +80,15 @@ class BaseContainer
 			throw new \InvalidArgumentException($key . ' is not defined.');
 		}
 		
+		if (isset($this->_accessCounter[$key]))
+		{
+			$this->_accessCounter[$key]++;
+		}
+		else
+		{
+			$this->_accessCounter[$key] = 1;
+		}
+		
 		if (is_callable($this->_container[$key]))
 		{
 			return $this->_container[$key]($this, $arguments);
@@ -102,5 +112,17 @@ class BaseContainer
 			
 			return $object;
 		};
+	}
+	
+	public function getAccessCounter($name)
+	{
+		if (isset($this->_accessCounter[$name]))
+		{
+			return $this->_accessCounter[$name];
+		}
+		else
+		{
+			return 0;
+		}
 	}
 }

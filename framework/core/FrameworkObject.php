@@ -57,6 +57,9 @@ abstract class FrameworkObject
 		self::$_container = $container;
 	}
 	
+	/**
+	 * @return \framework\core\ComponentsContainer
+	 */
 	public function getContainer()
 	{
 		return self::$_container;
