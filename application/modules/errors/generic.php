@@ -1,7 +1,7 @@
 <?php 
 
 /**
- * Copyright (C) 2010 - Kévin O'NEILL, François KLINGLER - <contact@42framework.com>
+ * Copyright (C) 2011 - K√©vin O'NEILL, Fran√ßois KLINGLER - <contact@42framework.com>
  * 
  * 42framework is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
