@@ -62,9 +62,22 @@ else
 	$loader = new \framework\libs\ClassLoader('application', APPLICATION_DIR);
 	$loader->register();
 
-	$loader = new \framework\libs\StaticClassLoader($autoload);
+	
+	$loader = new \framework\libs\ClassLoader('Doctrine\ORM', VENDORS_DIR.DS.'doctrine'.DS.'lib'.DS.'Doctrine'.DS.'ORM');
 	$loader->register();
 	
+	$loader = new \framework\libs\ClassLoader('Doctrine\Common', VENDORS_DIR.DS.'doctrine'.DS.'lib'.DS.'vendor'.DS.'doctrine-common'.DS.'lib'.DS.'Doctrine'.DS.'Common');
+	$loader->register();
+	
+	$loader = new \framework\libs\ClassLoader('Doctrine\DBAL', VENDORS_DIR.DS.'doctrine'.DS.'lib'.DS.'vendor'.DS.'doctrine-dbal'.DS.'lib'.DS.'Doctrine'.DS.'DBAL');
+	$loader->register();
+	
+	$loader = new \framework\libs\ClassLoader('Symfony\Component', VENDORS_DIR.DS.'doctrine'.DS.'lib'.DS.'vendor'.DS.'Symfony'.DS.'Component');
+	$loader->register();
+	
+	
+	$loader = new \framework\libs\StaticClassLoader($autoload);
+	$loader->register();
 	
 	$vendorsAutoload = array();
 	
