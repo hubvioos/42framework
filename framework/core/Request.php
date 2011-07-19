@@ -31,8 +31,6 @@ class Request extends \framework\core\FrameworkObject
 	const DEFAULT_STATE = -1;
 	const CLI_STATE = -50;
 	const FIRST_REQUEST = -100;
-	
-    protected static $_current = null;
 
 	public function __construct ($module, $action, Array $params = array(), $state = self::DEFAULT_STATE)
 	{
@@ -44,18 +42,12 @@ class Request extends \framework\core\FrameworkObject
 		$this->_action = $action;
 		$this->_params = $params;
 		$this->_state = $state;
-		self::$_current = $this;
-	}
-	
-	public static function getCurrent ()
-	{
-		return self::$_current;
 	}
 	
 	public function execute ()
 	{
-		$module = $this->getContainer()->getAction($this->_module, $this->_action);
-		$response = $this->getContainer()->getResponse();
+		$module = $this->getComponent('action', $this->_module, $this->_action);
+		$response = $this->getComponent('response');
 		return $module->execute($this, $response);
 	}
 	

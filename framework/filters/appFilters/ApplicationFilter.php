@@ -112,8 +112,6 @@ class ApplicationFilter extends \framework\filters\Filter
 			$response->set($this->createView($config['defaultModule'], $this->viewGetGlobal('layout')));
 		}
 		
-		$response->send();
-		
 		if (isset($config['viewFilters']))
 		{
 			$filterChain = $this->getComponent('filterChain');
@@ -124,10 +122,14 @@ class ApplicationFilter extends \framework\filters\Filter
 			}
 
 			$filterChain->addFilter(new \framework\filters\viewFilters\RenderFilter());
-			
+
 			$filterChain->execute($request, $response);
 		}
-		echo $response;
+		$render = $response->render();
+
+		$response->send();
+		
+		echo $render;
 		
 		if ($response->getStatus() == 200)
 		{

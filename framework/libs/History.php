@@ -42,14 +42,15 @@ class History
 	{
 		$size = sizeof($this->_history);
 		
-		foreach ($this->_history as $key)
-		{			
-			if (!($key == 0 && $size >= $this->_historySize))
+		foreach ($this->_history as $key => $value)
+		{
+			if ($key != 0 && $size >= $this->_historySize)
 			{				
 				$this->_history[$size-$key] = $this->_history[$size-$key-1];
 			}
 		}
 		$this->_history[0] = $values;
+		$this->_history->save();
 	}
 	
 	public function get ($offset = null)

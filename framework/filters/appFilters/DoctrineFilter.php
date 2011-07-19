@@ -1,4 +1,4 @@
-<?php 
+<?php
 /**
  * Copyright (C) 2010 - Kévin O'NEILL, François KLINGLER - <contact@42framework.com>
  * 
@@ -16,13 +16,16 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
-namespace application\modules\errors\controllers;
 
-class error404 extends \application\modules\errors\generic
+namespace framework\filters\appFilters;
+
+class DoctrineFilter extends \framework\filters\Filter
 {
-	public function processAction ($request = null)
+	public function _after(&$request, &$response)
 	{
-		$this->getComponent('httpResponse')->status(404)->set(
-				$this->createView('errors', 'error404', array('requestedUrl' => $this->getComponent('httpRequest')->getUrl(true))));		
+		if($this->getContainer()->getAccessCounter('entityManager') >= 1)
+		{
+			$this->getComponent('entityManager')->flush();
+		}
 	}
 }

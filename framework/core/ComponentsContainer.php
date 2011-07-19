@@ -209,7 +209,7 @@ class ComponentsContainer extends \framework\libs\BaseContainer
 					$config->setAutoGenerateProxyClasses(false);
 				}
 
-				return \Doctrine\ORM\EntityManager::create($c->config['dbConnectionParams'], $config);
+				return \Doctrine\ORM\EntityManager::create($c->config->get('dbConnectionParams', true), $config);
 			}
 		);
 	}

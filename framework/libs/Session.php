@@ -34,7 +34,7 @@ class Session extends \framework\libs\Registry
 			$_SESSION[$namespace] = array();
 		}
 		$this->_namespace = $namespace;
-		parent::__construct(&$_SESSION[$namespace]);
+		parent::__construct($_SESSION[$namespace]);
 	}
 	
 	public function init ()
@@ -65,5 +65,10 @@ class Session extends \framework\libs\Registry
 	public function getNamespace ()
 	{
 		return $this->_namespace;
+	}
+	
+	public function save()
+	{
+		$_SESSION[$this->_namespace] = $this->toArray();
 	}
 }

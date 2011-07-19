@@ -19,7 +19,7 @@
 namespace framework\core;
 
 /**
- * @var $app \Framework\core\Application
+ * @var $app \framework\core\Application
  */
 abstract class FrameworkObject
 {
