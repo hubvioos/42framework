@@ -1,6 +1,6 @@
 <?php 
 /**
- * Copyright (C) 2010 - Kévin O'NEILL, François KLINGLER - <contact@42framework.com>
+ * Copyright (C) 2011 - K√©vin O'NEILL, Fran√ßois KLINGLER - <contact@42framework.com>
  * 
  * 42framework is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -182,7 +182,7 @@ class Route
 			{
     			array_shift($args[0]);
     			
-    			foreach($args[0] as $value) // Pour chaque argument on check si ça correspond
+    			foreach($args[0] as $value) // Pour chaque argument on check si √ßa correspond
     			{
     			    $found = false;
     			    foreach($routeParams['params'] as $routeParam => $routeRegex)

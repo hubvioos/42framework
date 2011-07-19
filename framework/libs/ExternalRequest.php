@@ -1,6 +1,6 @@
 <?php 
 /**
- * Copyright (C) 2010 - Kévin O'NEILL, François KLINGLER - <contact@42framework.com>
+ * Copyright (C) 2011 - K√©vin O'NEILL, Fran√ßois KLINGLER - <contact@42framework.com>
  * 
  * 42framework is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,8 +25,8 @@ class ExternalRequest
 	protected $_params = null;
 
 	/*
-		Constructeur de la classe, partie importante pour l'exécution de la page.
-		Cette méthode s'occupe de déterminer le module et l'action à appeler, en faisant appel à Route.
+		Constructeur de la classe, partie importante pour l'ex√©cution de la page.
+		Cette m√©thode s'occupe de d√©terminer le module et l'action √† appeler, en faisant appel √† Route.
 	*/
 	public function __construct ($_url, $_params = null)
 	{
