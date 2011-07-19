@@ -26,8 +26,6 @@ define('BUILD_DIR', APPLICATION_DIR.DS.'build');
 define('LOG_DIR', APPLICATION_DIR.DS.'log');
 define('VENDORS_DIR', dirname(APPLICATION_DIR).DS.'vendors');
 
-define('RESOURCES_DIR', dirname(APPLICATION_DIR).DS.'resources');
-
 $autoload = array();
 $config = array();
 
@@ -66,18 +64,6 @@ else
 	
 	$loader = new \framework\libs\ClassLoader('Doctrine\ORM', VENDORS_DIR.DS.'doctrine'.DS.'lib'.DS.'Doctrine'.DS.'ORM');
 	$loader->register();
-
-<<<<<<< HEAD
-	$loader = new \framework\libs\ClassLoader('Doctrine\Common', VENDORS_DIR.DS.'doctrine'.DS.'lib'.DS.'vendor'.DS.'doctrine-common'.DS.'lib'.DS.'Doctrine'.DS.'Common');
-	$loader->register();
-
-	$loader = new \framework\libs\ClassLoader('Doctrine\DBAL', VENDORS_DIR.DS.'doctrine'.DS.'lib'.DS.'vendor'.DS.'doctrine-dbal'.DS.'lib'.DS.'Doctrine'.DS.'DBAL');
-	$loader->register();
-
-	$loader = new \framework\libs\ClassLoader('Symfony\Component', VENDORS_DIR.DS.'doctrine'.DS.'lib'.DS.'vendor'.DS.'Symfony'.DS.'Component');
-	$loader->register();
-	
-=======
 	
 	$loader = new \framework\libs\ClassLoader('Doctrine\ORM', VENDORS_DIR.DS.'doctrine'.DS.'lib'.DS.'Doctrine'.DS.'ORM');
 	$loader->register();
@@ -91,8 +77,6 @@ else
 	$loader = new \framework\libs\ClassLoader('Symfony\Component', VENDORS_DIR.DS.'doctrine'.DS.'lib'.DS.'vendor'.DS.'Symfony'.DS.'Component');
 	$loader->register();
 	
-	
->>>>>>> 5d5f3c4f82c44432973b05871fa903455715fc66
 	$loader = new \framework\libs\StaticClassLoader($autoload);
 	$loader->register();
 	
