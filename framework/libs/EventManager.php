@@ -29,7 +29,7 @@ class EventManager
     /**
      * @param array $events
      */
-	public function __construct(Array $events = array())
+    public function __construct(Array $events = array())
     {
     	$this->_listeners = $events;
     }
@@ -87,14 +87,20 @@ class EventManager
     public function dispatchEvent($eventName, $params = null)
     {
         $returnValue = null;
-    	foreach ($this->_listeners[$eventName] as $listener)
+        
+        if(isset($this->_listeners[$eventName]))
         {
-            $returnValue = $listener::$eventName($params);
-            if ($returnValue)
+            foreach ($this->_listeners[$eventName] as $listener)
             {
-            	break;
+                list($class, $method) = explode("::", $listener);
+                $returnValue = $class::$method($params);
+                if ($returnValue)
+                {
+                    break;
+                }
             }
         }
+
         return $returnValue;
     }
 
