@@ -139,6 +139,9 @@ class ApplicationFilter extends \framework\filters\Filter
 				'userAgent' => $request->getUserAgent()
 				));
 		}
+		
+		$this->getComponent('message')->getAll(false)->save();
+		
 		exit();
 	}
 }

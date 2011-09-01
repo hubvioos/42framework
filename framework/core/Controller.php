@@ -1,4 +1,5 @@
-<?php 
+<?php
+
 /**
  * Copyright (C) 2011 - K√©vin O'NEILL, Fran√ßois KLINGLER - <contact@42framework.com>
  * 
@@ -19,10 +20,14 @@
 
 namespace framework\core;
 
-class ControllerException extends \Exception { }
+class ControllerException extends \Exception
+{
+	
+}
 
 class Controller extends \framework\core\FrameworkObject
-{	
+{
+
 	/**
 	 * the view corresponding to the current action
 	 * 
@@ -36,37 +41,37 @@ class Controller extends \framework\core\FrameworkObject
 	 * @var array
 	 */
 	protected $_vars = array();
-	
+
 	/**
 	 * Contains the current request
 	 * 
 	 * @var Framework\Request
 	 */
 	protected $_request = null;
-	
+
 	/**
 	 * Contains the response
 	 * 
 	 * @var mixed (View, string or null)
 	 */
 	protected $_response = null;
-	
-	
+
+
 	/* Controller parameters */
 	protected $usesView = true;
 	protected $usesLayout = true;
 	protected $isInternal = false;
-	
+
 	/**
 	 * Executes the action corresponding to the current request
 	 * 
 	 * @param Framework\Request $request
 	 */
-	public function execute(Request &$request, Response &$response)
+	public function execute (Request &$request, Response &$response)
 	{
 		$this->_request = $request;
 		$this->_response = $response;
-		
+
 		if ($this->isInternal && $this->_request->getState() == \framework\core\Request::FIRST_REQUEST)
 		{
 			$this->_response->setStatus(\framework\core\Response::OUTSIDE_ACCESS_FORBIDDEN);
@@ -74,9 +79,9 @@ class Controller extends \framework\core\FrameworkObject
 		else
 		{
 			if ($this->_before($this->_request, $this->_response) !== false
-				&& call_user_func_array(array($this, 'processAction'), $this->_request->getParams()) !== false
-				&& $this->_after($this->_request, $this->_response) !== false
-				)
+					&& call_user_func_array(array($this, 'processAction'), $this->_request->getParams()) !== false
+					&& $this->_after($this->_request, $this->_response) !== false
+			)
 			{
 				if ($this->usesView)
 				{
@@ -84,14 +89,14 @@ class Controller extends \framework\core\FrameworkObject
 					{
 						$this->setLayout(false);
 					}
-					
+
 					if ($this->_view === null)
 					{
 						$this->setView($this->_request->getAction());
 					}
 					$this->_response->set($this->createView($this->_request->getModule(), $this->_view, $this->_vars));
 				}
-				
+
 				$this->_response->setStatus(\framework\core\Response::SUCCESS);
 			}
 			else
@@ -99,7 +104,7 @@ class Controller extends \framework\core\FrameworkObject
 				$this->_response->setStatus(\framework\core\Response::ERROR);
 			}
 		}
-		
+
 		return $this->_response;
 	}
 
@@ -108,19 +113,27 @@ class Controller extends \framework\core\FrameworkObject
 	 * 
 	 * @param mixed $view (string or false)
 	 */
-	public function setView($view)
+	public function setView ($view)
 	{
-		$this->_view = $view;
+		if ($view === false)
+		{
+			$this->usesView = false;
+		}
+		else
+		{
+			$this->_view = $view;
+		}
+
 		return $this;
 	}
-	
-	public function setLayout($layout)
+
+	public function setLayout ($layout)
 	{
 		$this->viewSetGlobal('layout', $layout);
 		return $this;
 	}
-	
-	public function setMessage($message, $category = 'notice')
+
+	public function setMessage ($message, $category = 'notice')
 	{
 		$this->getContainer()->getMessage()->set($message, $category);
 	}
@@ -131,7 +144,7 @@ class Controller extends \framework\core\FrameworkObject
 	 * @param mixed $var (array or string)
 	 * @param mixed $value
 	 */
-	public function set($var, $value = false)
+	public function set ($var, $value = false)
 	{
 		if (is_array($var))
 		{
@@ -143,15 +156,18 @@ class Controller extends \framework\core\FrameworkObject
 		}
 		return $this;
 	}
-	
+
 	/**
 	 * Filter executed before the action
 	 * 
 	 * @param Framework\Request $request
 	 * @return mixed (boolean or Framework\Response)
 	 */
-	protected function _before(Request &$request, Response &$response) { }
-	
+	protected function _before (Request &$request, Response &$response)
+	{
+		
+	}
+
 	/**
 	 * Filter executed after the action
 	 * 
@@ -159,20 +175,24 @@ class Controller extends \framework\core\FrameworkObject
 	 * @param mixed $actionResponse
 	 * @return mixed
 	 */
-	protected function _after(Request &$request, Response &$response) { }
-	
-	public function getRequest()
+	protected function _after (Request &$request, Response &$response)
+	{
+		
+	}
+
+	public function getRequest ()
 	{
 		return $this->_request;
 	}
-	
-	public function setResponse(Response $response)
+
+	public function setResponse (Response $response)
 	{
 		$this->_response = $response;
 	}
-	
-	public function getResponse()
+
+	public function getResponse ()
 	{
 		return $this->_response;
 	}
+
 }

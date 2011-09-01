@@ -206,7 +206,7 @@ class Route
     			{
     			    array_shift($match[0]);
 
-					$url = $routeUrl;
+					$url = \stripslashes($routeUrl);
 
     			    // And we replace each arg by its value.
     			    foreach($args[0] as $key => $value)

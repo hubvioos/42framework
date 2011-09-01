@@ -45,8 +45,12 @@ class Message
 		return array();
 	}
 	
-	public function getAll()
+	public function getAll($toArray = true)
 	{
+		if ($toArray)
+		{
+			return $this->_session->toArray();
+		}
 		return $this->_session;
 	}
 	

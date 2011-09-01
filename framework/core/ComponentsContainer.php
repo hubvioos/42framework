@@ -152,7 +152,7 @@ class ComponentsContainer extends \framework\libs\BaseContainer
 			function ($c, $args)
 			{
 				/* @var $c ApplicationContainer */
-				return new \framework\libs\Route($c->config['routes']);
+				return new \framework\libs\Route($c->config['routes']->toArray());
 			}
 		);
 		
