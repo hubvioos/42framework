@@ -25,6 +25,7 @@ define('MODULES_DIR', APPLICATION_DIR.DS.'modules');
 define('BUILD_DIR', APPLICATION_DIR.DS.'build');
 define('LOG_DIR', APPLICATION_DIR.DS.'log');
 define('VENDORS_DIR', dirname(APPLICATION_DIR).DS.'vendors');
+define('LIBS_DIR', FRAMEWORK_DIR.DS.'libs');
 
 $autoload = array();
 $config = array();
@@ -40,15 +41,23 @@ if (file_exists(BUILD_DIR.DS.'config.php'))
 }
 else
 {
+    // include the framework and app config files to get access to 
+    // $frameworkConfig and $appConfig
 	include FRAMEWORK_DIR.DS.'config'.DS.'config.php';
-	$frameworkConfig = $config;
-	$config = array();
 	include APPLICATION_DIR.DS.'config'.DS.'config.php';
-	$config = \array_merge($frameworkConfig, $config);
+    
+    require \VENDORS_DIR.DS.'theseer'.DS.'scanner'.DS.'filesonlyfilter.php';
+    require \VENDORS_DIR.DS.'theseer'.DS.'scanner'.DS.'includeexcludefilter.php';
+    require \VENDORS_DIR.DS.'theseer'.DS.'scanner'.DS.'directoryscanner.php';
+    require \LIBS_DIR.DS.'ConfigBuilder.php';
+    
+    // get the full config, i.e. framework + app + modules
+    $confBuilder = new \framework\libs\ConfigBuilder($frameworkConfig, $appConfig);
+    $config = $confBuilder->getConfig();
 }
 
-require FRAMEWORK_DIR.DS.'libs'.DS.'ClassLoader.php';
-require FRAMEWORK_DIR.DS.'libs'.DS.'StaticClassLoader.php';
+require LIBS_DIR.DS.'ClassLoader.php';
+require LIBS_DIR.DS.'StaticClassLoader.php';
 
 if ($config['environment'] == 'production')
 {

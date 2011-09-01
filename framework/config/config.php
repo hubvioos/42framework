@@ -17,7 +17,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-$config = array(
+$frameworkConfig = array(
 	'environment' => 'development',
     'errorReporting' => E_ALL|E_STRICT,
 	'displayErrors' => 1,
