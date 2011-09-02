@@ -68,7 +68,8 @@ class ApplicationFilter extends \framework\filters\Filter
 		{
 			$url = $request->getUrl();
 			
-			$path = $this->getComponent('route')->urlToPath($url, $config['defaultModule'], $config['defaultAction']);
+			// $path = $this->getComponent('route')->urlToPath($url, $config['defaultModule'], $config['defaultAction']);
+			$path = $this->getComponent('route')->urlToPath($url);
 			
 			$params = $this->getComponent('route')->pathToParams($path);
 			

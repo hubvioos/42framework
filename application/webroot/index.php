@@ -43,9 +43,8 @@ else
 {
     // include the framework and app config files to get access to 
     // $frameworkConfig and $appConfig
-	/* @var $frameworkConfig array */
-	/* @var $appConfig array */
-	
+	$frameworkConfig = array();
+	$appConfig = array();
 	include FRAMEWORK_DIR.DS.'config'.DS.'config.php';
 	include APPLICATION_DIR.DS.'config'.DS.'config.php';
     
