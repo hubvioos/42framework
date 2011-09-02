@@ -44,6 +44,13 @@ class ConfigBuilder
 		// merge the framework and app configs
 		$this->_config = \array_merge($frameworkConfig, $appConfig);
 
+		// @TODO : remove on file tree modification
+		$this->_config['modules'] = array(
+			'website' => array('dependenciesSatisfied' => true), 
+			'cli'=> array('dependenciesSatisfied' => true), 
+			'errors' => array('dependenciesSatisfied' => true)
+		);
+		
 		/* @var $scanner \TheSeer\Tools\DirectoryScanner */
 		$scanner = new \TheSeer\Tools\DirectoryScanner;
 

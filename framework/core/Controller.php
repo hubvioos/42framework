@@ -25,6 +25,42 @@ class ControllerException extends \Exception
 	
 }
 
+class ControllerDependencyException extends \Exception
+{
+	/**
+	 * Constructor
+	 * @param string $unsatisfiedModule The name of the unsatisfied
+	 * @param array $modulesConfig The config options for the modules i.e. $config['modules']
+	 */
+	public function __construct($unsatisfiedModule, array $modulesConfig)
+	{
+		// write a kickass message
+		$this->message = '<p>The module "<em>'.$unsatisfiedModule
+			.'</em>" couldn\'t be properly requested because '
+			.'one or more of its dependencies are not satified.</p>'
+			.'<p>List of the dependencies: </p><ul>';
+		
+		foreach($modulesConfig[$unsatisfiedModule]['dependencies'] as $dependency => $version)
+		{
+			$this->message .= '<li>'.$dependency.' version '.$version;
+			
+			if(!isset($modulesConfig[$dependency]) || 
+				$modulesConfig[$dependency]['dependenciesSatisfied'] === false)
+			{
+				$this->message .= ' : <strong>UNSATISFIED</strong>';
+			}
+			else if($modulesConfig[$dependency]['dependenciesSatisfied'] === true)
+			{
+				$this->message .= ' : satisfied';
+			}
+			
+			$this->message .= '</li>';
+		}
+		
+		$this->message .= '</ul>';
+	}
+}
+
 class Controller extends \framework\core\FrameworkObject
 {
 
@@ -78,42 +114,49 @@ class Controller extends \framework\core\FrameworkObject
 		}
 		else
 		{
-
-                //Preparation to "before" and "after" events lauching
-                $classPath = 'application\\modules\\'.$request->getModule().'\\controllers\\'.$request->getAction();
-                $beforeName = 'before'.ucfirst($request->getAction());
-                $afterName = 'after'.ucfirst($request->getAction());
-
-                 //Launch Before event
-                $this->raiseEvent($beforeName);
-                
-			if ($this->_before($this->_request, $this->_response) !== false
-					&& call_user_func_array(array($this, 'processAction'), $this->_request->getParams()) !== false
-					&& $this->_after($this->_request, $this->_response) !== false
-			)
+			// check if the module we are requesting has its dependencies satisfied
+			if ($this->getConfig('modules', false)->get($request->getModule(), false)->get('dependenciesSatisfied') === true)
 			{
-                                //Lauch After event
-                               $this->raiseEvent($afterName);
-                                
-				if ($this->usesView)
+				//Preparation to "before" and "after" events lauching
+				$classPath = 'application\\modules\\' . $request->getModule() . '\\controllers\\' . $request->getAction();
+				$beforeName = 'before' . ucfirst($request->getAction());
+				$afterName = 'after' . ucfirst($request->getAction());
+
+				//Launch Before event
+				$this->raiseEvent($beforeName);
+
+				if ($this->_before($this->_request, $this->_response) !== false
+						&& call_user_func_array(array($this, 'processAction'), $this->_request->getParams()) !== false
+						&& $this->_after($this->_request, $this->_response) !== false
+				)
 				{
-					if ($this->usesLayout == false)
+					//Lauch After event
+					$this->raiseEvent($afterName);
+
+					if ($this->usesView)
 					{
-						$this->setLayout(false);
+						if ($this->usesLayout == false)
+						{
+							$this->setLayout(false);
+						}
+
+						if ($this->_view === null)
+						{
+							$this->setView($this->_request->getAction());
+						}
+						$this->_response->set($this->createView($this->_request->getModule(), $this->_view, $this->_vars));
 					}
 
-					if ($this->_view === null)
-					{
-						$this->setView($this->_request->getAction());
-					}
-					$this->_response->set($this->createView($this->_request->getModule(), $this->_view, $this->_vars));
+					$this->_response->setStatus(\framework\core\Response::SUCCESS);
 				}
-
-				$this->_response->setStatus(\framework\core\Response::SUCCESS);
+				else
+				{
+					$this->_response->setStatus(\framework\core\Response::ERROR);
+				}
 			}
 			else
 			{
-				$this->_response->setStatus(\framework\core\Response::ERROR);
+				throw new \framework\core\ControllerDependencyException($request->getModule(), $this->getConfig('modules'));
 			}
 		}
 
