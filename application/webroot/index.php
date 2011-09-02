@@ -43,6 +43,9 @@ else
 {
     // include the framework and app config files to get access to 
     // $frameworkConfig and $appConfig
+	/* @var $frameworkConfig array */
+	/* @var $appConfig array */
+	
 	include FRAMEWORK_DIR.DS.'config'.DS.'config.php';
 	include APPLICATION_DIR.DS.'config'.DS.'config.php';
     
@@ -53,6 +56,8 @@ else
     
     // get the full config, i.e. framework + app + modules
     $confBuilder = new \framework\libs\ConfigBuilder($frameworkConfig, $appConfig);
+    $confBuilder->checkDependencies();
+    
     $config = $confBuilder->getConfig();
 }
 
