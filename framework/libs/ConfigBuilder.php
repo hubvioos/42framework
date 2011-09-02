@@ -78,8 +78,8 @@ class ConfigBuilder
 					// put the config options for module foo in $_config['modules']['foo']
 					$this->_config['modules'][$name[1]] = $config;
 				}
-				unset($config);
 			}
+			unset($config);
 		}
 	}
 
