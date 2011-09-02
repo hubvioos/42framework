@@ -87,17 +87,17 @@ class View extends \framework\core\FrameworkObject
 		{
 			try
 			{
-				extract(self::$globalsVars);
-				extract($this->vars);
+				extract(self::$_globalsVars);
+				extract($this->_vars);
 				
 				\ob_start();
-				include $this->file;
-				$this->renderedView = \ob_get_clean();
+				include $this->_file;
+				$this->_renderedView = \ob_get_clean();
 			}
 			catch (\Exception $e)
 			{
 				\ob_end_clean();
-				$this->renderedView = $e->__toString();
+				$this->_renderedView = $e->__toString();
 			}
 		}
 		return $this->renderedView;
