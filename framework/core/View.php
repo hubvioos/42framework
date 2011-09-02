@@ -83,16 +83,24 @@ class View extends \framework\core\FrameworkObject
 
 	public function render ()
 	{
-		if ($this->_renderedView === null)
+		if ($this->renderedView === null)
 		{
-			extract(self::$_globalsVars);
-			extract($this->_vars);
-			
-			ob_start();
-			include $this->_file;
-			$this->_renderedView = ob_get_clean();
+			try
+			{
+				extract(self::$globalsVars);
+				extract($this->vars);
+				
+				\ob_start();
+				include $this->file;
+				$this->renderedView = \ob_get_clean();
+			}
+			catch (\Exception $e)
+			{
+				\ob_end_clean();
+				$this->renderedView = $e->__toString();
+			}
 		}
-		return $this->_renderedView;
+		return $this->renderedView;
 	}
 	
 	public function getRenderedView()
