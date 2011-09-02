@@ -64,16 +64,21 @@ class ConfigBuilder
 		// scan the modules' directory
 		foreach ($scanner(\MODULES_DIR, true) as $file)
 		{
+			$config = array();
 			include $file->getPathName();
-			$name = array();
-
-			// get the module's name
-			\preg_match('#^' . \MODULES_DIR . '/(\w*)/config/#', $file->getPathName(), $name);
-
-			if (\count($name) === 2)
+			
+			if(isset($config) && \is_array($config))
 			{
-				// put the config options for module foo in $_config['modules']['foo']
-				$this->_config['modules'][$name[1]] = $config;
+				$name = array();
+				// get the module's name
+				\preg_match('#^' . \MODULES_DIR . '/(\w*)/config/#', $file->getPathName(), $name);
+
+				if (\count($name) === 2)
+				{
+					// put the config options for module foo in $_config['modules']['foo']
+					$this->_config['modules'][$name[1]] = $config;
+				}
+				unset($config);
 			}
 		}
 	}
