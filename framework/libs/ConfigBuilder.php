@@ -29,82 +29,242 @@ class ConfigBuilder
 {
 
 	/**
-	 * The configuration options
-	 * @var array 
+	 * The config we want to build
+	 * @var array
 	 */
 	protected $_config = array();
 
 	/**
+	 * The framework's config (to be merged with the application's config)
+	 * @var array 
+	 */
+	protected $_frameworkConfig = array();
+
+	/** The application's config (to be merged with the framework's config)
+	 * @var array 
+	 */
+	protected $_appConfig = array();
+
+	/**
+	 * The modules list
+	 * @var array
+	 */
+	protected $_modulesList = array();
+
+	/**
+	 * DirectoryIterator
+	 * @var \DirectoryIterator
+	 */
+	protected $_directoryIterator = null;
+
+	/**
+	 * The path to directory containing the modules we want to include in the config
+	 * @var string
+	 */
+	protected $_modulesDirectory = \MODULES_DIR;
+
+	const DEPENDENCIES_SATISFIED = 1;
+	const DEPENDENCIES_UNSATISFIED = -1;
+	const DEPENDENCIES_SCHRODINGER = 0; // also known as HEADS_OR_TAILS, INCH_ALLAH, GOD_BLESS_U
+
+	/**
 	 * Constructor
+	 * Can take the framework's and app's configs as argument
 	 * @param array $frameworkConfig
 	 * @param array $appConfig 
 	 */
 	public function __construct (array $frameworkConfig = array(), array $appConfig = array())
 	{
-		// merge the framework and app configs
-		$this->_config = \array_merge($frameworkConfig, $appConfig);
+		$this->_frameworkConfig = $frameworkConfig;
+		$this->_appConfig = $appConfig;
 
-		// @TODO : remove on file tree modification
-		$this->_config['modules'] = array(
-			'website' => array('dependenciesSatisfied' => true), 
-			'cli'=> array('dependenciesSatisfied' => true), 
-			'errors' => array('dependenciesSatisfied' => true)
-		);
-		
-		/* @var $scanner \TheSeer\Tools\DirectoryScanner */
-		$scanner = new \TheSeer\Tools\DirectoryScanner;
+		$this->_config['modules'] = array();
 
-		// don't scan controllers, models & views folders
-		$excludes = array('*/controllers/*', '*/models/*', '*/views/*');
-		$scanner->setExcludes($excludes);
-		// search for files named config/config.php
-		$includes = array('*/config/config.php');
-		$scanner->setIncludes($includes);
-
-		// scan the modules' directory
-		foreach ($scanner(\MODULES_DIR, true) as $file)
-		{
-			$config = array();
-			include $file->getPathName();
-			
-			if(isset($config) && \is_array($config))
-			{
-				$name = array();
-				// get the module's name
-				\preg_match('#^' . \MODULES_DIR . '/(\w*)/config/#', $file->getPathName(), $name);
-
-				if (\count($name) === 2)
-				{
-					// put the config options for module foo in $_config['modules']['foo']
-					$this->_config['modules'][$name[1]] = $config;
-				}
-			}
-			unset($config);
-		}
+		$this->_mergeInternalConfigs();
 	}
 
+	
 	/**
-	 * Get the computed config
-	 * @return array 
+	 * Get the computed configuration
+	 * @return array $_config
 	 */
 	public function getConfig ()
 	{
 		return $this->_config;
 	}
-
-	public function checkDependencies ()
+	
+	/**
+	 * Get the framework's config
+	 * @return array $this->_frameworkConfig; 
+	 */
+	public function getFrameworkConfig ()
 	{
-		if (isset($this->_config['modules']) && \is_array($this->_config['modules']))
-		{
-			foreach ($this->_config['modules'] as $moduleName => $options)
-			{
-				$this->_config['modules'][$moduleName]['dependenciesSatisfied'] = $this->_checkModuleDependencies($options);
-			}
-		}
+		return $this->_frameworkConfig;
+	}
+	
+	/**
+	 * Get the application's config
+	 * @return array $this->_appConfig
+	 */
+	public function getAppConfig ()
+	{
+		return $this->_appConfig;
 	}
 
 	/**
+	 * Get the modules list
+	 * @return array $_modulesList
+	 */
+	public function getModulesList ()
+	{
+		return $this->_modulesList;
+	}
+	
+	/**
+	 * Get the directory path to scan for the modules
+	 * @return string 
+	 */
+	public function getModulesDirectory ()
+	{
+		return $this->_modulesDirectory;
+	}
+
+		
+	
+	
+	/**
+	 * Set the framework's config
+	 * @param array $frameworkConfig The new framework's config
+	 * @return ConfigBuilder $this
+	 */
+	public function setFrameworkConfig (array $frameworkConfig)
+	{
+		$this->_frameworkConfig = $frameworkConfig;
+
+		return $this->_mergeInternalConfigs();
+	}
+	
+	/**
+	 * Set the application's config
+	 * @param array $appConfig The new application's config
+	 * @return ConfigBuilder $this
+	 */
+	public function setAppConfig (array $appConfig)
+	{
+		$this->_appConfig = $appConfig;
+
+		return $this->_mergeInternalConfigs();
+	}
+
+	/**
+	 * Set the path to directory to scan for the modules
+	 * @param string $_modulesDirectory
+	 * @return ConfigBuilder 
+	 */
+	public function setModulesDirectory ($modulesDirectory)
+	{
+		$this->_modulesDirectory = rtrim($modulesDirectory, '/\\');
+		
+		return $this;
+	}
+
+	
+	
+	
+	
+	/**
+	 * Build the modules list into $_config['modules']
+	 * @param string $modulesDirectory The directory to scan for the modules
+	 * @return ClassBuilder $this
+	 */
+	public function buildModulesList ($modulesDirectory = '')
+	{
+		if($modulesDirectory !== '')
+		{
+			$this->setModulesDirectory($modulesDirectory);
+		}
+		
+		$this->_directoryIterator = new \DirectoryIterator($this->_modulesDirectory);
+
+		// scan the directory and add every module it contains to the modules list
+		// except ./ and ../
+		foreach ($this->_directoryIterator as $file)
+		{
+			$moduleName = rtrim($file->getFilename(), '/\\');
+			if ($file->isDir() and !$file->isDot())
+			{
+				$this->_config['modules'][$moduleName] = array();
+				$this->_modulesList[] = $moduleName;
+			}
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Merge the $config array of each module (if existant) with the $_config['modules'][moduleName] array
+	 * @return ClassBuilder $this
+	 */
+	public function buildInitModulesConfig ()
+	{
+		foreach ($this->_modulesList as $moduleName)
+		{
+			$pathToConfigFile = $this->_modulesDirectory . DIRECTORY_SEPARATOR . $moduleName
+					. DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.php';
+
+			// get the $config var in the config/config.php file for each module, if existant
+			if (file_exists($pathToConfigFile))
+			{
+				require_once($pathToConfigFile);
+				if (isset($config))
+				{
+					$this->_config['modules'][$moduleName] = $config;
+				}
+				unset($config);
+			}
+			// or set an empty array
+			else
+			{
+				$this->_config['modules'][$moduleName] = array();
+			}
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Build the dependencies among the modules
+	 * @return ClassBuilder $this 
+	 */
+	public function buildModulesDependencies ()
+	{
+		foreach ($this->_config['modules'] as $moduleName => $options)
+		{
+			$this->_config['modules'][$moduleName]['dependenciesSatisfied'] = $this->_checkModuleDependencies($options);
+		}
+
+		return $this;
+	}
+
+
+	/**
+	 * Build the full config at once
+	 * i.e. build the modules list, build the modules' initial configs and dependencies
+	 * merge the application and framework config and set into $_config
+	 * @return ClassBuilder $this
+	 */
+	public function buildConfig ()
+	{
+		return $this->buildModulesList()
+						->buildInitModulesConfig()
+						->buildModulesDependencies()
+						->_mergeInternalConfigs();
+	}
+
+	
+	/**
 	 * Recursively check if a module's dependencies are satisfied
+	 * @TODO : log check results ?
 	 * @param array $options The module's configuration options
 	 * @return boolean Wether or not the dependencies are satified
 	 */
@@ -117,26 +277,26 @@ class ConfigBuilder
 				// if the dependency isn't installed
 				if (!isset($this->_config['modules'][$dependency]))
 				{
-					return false;
+					return self::DEPENDENCIES_UNSATISFIED;
 				}
 
-				// if the dependency has already been checked
-				if (isset($this->_config['modules'][$dependency]['dependenciesSatisfied']))
+				// if the dependency has already been marked as unsatisfied or SCHRODINGER
+				if (isset($this->_config['modules'][$dependency]['dependenciesSatisfied'])
+						&& $this->_config['modules'][$dependency]['dependenciesSatisfied'] != self::DEPENDENCIES_SATISFIED)
 				{
-					if ($this->_config['modules'][$dependency]['dependenciesSatisfied'] === false)
-					{
-						return false;
-					}
-					else
-					{
-						continue;
-					}
+					return $this->_config['modules'][$dependency]['dependenciesSatisfied'];
+				}
+
+				// if no version is specified for the installed version, INCH ALLAH
+				if (!isset($this->_config['modules'][$dependency]['version']))
+				{
+					return self::DEPENDENCIES_SCHRODINGER;
 				}
 
 				// if the installed version of the dependency is outdated
 				if ($this->_config['modules'][$dependency]['version'] < $minimalVersion)
 				{
-					return false;
+					return self::DEPENDENCIES_UNSATISFIED;
 				}
 
 				// if the dependency has dependencies, check them (and so on...)
@@ -148,8 +308,26 @@ class ConfigBuilder
 			}
 		}
 
-		// if everything went fine, well...
-		return true;
+		// if everything went fine or if no dependency is necessary, well...
+		return self::DEPENDENCIES_SATISFIED;
+	}
+	
+	/**
+	 * Put all the configs together into $_config
+	 * @return ConfigBuilder 
+	 */
+	private function _mergeInternalConfigs ()
+	{
+		// save the modules config if already existant
+		$modulesConfig = $this->_config['modules'];
+
+		// merge framework and application's configs for generic options 
+		// in case of duplicate options, application's config overrides framework's config
+		$this->_config = array_merge($this->_frameworkConfig, $this->_appConfig);
+		// add modules config for module specific options
+		$this->_config['modules'] = $modulesConfig;
+
+		return $this;
 	}
 
 }

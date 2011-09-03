@@ -54,10 +54,13 @@ else
     require \LIBS_DIR.DS.'ConfigBuilder.php';
     
     // get the full config, i.e. framework + app + modules
-    $confBuilder = new \framework\libs\ConfigBuilder($frameworkConfig, $appConfig);
-    $confBuilder->checkDependencies();
+    $configBuilder = new \framework\libs\ConfigBuilder();
+    $configBuilder->setAppConfig($appConfig)
+			->setFrameworkConfig($frameworkConfig)
+			->setModulesDirectory(\MODULES_DIR)
+			->buildConfig();
     
-    $config = $confBuilder->getConfig();
+	$config = $configBuilder->getConfig();
 }
 
 require LIBS_DIR.DS.'ClassLoader.php';

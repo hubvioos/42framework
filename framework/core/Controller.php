@@ -27,6 +27,13 @@ class ControllerException extends \Exception
 
 class ControllerDependencyException extends \Exception
 {
+	
+	protected static $_SATISFIED = '<span style="color:green; font-weight:bold;">SATISFIED</span>';
+	protected static $_MISSING = '<span style="color:red; font-weight:bold;">UNSATISFIED (not installed)</span>';
+	protected static $_UNSATISFIED = '<span style="color:red; font-weight:bold;">UNSATISFIED (version %f installed)</span>';
+	protected static $_SCHRODINGER = '<span style="color:orange; font-weight:bold;">UNABLE TO CHECK THE VERSION NUMBER</span>';
+
+		
 	/**
 	 * Constructor
 	 * @param string $unsatisfiedModule The name of the unsatisfied
@@ -34,6 +41,8 @@ class ControllerDependencyException extends \Exception
 	 */
 	public function __construct($unsatisfiedModule, array $modulesConfig)
 	{
+		echo 'exception for '.$unsatisfiedModule;
+		
 		// write a kickass message
 		$this->message = '<p>The module "<em>'.$unsatisfiedModule
 			.'</em>" couldn\'t be properly requested because '
@@ -42,16 +51,24 @@ class ControllerDependencyException extends \Exception
 		
 		foreach($modulesConfig[$unsatisfiedModule]['dependencies'] as $dependency => $version)
 		{
-			$this->message .= '<li>'.$dependency.' version '.$version;
+			$this->message .= '<li><span style="font-style:italic">'.$dependency
+					.'</span> version <span style="font-weight:bold;">'.$version.'</span> : ';
 			
-			if(!isset($modulesConfig[$dependency]) || 
-				$modulesConfig[$dependency]['dependenciesSatisfied'] === false)
+			if(!isset($modulesConfig[$dependency]))
 			{
-				$this->message .= ' : <strong>UNSATISFIED</strong>';
+				$this->message .= self::$_MISSING;
 			}
-			else if($modulesConfig[$dependency]['dependenciesSatisfied'] === true)
+			else if(!isset($modulesConfig[$dependency]['version']))
 			{
-				$this->message .= ' : satisfied';
+				$this->message .= self::$_SCHRODINGER;
+			}
+			else if($modulesConfig[$dependency]['version'] < $version)
+			{
+				$this->message .= sprintf(self::$_UNSATISFIED, $modulesConfig[$dependency]['version']);
+			}
+			else if($modulesConfig[$dependency]['version'] >= $version)
+			{
+				$this->message .= self::$_SATISFIED;
 			}
 			
 			$this->message .= '</li>';
@@ -114,8 +131,8 @@ class Controller extends \framework\core\FrameworkObject
 		}
 		else
 		{
-			// check if the module we are requesting has its dependencies satisfied
-			if ($this->getConfig('modules', false)->get($request->getModule(), false)->get('dependenciesSatisfied') === true)
+			// check if the module's dependencies are not unsatisfied (they can be SCHRODINGER !)
+			if ($this->getConfig('modules', false)->get($request->getModule(), false)->get('dependenciesSatisfied') !== \framework\libs\ConfigBuilder::DEPENDENCIES_UNSATISFIED)
 			{
 				//Preparation to "before" and "after" events lauching
 				$classPath = 'application\\modules\\' . $request->getModule() . '\\controllers\\' . $request->getAction();
