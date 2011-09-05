@@ -21,6 +21,11 @@ namespace framework\libs;
 
 class Registry extends \ArrayObject
 {
+	/**
+	 * Constructor.
+	 * This is recursive, i.e. every array inside $array will also be stored as an object
+	 * @param array $array The array that will be accessed as an object
+	 */
 	public function __construct(array $array = array())
 	{
 		foreach($array as $key => $value)
@@ -34,6 +39,10 @@ class Registry extends \ArrayObject
 		parent::__construct($array);
 	}
 	
+	/**
+	 * Return the object as an array (recursively)
+	 * @return array 
+	 */
 	public function toArray()
 	{
 		$array = $this->getArrayCopy();
@@ -49,16 +58,49 @@ class Registry extends \ArrayObject
 		return $array;
 	}
 	
+	/**
+	 * Try to get the instance variable named $offset (i.e. $this->$offset)
+	 * if it exists. If not, try to get the offset named $offset.
+	 * NOTE : the instance variable can _ONLY_ be accessed (thus returned)
+	 * if it's been initialized in the constructor
+	 * or if it has a default value
+	 * @param string $offset
+	 * @return mixed 
+	 */
 	public function __get($offset)
 	{
-		return $this->offsetGet($offset);
+		return (isset($this->$offset)) ? $this->$offset :$this->offsetGet($offset);
 	}
 	
+	/**
+	 * Try to set the instance variable named $offset (i.e. $this->$offset)
+	 * if it exists. If not, try to set the offset named $offset
+	 * NOTE : the instance variable can _ONLY_ be accessed (thus returned)
+	 * if it's been initialized in the constructor
+	 * or if it has a default value
+	 * @param mixed $offset 
+	 * @param mixed $value 
+	 */
 	public function __set($offset, $value)
 	{
-		$this->offsetSet($offset, $value);
+		if(isset($this->$offset))
+		{
+			echo $offset.' exists<br />';
+			$this->$offset = $value;
+		}
+		else
+		{
+			echo $offset.' doesn\'t exists<br />';
+			$this->offsetSet($offset, $value);
+		}
 	}
 	
+	/**
+	 * Assign the value $value to the offset $offset.
+	 * If $value is an array, it'll be stored as an ArrayObject
+	 * @param mixed $offset
+	 * @param mixed $value 
+	 */
 	public function offsetSet($offset, $value)
 	{
 		if (\is_array($value))
@@ -69,14 +111,24 @@ class Registry extends \ArrayObject
 		parent::offsetSet($offset, $value);
 	}
 
+	/**
+	 * Get the value of an offset ONLY. 
+	 * Instance variable are not accessible with this method, use "$this->$key" instead. 
+	 * For nested array, use the dotted notation, i.e. array1.array2.key
+	 * @param mixed $key The offset
+	 * @param boolean $toArray Whether or not the offset should be returned as an array instead of an object
+	 * @return mixed 
+	 */
 	public function get($key, $toArray = true)
 	{
 		$params = \explode('.', $key);
-		$value = $this[$params[0]];
+		$size = \count($params);
+		$value = $this->offsetGet($params[0]);
 		
-		if (\count($params) > 1)
+		// deep into the array if dotted notation was used
+		if ($size > 1)
 		{
-			for ($i = 1; $i < \count($params); $i++)
+			for ($i = 1; $i < $size; $i++)
 			{
 				$value = $value[$params[$i]];
 			}
@@ -90,6 +142,13 @@ class Registry extends \ArrayObject
 		return $value;
 	}
 	
+	/**
+	 * Set the value of an offset ONLY. 
+	 * Instance variable are not accessible with this method, use "$this->$key = $value" instead. 
+	 * For nested array, use the dotted notation, i.e. array1.array2.key
+	 * @param mixed $key
+	 * @param mixed $value
+	 */
 	public function set($key, $value)
 	{
 		$params = \explode('.', $key);
@@ -106,18 +165,18 @@ class Registry extends \ArrayObject
 					break;
 				}
 				
-				if(!isset($obj[$params[$i]]))
+				if(!$this->offsetExists($params[$i]))
 				{
-					$obj[$params[$i]] = new self();
+					$obj->offsetSet($params[$i], new self());
 				}
 				
-				$obj = $obj[$params[$i]];
+				$obj = $obj->offsetGet($params[$i]);
 			}
 			
-			$obj[$params[$size-1]] = $value;
+			$obj->offsetSet($params[$size-1], $value);
 			return;
 		}
 		
-		$this[$params[0]] = $value;
+		$this->offsetSet($params[0], $value);
 	}
 }
