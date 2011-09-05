@@ -85,12 +85,10 @@ class Registry extends \ArrayObject
 	{
 		if(isset($this->$offset))
 		{
-			echo $offset.' exists<br />';
 			$this->$offset = $value;
 		}
 		else
 		{
-			echo $offset.' doesn\'t exists<br />';
 			$this->offsetSet($offset, $value);
 		}
 	}
