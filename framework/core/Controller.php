@@ -132,7 +132,7 @@ class Controller extends \framework\core\FrameworkObject
 		else
 		{
 			// check if the module's dependencies are not unsatisfied (they can be SCHRODINGER !)
-			if ($this->getConfig('modules', false)->get($request->getModule(), false)->get('dependenciesSatisfied') !== \framework\libs\ConfigBuilder::DEPENDENCIES_UNSATISFIED)
+			if ($this->getConfig()->get('modules.'.$request->getModule().'.dependenciesSatisfied') !== \framework\libs\ConfigBuilder::DEPENDENCIES_UNSATISFIED)
 			{
 				//Preparation to "before" and "after" events lauching
 				$classPath = 'application\\modules\\' . $request->getModule() . '\\controllers\\' . $request->getAction();
