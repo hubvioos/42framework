@@ -73,13 +73,13 @@ class ConfigBuilder
 	 * The names of the variable
 	 * Framework config variable, Application config variable, and Module config variable can have different names.
 	 * 		- array[0] : framework config variable name
-	 *		- array[1] : application config variable name
-	 *		- array[2] : module config variable name
+	 * 		- array[1] : application config variable name
+	 * 		- array[2] : module config variable name
 	 * @var array
 	 */
 	protected $_variablesNames = array('framework' => 'frameworkConfig',
-														   'app' => 'appConfig',
-														   'module' => 'config');
+		'app' => 'appConfig',
+		'module' => 'config');
 
 	const DEPENDENCIES_SATISFIED = 1;
 	const DEPENDENCIES_UNSATISFIED = -1;
@@ -87,22 +87,21 @@ class ConfigBuilder
 
 	/**
 	 * Constructor
-	 * Can take the framework's and app's configs as argument
 	 * @param array $configFileName - The name of config file (whithout .php extension)
-	 * @param array $appConfig - The
+	 * @param array $variablesNames - The variables' names to use for the framework, application and modules' config
 	 */
 	public function __construct ($configFileName = 'config', $variablesNames = array('framework' => 'frameworkConfig',
-																															  'app' => 'appConfig',
-																															  'module' => 'config'))
+		'app' => 'appConfig',
+		'module' => 'config'))
 	{
 
 		//Set file and variables name
 		$this->_configFileName = $configFileName;
 		$this->_variablesNames = $variablesNames;
-		
+
 		//Include config files of the framework and the application config file
-		include FRAMEWORK_DIR.DS.'config'.DS.$this->_configFileName.'.php';
-		include APP_DIR.DS.'config'.DS.$this->_configFileName.'.php';
+		include FRAMEWORK_DIR . DS . 'config' . DS . $this->_configFileName . '.php';
+		include APPLICATION_DIR . DS . 'config' . DS . $this->_configFileName . '.php';
 
 		//Set framework & application config
 		$this->_frameworkConfig = ${$this->_variablesNames['framework']};
@@ -112,7 +111,6 @@ class ConfigBuilder
 		$this->_mergeInternalConfigs();
 	}
 
-	
 	/**
 	 * Get the computed configuration
 	 * @return array $_config
@@ -121,7 +119,7 @@ class ConfigBuilder
 	{
 		return $this->_config;
 	}
-	
+
 	/**
 	 * Get the framework's config
 	 * @return array $this->_frameworkConfig; 
@@ -130,7 +128,7 @@ class ConfigBuilder
 	{
 		return $this->_frameworkConfig;
 	}
-	
+
 	/**
 	 * Get the application's config
 	 * @return array $this->_appConfig
@@ -148,7 +146,7 @@ class ConfigBuilder
 	{
 		return $this->_modulesList;
 	}
-	
+
 	/**
 	 * Get the directory path to scan for the modules
 	 * @return string 
@@ -158,9 +156,6 @@ class ConfigBuilder
 		return $this->_modulesDirectory;
 	}
 
-		
-	
-	
 	/**
 	 * Set the framework's config
 	 * @param array $frameworkConfig The new framework's config
@@ -172,7 +167,7 @@ class ConfigBuilder
 
 		return $this->_mergeInternalConfigs();
 	}
-	
+
 	/**
 	 * Set the application's config
 	 * @param array $appConfig The new application's config
@@ -193,7 +188,7 @@ class ConfigBuilder
 	public function setModulesDirectory ($modulesDirectory)
 	{
 		$this->_modulesDirectory = rtrim($modulesDirectory, '/\\');
-		
+
 		return $this;
 	}
 
@@ -204,11 +199,11 @@ class ConfigBuilder
 	 */
 	public function buildModulesList ($modulesDirectory = '')
 	{
-		if($modulesDirectory !== '')
+		if ($modulesDirectory !== '')
 		{
 			$this->setModulesDirectory($modulesDirectory);
 		}
-		
+
 		$this->_directoryIterator = new \DirectoryIterator($this->_modulesDirectory);
 
 		// scan the directory and add every module it contains to the modules list
@@ -233,13 +228,13 @@ class ConfigBuilder
 	{
 
 		foreach ($this->_modulesList as $moduleName)
-		{		
+		{
 			$pathToConfigFile = $this->_modulesDirectory . DIRECTORY_SEPARATOR . $moduleName
 					. DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . $this->_configFileName . '.php';
 
 			// get the $config var in the config/config.php file for each module, if existant
 			if (file_exists($pathToConfigFile))
-			{ 
+			{
 				require_once($pathToConfigFile);
 				if (isset($$varName))
 				{
@@ -271,7 +266,6 @@ class ConfigBuilder
 		return $this;
 	}
 
-
 	/**
 	 * Build the full config at once
 	 * i.e. build the modules list, build the modules' initial configs and dependencies
@@ -286,7 +280,6 @@ class ConfigBuilder
 						->_mergeInternalConfigs();
 	}
 
-	
 	/**
 	 * Recursively check if a module's dependencies are satisfied
 	 * @TODO : log check results ?
@@ -336,7 +329,7 @@ class ConfigBuilder
 		// if everything went fine or if no dependency is necessary, well...
 		return self::DEPENDENCIES_SATISFIED;
 	}
-	
+
 	/**
 	 * Put all the configs together into $_config
 	 * @return ConfigBuilder 

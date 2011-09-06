@@ -112,13 +112,8 @@ else
 
 $registry = new \framework\libs\Registry($config);
 
-//OLD
 $container = new \framework\core\ComponentsContainer($registry);
 $core = $container->getCore();
-
-//TEMP -
-//$containerv2 = new \framework\core\ComponentsContainerv2($registry, $componentsContainerConfig);	
-//$core = $containerv2->getCore();
 
 $core	->bootstrap()
 		->run();
