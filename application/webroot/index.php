@@ -64,10 +64,7 @@ if (\file_exists(\BUILD_DIR.\DIRECTORY_SEPARATOR.'config.php'))
 }
 else
 {
-    require \FRAMEWORK_DIR.\DIRECTORY_SEPARATOR.'vendors'.\DIRECTORY_SEPARATOR.'theseer'.\DIRECTORY_SEPARATOR.'scanner'.\DIRECTORY_SEPARATOR.'filesonlyfilter.php';
-    require \FRAMEWORK_DIR.\DIRECTORY_SEPARATOR.'vendors'.\DIRECTORY_SEPARATOR.'theseer'.\DIRECTORY_SEPARATOR.'scanner'.\DIRECTORY_SEPARATOR.'includeexcludefilter.php';
-    require \FRAMEWORK_DIR.\DIRECTORY_SEPARATOR.'vendors'.\DIRECTORY_SEPARATOR.'theseer'.\DIRECTORY_SEPARATOR.'scanner'.\DIRECTORY_SEPARATOR.'directoryscanner.php';
-    require \FRAMEWORK_DIR.\DIRECTORY_SEPARATOR.'libs'.\DIRECTORY_SEPARATOR.'ConfigBuilder.php';
+    require \LIBS_DIR.DS.'ConfigBuilder.php';
     
     // get the full config, i.e. framework + app + modules
     $configBuilder = new \framework\libs\ConfigBuilder();
