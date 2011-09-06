@@ -18,21 +18,10 @@
  */
 namespace application\modules\cli\controllers;
 
-class CompileConfig extends \application\modules\cli\controllers\CliCommand
+class ShowDoc extends \application\modules\cli\controllers\CliCommand
 {
-	public function processAction ($configFileName = 'config', $frameworkConfigVariableName = 'frameworkConfig',  $appConfigVariableName= 'appConfig', $moduleConfigVariableName = 'config')
+	public function processAction ()
 	{
-		$variablesNames = array(   'framework' => $frameworkConfigVariableName,
-												 'app' => $appConfigVariableName,
-												 'module' => $moduleConfigVariableName);
-		$configBuilder = new \framework\libs\ConfigBuilder($configFileName, $variablesNames);
-		$configBuilder->setModulesDirectory(\MODULES_DIR)
-							->buildConfig();
-		$config = $configBuilder->getConfig();
-
 		
-		$ab = new \application\modules\cli\ConfigBuilder($config);
-		$ab->setTemplateFile(\MODULES_DIR.\DIRECTORY_SEPARATOR.'cli'.\DIRECTORY_SEPARATOR.'views'.\DIRECTORY_SEPARATOR.'configTemplate.php');
-		$ab->save(\APP_DIR.DS.'build'.DS.$configFileName.'.php');
 	}
 }

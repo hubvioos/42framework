@@ -18,21 +18,16 @@
  */
 namespace application\modules\cli\controllers;
 
-class CompileConfig extends \application\modules\cli\controllers\CliCommand
+class CliCommand extends \framework\core\Controller
 {
-	public function processAction ($configFileName = 'config', $frameworkConfigVariableName = 'frameworkConfig',  $appConfigVariableName= 'appConfig', $moduleConfigVariableName = 'config')
-	{
-		$variablesNames = array(   'framework' => $frameworkConfigVariableName,
-												 'app' => $appConfigVariableName,
-												 'module' => $moduleConfigVariableName);
-		$configBuilder = new \framework\libs\ConfigBuilder($configFileName, $variablesNames);
-		$configBuilder->setModulesDirectory(\MODULES_DIR)
-							->buildConfig();
-		$config = $configBuilder->getConfig();
+	protected $usesView = false;
+	protected $usesLayout = false;
 
-		
-		$ab = new \application\modules\cli\ConfigBuilder($config);
-		$ab->setTemplateFile(\MODULES_DIR.\DIRECTORY_SEPARATOR.'cli'.\DIRECTORY_SEPARATOR.'views'.\DIRECTORY_SEPARATOR.'configTemplate.php');
-		$ab->save(\APP_DIR.DS.'build'.DS.$configFileName.'.php');
+	protected function _before(\framework\core\Request &$request, \framework\core\Response &$response)
+	{
+		if ($request->getState() != \framework\core\Request::CLI_STATE)
+		{
+			//$this->getContainer()->getNewRequest('errors', 'error403', array($request))->execute();
+		}
 	}
 }

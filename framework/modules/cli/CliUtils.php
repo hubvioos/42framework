@@ -16,24 +16,38 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
-namespace application\modules\cli\controllers;
+namespace application\modules\cli;
 
-class CompileAutoload extends \application\modules\cli\controllers\CliCommand
+class CliUtils
 {
-	public function processAction ()
+	/**
+	 * Extract request params from the cli
+	 * 
+	 * @return array
+	 */
+	public static function extractParams ()
 	{
-		$scanner = new \application\modules\cli\DirectoryScanner;
-		$scanner->addInclude('*.php');
+		if ($_SERVER['argc'] === 1)
+		{
+			return array('action' => 'showDoc', 'params' => array('all'));
+		}
+		if ($_SERVER['argc'] === 2)
+		{
+			return array('action' => $_SERVER['argv'][1], 'params' => array());
+		}
 		
-		$finder = new \application\modules\cli\ClassFinder;
-		
-		$found = array_merge($finder->parseMulti($scanner(VENDORS_DIR)), 
-							 $finder->parseMulti($scanner(FRAMEWORK_DIR)), 
-							 $finder->parseMulti($scanner(MODULES_DIR)),
-							 $finder->parseMulti($scanner(APP_DIR)));
-		
-		$ab = new \application\modules\cli\AutoloadBuilder($found);
-		$ab->setTemplateFile(MODULES_DIR.DS.'cli'.DS.'views'.DS.'autoloadTemplate.php');
-		$ab->save(APP_DIR.DS.'build'.DS.'autoload.php');
+		$params = array('action' => '', 'params' => array());
+		for ($i = 1; $i < $_SERVER['argc']; $i++)
+		{
+			if ($i === 1)
+			{
+				$params['action'] = $_SERVER['argv'][$i];
+			}
+			else 
+			{
+				$params['params'][] = $_SERVER['argv'][$i];
+			}
+		}
+		return $params;
 	}
 }

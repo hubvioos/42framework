@@ -102,7 +102,7 @@ class ConfigBuilder
 		
 		//Include config files of the framework and the application config file
 		include FRAMEWORK_DIR.DS.'config'.DS.$this->_configFileName.'.php';
-		include APPLICATION_DIR.DS.'config'.DS.$this->_configFileName.'.php';
+		include APP_DIR.DS.'config'.DS.$this->_configFileName.'.php';
 
 		//Set framework & application config
 		$this->_frameworkConfig = ${$this->_variablesNames['framework']};

@@ -38,6 +38,6 @@ $frameworkConfig = array(
 	'events' => array(),
 	'dbConnectionParams' => array(
 		'driver' => 'pdo_sqlite',
-		'path' => APPLICATION_DIR.DS.'database'.DS.'db.sqlite'
+		'path' => APP_DIR.DS.'database'.DS.'db.sqlite'
 	)
 );

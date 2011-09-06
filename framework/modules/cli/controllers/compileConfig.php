@@ -20,19 +20,19 @@ namespace application\modules\cli\controllers;
 
 class CompileConfig extends \application\modules\cli\controllers\CliCommand
 {
-	public function processAction ($configFileName = 'config', $frameworkConfigVariableName = 'frameworkConfig',  $appConfigVariableName= 'appConfig', $moduleConfigVariableName = 'config')
+	public function processAction ()
 	{
-		$variablesNames = array(   'framework' => $frameworkConfigVariableName,
-												 'app' => $appConfigVariableName,
-												 'module' => $moduleConfigVariableName);
-		$configBuilder = new \framework\libs\ConfigBuilder($configFileName, $variablesNames);
-		$configBuilder->setModulesDirectory(\MODULES_DIR)
-							->buildConfig();
-		$config = $configBuilder->getConfig();
-
+		$config = array();
+		require FRAMEWORK_DIR.DS.'config'.DS.'config.php';
+		$frameworkConfig = $config;
+		
+		require APP_DIR.DS.'config'.DS.'config.php';
+		$appConfig = $config;
+		
+		$config = array_merge($frameworkConfig, $appConfig);
 		
 		$ab = new \application\modules\cli\ConfigBuilder($config);
-		$ab->setTemplateFile(\MODULES_DIR.\DIRECTORY_SEPARATOR.'cli'.\DIRECTORY_SEPARATOR.'views'.\DIRECTORY_SEPARATOR.'configTemplate.php');
-		$ab->save(\APP_DIR.DS.'build'.DS.$configFileName.'.php');
+		$ab->setTemplateFile(MODULES_DIR.DS.'cli'.DS.'views'.DS.'configTemplate.php');
+		$ab->save(APP_DIR.DS.'build'.DS.'config.php');
 	}
 }

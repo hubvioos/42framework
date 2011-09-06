@@ -36,7 +36,7 @@ class View extends \framework\core\FrameworkObject
 		
 		if (!file_exists($this->_file))
 		{
-			$globalFile = APPLICATION_DIR.DS.'views'.DS.$file.$config['viewExtension'];
+			$globalFile = APP_DIR.DS.'views'.DS.$file.$config['viewExtension'];
 			if (file_exists($globalFile))
 			{
 				$this->_file = $globalFile;
