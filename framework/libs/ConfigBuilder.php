@@ -63,6 +63,24 @@ class ConfigBuilder
 	 */
 	protected $_modulesDirectory = \MODULES_DIR;
 
+	/**
+	 * The name of the config file (without extension .php)
+	 * @var string
+	 */
+	protected $_configFileName = 'config';
+
+	/**
+	 * The names of the variable
+	 * Framework config variable, Application config variable, and Module config variable can have different names.
+	 * 		- array[0] : framework config variable name
+	 *		- array[1] : application config variable name
+	 *		- array[2] : module config variable name
+	 * @var array
+	 */
+	protected $_variablesNames = array('framework' => 'frameworkConfig',
+														   'app' => 'appConfig',
+														   'module' => 'config');
+
 	const DEPENDENCIES_SATISFIED = 1;
 	const DEPENDENCIES_UNSATISFIED = -1;
 	const DEPENDENCIES_SCHRODINGER = 0; // also known as HEADS_OR_TAILS, INCH_ALLAH, GOD_BLESS_U
@@ -70,16 +88,27 @@ class ConfigBuilder
 	/**
 	 * Constructor
 	 * Can take the framework's and app's configs as argument
-	 * @param array $frameworkConfig
-	 * @param array $appConfig 
+	 * @param array $configFileName - The name of config file (whithout .php extension)
+	 * @param array $appConfig - The
 	 */
-	public function __construct (array $frameworkConfig = array(), array $appConfig = array())
+	public function __construct ($configFileName = 'config', $variablesNames = array('framework' => 'frameworkConfig',
+																															  'app' => 'appConfig',
+																															  'module' => 'config'))
 	{
-		$this->_frameworkConfig = $frameworkConfig;
-		$this->_appConfig = $appConfig;
+
+		//Set file and variables name
+		$this->_configFileName = $configFileName;
+		$this->_variablesNames = $variablesNames;
+		
+		//Include config files of the framework and the application config file
+		include FRAMEWORK_DIR.DS.'config'.DS.$this->_configFileName.'.php';
+		include APPLICATION_DIR.DS.'config'.DS.$this->_configFileName.'.php';
+
+		//Set framework & application config
+		$this->_frameworkConfig = ${$this->_variablesNames['framework']};
+		$this->_appConfig = ${$this->_variablesNames['app']};
 
 		$this->_config['modules'] = array();
-
 		$this->_mergeInternalConfigs();
 	}
 
@@ -168,10 +197,6 @@ class ConfigBuilder
 		return $this;
 	}
 
-	
-	
-	
-	
 	/**
 	 * Build the modules list into $_config['modules']
 	 * @param string $modulesDirectory The directory to scan for the modules
@@ -197,7 +222,6 @@ class ConfigBuilder
 				$this->_modulesList[] = $moduleName;
 			}
 		}
-
 		return $this;
 	}
 
@@ -207,20 +231,21 @@ class ConfigBuilder
 	 */
 	public function buildInitModulesConfig ()
 	{
+
 		foreach ($this->_modulesList as $moduleName)
-		{
+		{		
 			$pathToConfigFile = $this->_modulesDirectory . DIRECTORY_SEPARATOR . $moduleName
-					. DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.php';
+					. DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . $this->_configFileName . '.php';
 
 			// get the $config var in the config/config.php file for each module, if existant
 			if (file_exists($pathToConfigFile))
-			{
+			{ 
 				require_once($pathToConfigFile);
-				if (isset($config))
+				if (isset($$varName))
 				{
-					$this->_config['modules'][$moduleName] = $config;
+					$this->_config['modules'][$moduleName] = ${$this->_variablesNames['module']};
 				}
-				unset($config);
+				unset(${$this->_variablesNames['module']});
 			}
 			// or set an empty array
 			else

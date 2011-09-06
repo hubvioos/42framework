@@ -41,13 +41,6 @@ if (file_exists(BUILD_DIR.DS.'config.php'))
 }
 else
 {
-    // include the framework and app config files to get access to 
-    // $frameworkConfig and $appConfig
-	$frameworkConfig = array();
-	$appConfig = array();
-	include FRAMEWORK_DIR.DS.'config'.DS.'config.php';
-	include APPLICATION_DIR.DS.'config'.DS.'config.php';
-    
     require \VENDORS_DIR.DS.'theseer'.DS.'scanner'.DS.'filesonlyfilter.php';
     require \VENDORS_DIR.DS.'theseer'.DS.'scanner'.DS.'includeexcludefilter.php';
     require \VENDORS_DIR.DS.'theseer'.DS.'scanner'.DS.'directoryscanner.php';
@@ -55,12 +48,11 @@ else
     
     // get the full config, i.e. framework + app + modules
     $configBuilder = new \framework\libs\ConfigBuilder();
-    $configBuilder->setAppConfig($appConfig)
-			->setFrameworkConfig($frameworkConfig)
-			->setModulesDirectory(\MODULES_DIR)
-			->buildConfig();
+    $configBuilder->setModulesDirectory(\MODULES_DIR)
+						->buildConfig();
     
 	$config = $configBuilder->getConfig();
+
 }
 
 require LIBS_DIR.DS.'ClassLoader.php';
@@ -105,9 +97,16 @@ else
 }
 
 $config = new \framework\libs\Registry($config);
-$container = new \framework\core\ComponentsContainer($config);
 
-$core = $container->get('core');
+//OLD
+$container = new \framework\core\ComponentsContainer($config);
+$core = $container->getCore();
+
+
+//TEMP -
+$containerv2 = new \framework\core\ComponentsContainerv2($config, $componentsContainerConfig);	
+//	$core = $containerv2->getCore();
 
 $core	->bootstrap()
 		->run();
+

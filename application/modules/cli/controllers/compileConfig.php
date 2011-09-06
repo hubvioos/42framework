@@ -20,19 +20,19 @@ namespace application\modules\cli\controllers;
 
 class CompileConfig extends \application\modules\cli\controllers\CliCommand
 {
-	public function processAction ()
+	public function processAction ($configFileName = 'config', $frameworkConfigVariableName = 'frameworkConfig',  $appConfigVariableName= 'appConfig', $moduleConfigVariableName = 'config')
 	{
-		$config = array();
-		require FRAMEWORK_DIR.DS.'config'.DS.'config.php';
-		$frameworkConfig = $config;
-		
-		require APPLICATION_DIR.DS.'config'.DS.'config.php';
-		$appConfig = $config;
-		
-		$config = array_merge($frameworkConfig, $appConfig);
+		$variablesNames = array(   'framework' => $frameworkConfigVariableName,
+												 'app' => $appConfigVariableName,
+												 'module' => $moduleConfigVariableName);
+		$configBuilder = new \framework\libs\ConfigBuilder($configFileName, $variablesNames);
+		$configBuilder->setModulesDirectory(\MODULES_DIR)
+							->buildConfig();
+		$config = $configBuilder->getConfig();
+
 		
 		$ab = new \application\modules\cli\ConfigBuilder($config);
 		$ab->setTemplateFile(MODULES_DIR.DS.'cli'.DS.'views'.DS.'configTemplate.php');
-		$ab->save(APPLICATION_DIR.DS.'build'.DS.'config.php');
+		$ab->save(APPLICATION_DIR.DS.'build'.DS.$configFileName.'.php');
 	}
 }
