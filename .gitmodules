@@ -1,3 +1,6 @@
 [submodule "vendors/doctrine"]
 	path = vendors/doctrine
 	url = https://github.com/doctrine/doctrine2.git
+[submodule "vendors/gacela"]
+	path = vendors/gacela
+	url = https://github.com/gabriel1836/gacela.git
