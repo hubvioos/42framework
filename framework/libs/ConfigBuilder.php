@@ -100,7 +100,7 @@ class ConfigBuilder
 	 * @param array $variablesNames A string indexed array containing the names of the config variables at each level
 	 */
 	public function __construct ($configFileName = 'config', array $variablesNames =
-		array('framework' => 'frameworkConfig', 'application' => 'appConfig', 'modules' => 'config'))
+	array('framework' => 'frameworkConfig', 'application' => 'appConfig', 'modules' => 'config'))
 	{
 		//Set file and variables name
 		$this->_configFileName = $configFileName;
@@ -120,6 +120,7 @@ class ConfigBuilder
 		$this->_appConfig = ${$this->_variablesNames['application']};
 
 		$this->_config['modules'] = array();
+		$this->_config['modulesLocation'] = array();
 		$this->_mergeInternalConfigs();
 	}
 
@@ -186,7 +187,7 @@ class ConfigBuilder
 		return $this->_variablesNames;
 	}
 
-		/**
+	/**
 	 * Set the framework's config
 	 * @param array $frameworkConfig The new framework's config
 	 * @return ConfigBuilder $this
@@ -239,8 +240,7 @@ class ConfigBuilder
 	{
 		$this->_configFileName = rtrim($_configFileName, '\.php/\\ \t');
 	}
-	
-	
+
 	/**
 	 * Set the paths to directories to scan for the modules
 	 * The keys of the array can ONLY be chosen among 'framework, 'application' or 'modules'.
@@ -317,6 +317,19 @@ class ConfigBuilder
 	}
 
 	/**
+	 * Build the $_config[modulesLocation] annuary of the config to locate every module
+	 * @return ConfigBuilder $this
+	 */
+	public function buildModulesLocation ()
+	{
+		$this->_locateModulesFromLevel('framework')
+				->_locateModulesFromLevel('modules')
+				->_locateModulesFromLevel('application');
+
+		return $this;
+	}
+
+	/**
 	 * Build the full config at once
 	 * i.e. build the modules list, build the modules' initial configs and dependencies
 	 * merge the application and framework config and set into $_config
@@ -327,6 +340,7 @@ class ConfigBuilder
 		return $this->buildModulesList()
 						->buildInitModulesConfig()
 						->buildModulesDependencies()
+						->buildModulesLocation()
 						->_mergeInternalConfigs();
 	}
 
@@ -378,6 +392,16 @@ class ConfigBuilder
 
 		// if everything went fine or if no dependency is necessary, well...
 		return self::DEPENDENCIES_SATISFIED;
+	}
+
+	private function _locateModulesFromLevel ($level = 'application')
+	{
+		foreach ($this->_modulesList[$level] as $moduleName)
+		{
+			$this->_config['modulesLocation'][$moduleName] = $level;
+		}
+
+		return $this;
 	}
 
 	/**
@@ -437,12 +461,14 @@ class ConfigBuilder
 	{
 		// save the modules config if already existant
 		$modulesConfig = $this->_config['modules'];
+		$modulesLocation = $this->_config['modulesLocation'];
 
 		// merge framework and application's configs for generic options 
 		// in case of duplicate options, application's config overrides framework's config
 		$this->_config = array_merge($this->_frameworkConfig, $this->_appConfig);
 		// add modules config for module specific options
 		$this->_config['modules'] = $modulesConfig;
+		$this->_config['modulesLocation'] = $modulesLocation;
 
 		return $this;
 	}

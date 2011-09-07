@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Copyright (C) 2010 - Kévin O'NEILL, François KLINGLER - <contact@42framework.com>
  * 
@@ -63,20 +64,19 @@ if (\file_exists(\BUILD_DIR.\DIRECTORY_SEPARATOR.'config.php'))
 }
 else
 {
-    require \LIBS_DIR.DIRECTORY_SEPARATOR.'ConfigBuilder.php';
-	
-	$modulesDirectories = array();
-	$modulesDirectories['framework'] = \FRAMEWORK_DIR.\DIRECTORY_SEPARATOR.'modules';
-	$modulesDirectories['modules'] = \MODULES_DIR;
-	$modulesDirectories['application'] = \APP_DIR.\DIRECTORY_SEPARATOR.'modules';
-	
-    // get the full config, i.e. framework + app + modules
-    $configBuilder = new \framework\libs\ConfigBuilder();
-    $configBuilder->setModulesDirectories($modulesDirectories)
-		->buildConfig();
-    
-	$config = $configBuilder->getConfig();
+	require \LIBS_DIR . DIRECTORY_SEPARATOR . 'ConfigBuilder.php';
 
+	$modulesDirectories = array();
+	$modulesDirectories['framework'] = \FRAMEWORK_DIR . \DIRECTORY_SEPARATOR . 'modules';
+	$modulesDirectories['modules'] = \MODULES_DIR;
+	$modulesDirectories['application'] = \APP_DIR . \DIRECTORY_SEPARATOR . 'modules';
+
+	// get the full config, i.e. framework + app + modules
+	$configBuilder = new \framework\libs\ConfigBuilder();
+	$configBuilder->setModulesDirectories($modulesDirectories)
+			->buildConfig();
+
+	$config = $configBuilder->getConfig();
 }
 
 if (\file_exists(\BUILD_DIR.\DIRECTORY_SEPARATOR.'autoload.php'))
@@ -102,10 +102,10 @@ else
 	
 	$loader = new \framework\libs\ClassLoader('application', \APP_DIR);
 	$loader->register();
-	
+
 	$loader = new \framework\libs\StaticClassLoader($autoload);
 	$loader->register();
-	
+
 	$vendorsAutoload = array();
 	
 	include \FRAMEWORK_DIR.\DIRECTORY_SEPARATOR.'config'.\DIRECTORY_SEPARATOR.'vendorsAutoload.php';
@@ -119,6 +119,6 @@ $registry = new \framework\libs\Registry($config);
 $container = new \framework\core\ComponentsContainer($registry);
 $core = $container->getCore();
 
-$core	->bootstrap()
+$core->bootstrap()
 		->run();
 
