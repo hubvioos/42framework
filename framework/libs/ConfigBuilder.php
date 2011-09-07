@@ -49,7 +49,11 @@ class ConfigBuilder
 	 * The modules list
 	 * @var array
 	 */
-	protected $_modulesList = array();
+	protected $_modulesList = array(
+		'framework' => array(),
+		'application' => array(),
+		'modules' => array()
+	);
 
 	/**
 	 * DirectoryIterator
@@ -111,7 +115,7 @@ class ConfigBuilder
 		$this->_modulesDirectories['framework'] = \FRAMEWORK_DIR . \DIRECTORY_SEPARATOR . 'modules';
 		$this->_modulesDirectories['modules'] = \MODULES_DIR;
 		$this->_modulesDirectories['application'] = \APP_DIR . \DIRECTORY_SEPARATOR . 'modules';
-
+		
 		// Get framework's & application's config
 		include FRAMEWORK_DIR . \DIRECTORY_SEPARATOR . 'config' . \DIRECTORY_SEPARATOR . $this->_configFileName . '.php';
 		include APP_DIR . \DIRECTORY_SEPARATOR . 'config' . \DIRECTORY_SEPARATOR . $this->_configFileName . '.php';
