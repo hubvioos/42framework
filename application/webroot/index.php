@@ -58,11 +58,20 @@
 $autoload = array();
 $config = array();
 
+require \FRAMEWORK_DIR.\DIRECTORY_SEPARATOR.'core'.\DIRECTORY_SEPARATOR.'FrameworkObject.php';
+require \FRAMEWORK_DIR.\DIRECTORY_SEPARATOR.'core'.\DIRECTORY_SEPARATOR.'Core.php';
+
 if (\file_exists(\BUILD_DIR.\DIRECTORY_SEPARATOR.'config.php'))
 {
 	include \BUILD_DIR.\DIRECTORY_SEPARATOR.'config.php';
 }
-else
+
+if (!isset ($config['environment']))
+{
+	$config['environment'] = \framework\core\Core::DEV;
+}
+
+if ($config['environment'] == \framework\core\Core::DEV)
 {
 	require \LIBS_DIR . DIRECTORY_SEPARATOR . 'ConfigBuilder.php';
 
@@ -79,6 +88,11 @@ else
 	$config = $configBuilder->getConfig();
 }
 
+/**
+ * Defines the execution mode
+ */
+\define('ENV', $config['environment']);
+
 if (\file_exists(\BUILD_DIR.\DIRECTORY_SEPARATOR.'autoload.php'))
 {
 	include \BUILD_DIR.\DIRECTORY_SEPARATOR.'autoload.php';
@@ -87,7 +101,7 @@ if (\file_exists(\BUILD_DIR.\DIRECTORY_SEPARATOR.'autoload.php'))
 require \FRAMEWORK_DIR.\DIRECTORY_SEPARATOR.'libs'.\DIRECTORY_SEPARATOR.'ClassLoader.php';
 require \FRAMEWORK_DIR.\DIRECTORY_SEPARATOR.'libs'.\DIRECTORY_SEPARATOR.'StaticClassLoader.php';
 
-if ($config['environment'] == 'production')
+if (\ENV != \framework\core\Core::DEV)
 {
 	$loader = new \framework\libs\StaticClassLoader($autoload);
 	$loader->register();
