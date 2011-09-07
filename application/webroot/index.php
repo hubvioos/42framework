@@ -54,7 +54,6 @@
 
 \define('DS', \DIRECTORY_SEPARATOR);
 
-
 $autoload = array();
 $config = array();
 
@@ -64,12 +63,12 @@ if (\file_exists(\BUILD_DIR.\DIRECTORY_SEPARATOR.'config.php'))
 }
 else
 {
-    require \LIBS_DIR.DS.'ConfigBuilder.php';
-    
+    require \LIBS_DIR.DIRECTORY_SEPARATOR.'ConfigBuilder.php';
+    	
     // get the full config, i.e. framework + app + modules
     $configBuilder = new \framework\libs\ConfigBuilder();
     $configBuilder->setModulesDirectory(\MODULES_DIR)
-						->buildConfig();
+		->buildConfig();
     
 	$config = $configBuilder->getConfig();
 

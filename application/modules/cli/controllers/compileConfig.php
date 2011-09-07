@@ -1,4 +1,5 @@
-<?php 
+<?php
+
 /**
  * Copyright (C) 2011 - K√©vin O'NEILL, Fran√ßois KLINGLER - <contact@42framework.com>
  * 
@@ -16,23 +17,30 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
+
 namespace application\modules\cli\controllers;
 
 class CompileConfig extends \application\modules\cli\controllers\CliCommand
 {
-	public function processAction ($configFileName = 'config', $frameworkConfigVariableName = 'frameworkConfig',  $appConfigVariableName= 'appConfig', $moduleConfigVariableName = 'config')
+
+	public function processAction ($configFileName = 'config', $frameworkConfigVariableName = 'frameworkConfig', $appConfigVariableName= 'appConfig', $moduleConfigVariableName = 'config')
 	{
-		$variablesNames = array(   'framework' => $frameworkConfigVariableName,
-												 'app' => $appConfigVariableName,
-												 'module' => $moduleConfigVariableName);
+		$variablesNames = array(
+			'framework' => $frameworkConfigVariableName,
+			'application' => $appConfigVariableName, 
+			'modules' => $moduleConfigVariableName
+		);
+		
 		$configBuilder = new \framework\libs\ConfigBuilder($configFileName, $variablesNames);
 		$configBuilder->setModulesDirectory(\MODULES_DIR)
-							->buildConfig();
+				->buildConfig();
 		$config = $configBuilder->getConfig();
 
-		
+
 		$ab = new \application\modules\cli\ConfigBuilder($config);
+		
 		$ab->setTemplateFile(\MODULES_DIR.\DIRECTORY_SEPARATOR.'cli'.\DIRECTORY_SEPARATOR.'views'.\DIRECTORY_SEPARATOR.'configTemplate.php');
 		$ab->save(\APP_DIR.DS.'build'.DS.$configFileName.'.php');
 	}
+
 }
