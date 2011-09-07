@@ -64,10 +64,15 @@ if (\file_exists(\BUILD_DIR.\DIRECTORY_SEPARATOR.'config.php'))
 else
 {
     require \LIBS_DIR.DIRECTORY_SEPARATOR.'ConfigBuilder.php';
-    	
+	
+	$modulesDirectories = array();
+	$modulesDirectories['framework'] = \FRAMEWORK_DIR.\DIRECTORY_SEPARATOR.'modules';
+	$modulesDirectories['modules'] = \MODULES_DIR;
+	$modulesDirectories['application'] = \APP_DIR.\DIRECTORY_SEPARATOR.'modules';
+	
     // get the full config, i.e. framework + app + modules
     $configBuilder = new \framework\libs\ConfigBuilder();
-    $configBuilder->setModulesDirectory(\MODULES_DIR)
+    $configBuilder->setModulesDirectories($modulesDirectories)
 		->buildConfig();
     
 	$config = $configBuilder->getConfig();

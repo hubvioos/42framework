@@ -32,7 +32,15 @@ class CompileConfig extends \application\modules\cli\controllers\CliCommand
 		);
 		
 		$configBuilder = new \framework\libs\ConfigBuilder($configFileName, $variablesNames);
-		$configBuilder->setModulesDirectory(\MODULES_DIR)
+		
+		// set the modules directories
+		$modulesDirectories = array();
+		$modulesDirectories['framework'] = \FRAMEWORK_DIR.\DIRECTORY_SEPARATOR.'modules';
+		$modulesDirectories['modules'] = \MODULES_DIR;
+		$modulesDirectories['application'] = \APP_DIR.\DIRECTORY_SEPARATOR.'modules';
+		
+		// HERE WE GOOOOOOOO
+		$configBuilder->setModulesDirectories($modulesDirectories)
 				->buildConfig();
 		$config = $configBuilder->getConfig();
 

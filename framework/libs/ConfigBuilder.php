@@ -58,10 +58,11 @@ class ConfigBuilder
 	protected $_directoryIterator = null;
 
 	/**
-	 * The path to directory containing the modules we want to include in the config
-	 * @var string
+	 * An array containing the paths to the directories where the modules are stored.
+	 * The array must contain absolute paths
+	 * @var array
 	 */
-	protected $_modulesDirectory = \MODULES_DIR;
+	protected $_modulesDirectories = array();
 
 	/**
 	 * The name of the config file (without extension .php)
@@ -70,42 +71,53 @@ class ConfigBuilder
 	protected $_configFileName = 'config';
 
 	/**
-	 * The names of the variable
+	 * A string-indexed array containing the names of the config variable at each level
 	 * Framework config variable, Application config variable, and Module config variable can have different names.
-	 * 		- array[0] : framework config variable name
-	 * 		- array[1] : application config variable name
-	 * 		- array[2] : module config variable name
+	 * 		- array['framework'] : framework config variable name
+	 * 		- array['application'] : application config variable name
+	 * 		- array['modules'] : module config variable name
 	 * @var array
 	 */
-	protected $_variablesNames = array('framework' => 'frameworkConfig',
-		'app' => 'appConfig',
-		'module' => 'config');
+	protected $_variablesNames = array(
+		'framework' => 'frameworkConfig',
+		'application' => 'appConfig',
+		'modules' => 'config'
+	);
+
+	/**
+	 * The only keys that will be used in the arrays passed as parameters
+	 * @var array 
+	 */
+	protected static $_allowedKeys = array('framework', 'application', 'modules');
 
 	const DEPENDENCIES_SATISFIED = 1;
 	const DEPENDENCIES_UNSATISFIED = -1;
-	const DEPENDENCIES_SCHRODINGER = 0; // also known as HEADS_OR_TAILS, INCH_ALLAH, GOD_BLESS_U
+	const DEPENDENCIES_SCHRODINGER = 0; // also known as HEALDS_OR_TAILS, INCH_ALLAH, GOD_BLESS_U
 
 	/**
 	 * Constructor
-	 * @param array $configFileName - The name of config file (whithout .php extension)
-	 * @param array $variablesNames - The variables' names to use for the framework, application and modules' config
+	 * @param array $configFileName The name of config file WHITHOUT .php extension
+	 * @param array $variablesNames A string indexed array containing the names of the config variables at each level
 	 */
-	public function __construct ($configFileName = 'config', $variablesNames = array('framework' => 'frameworkConfig',
-		'app' => 'appConfig',
-		'module' => 'config'))
+	public function __construct ($configFileName = 'config', array $variablesNames =
+		array('framework' => 'frameworkConfig', 'application' => 'appConfig', 'modules' => 'config'))
 	{
-
 		//Set file and variables name
 		$this->_configFileName = $configFileName;
-		$this->_variablesNames = $variablesNames;
+		$this->_selectiveMerge($this->_variablesNames, $variablesNames);
 
-		//Include config files of the framework and the application config file
-		include FRAMEWORK_DIR . DS . 'config' . DS . $this->_configFileName . '.php';
-		include APPLICATION_DIR . DS . 'config' . DS . $this->_configFileName . '.php';
+		// 3 levels here for the modules: 
+		// "framework" overriden by "modules" overriden by "application"
+		$this->_modulesDirectories['framework'] = \FRAMEWORK_DIR . \DIRECTORY_SEPARATOR . 'modules';
+		$this->_modulesDirectories['modules'] = \MODULES_DIR;
+		$this->_modulesDirectories['application'] = \APP_DIR . \DIRECTORY_SEPARATOR . 'modules';
 
-		//Set framework & application config
+		// Get framework's & application's config
+		include FRAMEWORK_DIR . \DIRECTORY_SEPARATOR . 'config' . \DIRECTORY_SEPARATOR . $this->_configFileName . '.php';
+		include APP_DIR . \DIRECTORY_SEPARATOR . 'config' . \DIRECTORY_SEPARATOR . $this->_configFileName . '.php';
+
 		$this->_frameworkConfig = ${$this->_variablesNames['framework']};
-		$this->_appConfig = ${$this->_variablesNames['app']};
+		$this->_appConfig = ${$this->_variablesNames['application']};
 
 		$this->_config['modules'] = array();
 		$this->_mergeInternalConfigs();
@@ -139,7 +151,7 @@ class ConfigBuilder
 	}
 
 	/**
-	 * Get the modules list
+	 * Get the modules list, sorted by levels (framework, modules and application)
 	 * @return array $_modulesList
 	 */
 	public function getModulesList ()
@@ -148,15 +160,33 @@ class ConfigBuilder
 	}
 
 	/**
-	 * Get the directory path to scan for the modules
+	 * Get the directories path to scan for the modules
 	 * @return string 
 	 */
-	public function getModulesDirectory ()
+	public function getModulesDirectories ()
 	{
-		return $this->_modulesDirectory;
+		return $this->_modulesDirectories;
 	}
 
 	/**
+	 * Get the modules' config filename
+	 * @return string 
+	 */
+	public function getConfigFileName ()
+	{
+		return $this->_configFileName;
+	}
+
+	/**
+	 * Get the config variables' names at each level
+	 * @return array 
+	 */
+	public function getVariablesNames ()
+	{
+		return $this->_variablesNames;
+	}
+
+		/**
 	 * Set the framework's config
 	 * @param array $frameworkConfig The new framework's config
 	 * @return ConfigBuilder $this
@@ -181,80 +211,100 @@ class ConfigBuilder
 	}
 
 	/**
-	 * Set the path to directory to scan for the modules
-	 * @param string $_modulesDirectory
-	 * @return ConfigBuilder 
+	 * Set the paths to directories to scan for the modules
+	 * The keys of the array can ONLY be chosen among 'framework, 'application' or 'modules'.
+	 * Any other key will be IGNORED.
+	 * The directories should not end with a trailing slash or back-slash
+	 * @param array $_modulesDirectory A string-indexed array where the keys represent the level of the module
+	 * @return ConfigBuilder $this
 	 */
-	public function setModulesDirectory ($modulesDirectory)
+	public function setModulesDirectories (array $modulesDirectories)
 	{
-		$this->_modulesDirectory = rtrim($modulesDirectory, '/\\');
+		array_map(
+				function($directoryPath)
+				{
+					return rtrim($directoryPath, '/\\ \t');
+				}, $modulesDirectories);
+
+		$this->_selectiveMerge($this->_modulesDirectories, $modulesDirectories);
+
+		return $this;
+	}
+
+	/**
+	 * Set the modules' config filename.
+	 * @param string $_configFileName The filename, WITHOUT the '.php' extension
+	 */
+	public function setConfigFileName ($_configFileName)
+	{
+		$this->_configFileName = rtrim($_configFileName, '\.php/\\ \t');
+	}
+	
+	
+	/**
+	 * Set the paths to directories to scan for the modules
+	 * The keys of the array can ONLY be chosen among 'framework, 'application' or 'modules'.
+	 * Any other key will be IGNORED
+	 * @param array $variablesNames 
+	 * @return ConfigBuilder $this
+	 */
+	public function setVariablesNames (array $variablesNames)
+	{
+		$this->_selectiveMege($this->_variablesNames, $variablesNames);
 
 		return $this;
 	}
 
 	/**
 	 * Build the modules list into $_config['modules']
-	 * @param string $modulesDirectory The directory to scan for the modules
-	 * @return ClassBuilder $this
+	 * @param string $modulesDirectories The directory to scan for the modules
+	 * @return ConfigBuilder $this
 	 */
-	public function buildModulesList ($modulesDirectory = '')
+	public function buildModulesList (array $modulesDirectories = array())
 	{
-		if ($modulesDirectory !== '')
+		if (!empty($modulesDirectories))
 		{
-			$this->setModulesDirectory($modulesDirectory);
+			$this->setModulesDirectories($modulesDirectories);
 		}
 
-		$this->_directoryIterator = new \DirectoryIterator($this->_modulesDirectory);
-
-		// scan the directory and add every module it contains to the modules list
-		// except ./ and ../
-		foreach ($this->_directoryIterator as $file)
+		// levels are framework / application / module
+		foreach ($this->_modulesDirectories as $level => $moduleDirectory)
 		{
-			$moduleName = rtrim($file->getFilename(), '/\\');
-			if ($file->isDir() and !$file->isDot())
+			$this->_directoryIterator = new \DirectoryIterator($moduleDirectory);
+
+			// scan the directory and add every module it contains to the modules list
+			// except ./ and ../
+			foreach ($this->_directoryIterator as $file)
 			{
-				$this->_config['modules'][$moduleName] = array();
-				$this->_modulesList[] = $moduleName;
+				$moduleName = rtrim($file->getFilename(), '/\\');
+				if ($file->isDir() and !$file->isDot())
+				{
+					$this->_config['modules'][$moduleName] = array();
+					$this->_modulesList[$level][] = $moduleName;
+				}
 			}
 		}
+
 		return $this;
 	}
 
 	/**
-	 * Merge the $config array of each module (if existant) with the $_config['modules'][moduleName] array
-	 * @return ClassBuilder $this
+	 * Merge the config array of each module (if existant) with the $_config['modules'][moduleName] array
+	 * @return ConfigBuilder $this
 	 */
 	public function buildInitModulesConfig ()
 	{
-
-		foreach ($this->_modulesList as $moduleName)
-		{
-			$pathToConfigFile = $this->_modulesDirectory . DIRECTORY_SEPARATOR . $moduleName
-					. DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . $this->_configFileName . '.php';
-
-			// get the $config var in the config/config.php file for each module, if existant
-			if (file_exists($pathToConfigFile))
-			{
-				require_once($pathToConfigFile);
-				if (isset($$varName))
-				{
-					$this->_config['modules'][$moduleName] = ${$this->_variablesNames['module']};
-				}
-				unset(${$this->_variablesNames['module']});
-			}
-			// or set an empty array
-			else
-			{
-				$this->_config['modules'][$moduleName] = array();
-			}
-		}
+		// the order IS important
+		$this->_getAllModulesConfigFromLevel('framework')
+				->_getAllModulesConfigFromLevel('modules')
+				->_getAllModulesConfigFromLevel('application');
 
 		return $this;
 	}
 
 	/**
 	 * Build the dependencies among the modules
-	 * @return ClassBuilder $this 
+	 * @return ConfigBuilder $this 
 	 */
 	public function buildModulesDependencies ()
 	{
@@ -270,7 +320,7 @@ class ConfigBuilder
 	 * Build the full config at once
 	 * i.e. build the modules list, build the modules' initial configs and dependencies
 	 * merge the application and framework config and set into $_config
-	 * @return ClassBuilder $this
+	 * @return ConfigBuilder $this
 	 */
 	public function buildConfig ()
 	{
@@ -331,8 +381,57 @@ class ConfigBuilder
 	}
 
 	/**
+	 * Get the initial config (i.e. without the dependency checking)
+	 * of each module of a given level
+	 * @param string $level
+	 */
+	private function _getAllModulesConfigFromLevel ($level = 'application')
+	{
+		$directory = $this->_modulesDirectories[$level] . \DIRECTORY_SEPARATOR;
+		$configFile = \DIRECTORY_SEPARATOR . 'config' . \DIRECTORY_SEPARATOR . $this->_configFileName . '.php';
+
+		foreach ($this->_modulesList[$level] as $moduleName)
+		{
+			$pathToConfigFile = $directory . $moduleName . $configFile;
+
+			// unset a variable that could have been included before
+			unset(${$this->_variablesNames['modules']});
+
+			// get the config var in the config file for each module, if existant
+			if (file_exists($pathToConfigFile))
+			{
+				require_once($pathToConfigFile);
+
+				if (isset(${$this->_variablesNames['modules']}))
+				{
+					// if the module has already some config options from another level
+					// merge the new ones with them
+					if (isset($this->_config['modules'][$moduleName]))
+					{
+						$this->_config['modules'][$moduleName] = array_merge($this->_config['modules'][$moduleName], ${$this->_variablesNames['modules']});
+					}
+					else
+					{
+						$this->_config['modules'][$moduleName] = ${$this->_variablesNames['modules']};
+					}
+				}
+			}
+			// or set an empty array
+			else
+			{
+				if (!isset($this->_config['modules'][$moduleName]))
+				{
+					$this->_config['modules'][$moduleName] = array();
+				}
+			}
+		}
+
+		return $this;
+	}
+
+	/**
 	 * Put all the configs together into $_config
-	 * @return ConfigBuilder 
+	 * @return ConfigBuilder $this
 	 */
 	private function _mergeInternalConfigs ()
 	{
@@ -346,6 +445,23 @@ class ConfigBuilder
 		$this->_config['modules'] = $modulesConfig;
 
 		return $this;
+	}
+
+	/**
+	 * Merge an 'external' array (i.e. from the user) with an 'internal' array (i.e. an instance variable)
+	 * @param array $internal
+	 * @param array $external
+	 * @return ConfigBuilder $this
+	 */
+	private function _selectiveMerge (array &$internal, array $external)
+	{
+		// replace the value in the internal array 
+		// only if the key is among the allowed keys
+		foreach ($external as $key => $value)
+		{
+			if (\in_array($key, self::$_allowedKeys))
+				$internal[$key] = $value;
+		}
 	}
 
 }
