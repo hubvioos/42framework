@@ -20,16 +20,21 @@ namespace framework\libs;
 
 class Message
 {	
-	protected $_session = null;
+	protected $_namespace = null;
 	
-	public function __construct(Session $session)
+	public function __construct($namespace)
 	{
-		$this->_session = $session;
+		$this->_namespace = $namespace;
+		
+		if (!isset ($_SESSION[$this->_namespace]))
+		{
+			$_SESSION[$this->_namespace] = array();
+		}
 	}
 	
 	public function set ($value, $category = 'notice')
 	{
-		$this->_session[$category][] = $value;
+		$_SESSION[$this->_namespace][$category][] = $value;
 	}
 	
 	/**
@@ -38,29 +43,25 @@ class Message
 	 */
 	public function get ($category = 'notice')
 	{
-		if (isset($this->_session[$category]))
+		if (isset($_SESSION[$this->_namespace][$category]))
 		{
-			return $this->_session[$category];
+			return $_SESSION[$this->_namespace][$category];
 		}
 		return array();
 	}
 	
-	public function getAll($toArray = true)
+	public function getAll()
 	{
-		if ($toArray)
-		{
-			return $this->_session->toArray();
-		}
-		return $this->_session;
+		return $_SESSION[$this->_namespace];
 	}
 	
 	public function clear ($category = 'notice')
 	{
-		unset($this->_session[$category]);
+		unset($_SESSION[$this->_namespace][$category]);
 	}
 	
 	public function clearAll ()
 	{
-		$this->_session->destroy();
+		unset($_SESSION[$this->_namespace]);
 	}
 }

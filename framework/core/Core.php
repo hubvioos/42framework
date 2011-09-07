@@ -21,10 +21,11 @@ namespace framework\core;
 
 class Core extends \framework\core\FrameworkObject
 {	
-	/**
-	 * @var \framework\filters\FilterChain
-	 */
-	protected $_filterChain = null;
+	const DEV = 'dev';
+	
+	const PROD = 'prod';
+	
+	const STAGE = 'stage';
 	
 	
 	public function __construct (\framework\core\ComponentsContainer $container)
@@ -41,23 +42,10 @@ class Core extends \framework\core\FrameworkObject
 	{
 		$this->getComponent('errorHandler');
 		
+		$this->getComponent('session')->init();
+		
 		// Timezone
-		date_default_timezone_set($this->getConfig('defaultTimezone'));
-		
-		$this->_filterChain = $this->getComponent('filterChain');
-		
-		$this->_filterChain->addFilter(new \framework\filters\appFilters\ApplicationFilter());
-		$this->_filterChain->addFilter(new \framework\filters\appFilters\SecurityFilter());
-		$this->_filterChain->addFilter(new \framework\filters\appFilters\DoctrineFilter());
-		
-		foreach ($this->getConfig('applicationFilters') as $filter)
-		{
-			$this->_filterChain->addFilter(new $filter);
-		}
-		
-		$this->_filterChain->addFilter(new \framework\filters\appFilters\ExecFilter());
-		
-		$this->_filterChain->init();
+		\date_default_timezone_set($this->getConfig('defaultTimezone'));
 		
 		return $this;
 	}
@@ -71,8 +59,131 @@ class Core extends \framework\core\FrameworkObject
 	{
 		$request = $this->getComponent('httpRequest');
 		$response = $this->getComponent('httpResponse');
-		$this->_filterChain->execute($request, $response);
+		
+		if (\PHP_SAPI === 'cli')
+		{
+			$request->setCli(true);
+			$params = \framework\modules\cli\CliUtils::extractParams();
+			$params['module'] = 'cli';
+			
+			$state = \framework\core\Request::CLI_STATE;
+		}
+		else
+		{
+			$url = $request->getUrl();
+			
+			// $path = $this->getComponent('route')->urlToPath($url, $config['defaultModule'], $config['defaultAction']);
+			$path = $this->getComponent('route')->urlToPath($url);
+			
+			$params = $this->getComponent('route')->pathToParams($path);
+			
+			$this->duplicateContentPolicy($url, $path, $params);
+			
+			$state = \framework\core\Request::FIRST_REQUEST;
+			
+			// Views variables
+			$this->viewSetGlobal('messages', $this->getComponent('message')->getAll());
+			$this->getComponent('message')->clearAll();
+			
+			if (!class_exists('application\\modules\\'.$params['module'].'\\controllers\\'.$params['action']))
+			{
+				$params['module'] = 'errors';
+				$params['action'] = 'error404';
+				$params['params'] = array();
+			}
+		}
+		$execute = $this->createRequest($params['module'], $params['action'], $params['params'], $state);
+		
+		$this->raiseEvent('beforeApp');
+		
+		$executeResponse = $execute->execute();
+		
+		if ($executeResponse->getStatus() == \framework\core\Response::SUCCESS)
+		{
+			$response->set($executeResponse->get());
+		}
+		else
+		{
+			$this->createRequest('errors', 'error404')->execute();
+		}
+		
+		if (!$request->isCli())
+		{
+			$previousIpAddress = $request->getPreviousIpAddress();
+			$previousUserAgent = $request->getPreviousUserAgent();
+						
+			if ($previousIpAddress !== null 
+				&& $previousIpAddress != $request->getIpAddress()
+				&& $previousUserAgent !== null
+				&& $previousUserAgent != $request->getUserAgent()
+				)
+			{
+				$this->getComponent('session')->destroyAll();
+				$this->getComponent('message')
+					->set('It seems that your session has been stolen, we destroyed it for security reasons. 
+						Check your environment security.', 'warning');
+				$this->getResponse()->redirect($this->getConfig('siteUrl'), 301, true);
+			}
+		}
+		
+		$this->raiseEvent('afterApp');
+    	
+    	if ($this->viewGetGlobal('layout') === null)
+		{
+			$this->viewSetGlobal('layout', $this->getConfig('defaultLayout'));
+		}
+		
+    	if ($this->viewGetGlobal('layout') !== false)
+		{
+			$this->viewSetGlobal('contentForLayout', $response->get());
+			$response->clear();
+			
+			$response->set($this->createView($this->getConfig('defaultModule'), $this->viewGetGlobal('layout')));
+		}
+		
+		$this->raiseEvent('beforeView');
+		
+		$render = $response->render();
+		
+		$this->raiseEvent('afterView', $render);
+		
+		$response->send();
+		
+		echo $render;
+		
+		if ($response->getStatus() == 200)
+		{
+			$request->updateHistory();
+		}
+		
+		//exit();
 		
 		return $this;
+	}
+	
+	public function duplicateContentPolicy ($url, $path, $params)
+	{
+		// Redirect to root if we use the default module and action.
+		if ($url != '' 
+		    && $params['module'] == $this->getConfig('defaultModule')
+		    && $params['action'] == $this->getConfig('defaultAction')
+		    && empty($params['params'])
+		    )
+		{
+		    $this->getComponent('httpResponse')->redirect($this->getConfig('siteUrl'), 301, true);
+		}
+		// Avoid duplicate content of the routes.
+		else if ($url != $this->getComponent('route')->pathToUrl($path)
+			&& $url != '')
+		{
+		    $this->getComponent('httpResponse')
+		    		->redirect($this->getConfig('siteUrl') . $this->getComponent('route')->pathToUrl($path), 301, true);
+		}
+						
+		// Avoid duplicate content with just a "/" after the URL
+		if(strrchr($url, '/') === '/')
+		{
+		    $this->getComponent('httpResponse')->redirect($this->getConfig('siteUrl') . rtrim($url, '/'), 301, true);  
+		}
 	}
 }

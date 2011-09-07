@@ -144,7 +144,7 @@ class ComponentsContainer extends \framework\libs\BaseContainer
 			function ($c, $args)
 			{
 				/* @var $c ApplicationContainer */
-				return new \framework\libs\History($c->getSession('history'), $c->config['historySize']);
+				return new \framework\libs\History('_history', $c->config['historySize']);
 			}
 		);
 		
@@ -161,16 +161,16 @@ class ComponentsContainer extends \framework\libs\BaseContainer
 			function ($c, $args)
 			{
 				/* @var $c ComponentsContainer */
-				return new \framework\libs\Message($c->getSession('flash'));
+				return new \framework\libs\Message('_flash');
 			}
 		);
 		
-		$this->session = function ($c, $args)
-		{
-			$namespace = isset($args[0]) ? $args[0] : 'default';
-			
-			return new \framework\libs\Session($namespace);
-		};
+		$this->session = $this->asUniqueInstance(
+			function ($c, $args)
+			{
+				return new \framework\libs\Session();
+			}
+		);
 		
 		
 		/*

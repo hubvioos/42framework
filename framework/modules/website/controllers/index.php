@@ -11,7 +11,7 @@ class Index extends \framework\core\Controller
 	public function processAction ()
 	{
             echo "Index - Action <br/>";
-            $this->getComponent("eventManager")->addListener("afterIndex", "\\application\\modules\\website\\controllers\\kuku::kaka");
+            //$this->getComponent("eventManager")->addListener("afterIndex", "\\application\\modules\\website\\controllers\\kuku::kaka");
         }
         
         public function _after(\framework\core\Request &$request, \framework\core\Response &$response)

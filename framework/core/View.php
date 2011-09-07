@@ -127,7 +127,7 @@ class View extends \framework\core\FrameworkObject
 				'params' => $params));
 	}
 	
-	public function setTilte($title)
+	public function setTitle($title)
 	{
 		self::setGlobal('title', $title);
 	}

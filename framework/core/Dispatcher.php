@@ -17,27 +17,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-$frameworkConfig = array(
-	'environment' => \framework\core\Core::DEV,
-    'errorReporting' => E_ALL|E_STRICT,
-	'displayErrors' => 1,
-	'defaultModule' => 'website',
-    'defaultAction' => 'index',
-	'defaultLayout' => false,
-	'defaultCharset' => 'utf-8',
-	'defaultLanguage' => 'fr',
-	'defaultTimezone' => 'Europe/Paris',
-	'viewExtension' => '.php',
-	'siteUrl' => 'http://localhost/',
-	'routes' => array(),
-	'historySize' => 2,
-	'errorHandlerListeners' => array('framework\\errorHandler\\listeners\\Html'),
-	'viewExtension' => '.php',
-	'applicationFilters' => array(),
-	'viewFilters' => array(),
-	'events' => array(),
-	'dbConnectionParams' => array(
-		'driver' => 'pdo_sqlite',
-		'path' => APP_DIR.DS.'database'.DS.'db.sqlite'
-	)
-);
+namespace framework\core;
+
+class Dispatcher extends \framework\core\FrameworkObject
+{
+	public function dispatch ()
+	{
+		
+	}
+}

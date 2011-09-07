@@ -201,6 +201,11 @@ class Controller extends \framework\core\FrameworkObject
 
 	public function setLayout ($layout)
 	{
+		if ($layout === false)
+		{
+			$this->usesLayout = false;
+		}
+		
 		$this->viewSetGlobal('layout', $layout);
 		return $this;
 	}
