@@ -135,16 +135,16 @@ class Controller extends \framework\core\FrameworkObject
 			if ($this->getConfig()->get('modules.'.$request->getModule().'.dependenciesSatisfied') !== \framework\libs\ConfigBuilder::DEPENDENCIES_UNSATISFIED)
 			{
 				//Preparation to "before" and "after" events lauching
-				$classPath = 'application\\modules\\' . $request->getModule() . '\\controllers\\' . $request->getAction();
+				//$classPath = 'application\\modules\\' . $request->getModule() . '\\controllers\\' . $request->getAction();
 				$beforeName = 'before' . ucfirst($request->getAction());
 				$afterName = 'after' . ucfirst($request->getAction());
 
 				//Launch Before event
 				$this->raiseEvent($beforeName);
 
-				if ($this->_before($this->_request, $this->_response) !== false
+				if ($this->_before() !== false
 						&& call_user_func_array(array($this, 'processAction'), $this->_request->getParams()) !== false
-						&& $this->_after($this->_request, $this->_response) !== false
+						&& $this->_after() !== false
 				)
 				{
 					//Lauch After event
@@ -240,7 +240,7 @@ class Controller extends \framework\core\FrameworkObject
 	 * @param Framework\Request $request
 	 * @return mixed (boolean or Framework\Response)
 	 */
-	protected function _before (Request &$request, Response &$response)
+	protected function _before ()
 	{
 		
 	}
@@ -252,7 +252,7 @@ class Controller extends \framework\core\FrameworkObject
 	 * @param mixed $actionResponse
 	 * @return mixed
 	 */
-	protected function _after (Request &$request, Response &$response)
+	protected function _after ()
 	{
 		
 	}

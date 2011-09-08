@@ -32,11 +32,13 @@ class View extends \framework\core\FrameworkObject
 	public function __construct ($module, $file, $vars = false)
 	{
 		$config = $this->getConfig();
-		$this->_file = MODULES_DIR.DS.$module.DS.'views'.DS.$file.$config['viewExtension'];
+		
+		$this->_file = $this->getComponent('dispatcher')->getModulePath($module);
+		$this->_file .= \DIRECTORY_SEPARATOR.'views'.\DIRECTORY_SEPARATOR.$file.$config['viewExtension'];
 		
 		if (!file_exists($this->_file))
 		{
-			$globalFile = APP_DIR.DS.'views'.DS.$file.$config['viewExtension'];
+			$globalFile = \APP_DIR.\DIRECTORY_SEPARATOR.'views'.\DIRECTORY_SEPARATOR.$file.$config['viewExtension'];
 			if (file_exists($globalFile))
 			{
 				$this->_file = $globalFile;

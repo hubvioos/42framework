@@ -86,12 +86,14 @@ class ComponentsContainer extends \framework\libs\BaseContainer
 			return new \framework\core\Response();
 		};
 		
+		$this->dispatcher = function ($c, $args)
+		{
+			return new \framework\core\Dispatcher();
+		};
+		
 		$this->action = function ($c, $args)
 		{
-			$module = $args[0];
-			$action = $args[1];
-			
-			$controller = 'application\\modules\\'.$module.'\\controllers\\'.$action;
+			$controller = $args[0];
 			return new $controller;
 		};
 		

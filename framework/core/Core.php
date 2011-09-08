@@ -84,13 +84,6 @@ class Core extends \framework\core\FrameworkObject
 			// Views variables
 			$this->viewSetGlobal('messages', $this->getComponent('message')->getAll());
 			$this->getComponent('message')->clearAll();
-			
-			if (!class_exists('application\\modules\\'.$params['module'].'\\controllers\\'.$params['action']))
-			{
-				$params['module'] = 'errors';
-				$params['action'] = 'error404';
-				$params['params'] = array();
-			}
 		}
 		$execute = $this->createRequest($params['module'], $params['action'], $params['params'], $state);
 		

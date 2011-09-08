@@ -21,8 +21,77 @@ namespace framework\core;
 
 class Dispatcher extends \framework\core\FrameworkObject
 {
-	public function dispatch ()
+	public function dispatch (\framework\core\Request $request)
 	{
+		$config = $this->getConfig('modulesLocation');
 		
+		$actionExists = false;
+		
+		if (isset ($config[$request->getModule()]))
+		{
+			$classname = $this->getModuleNamespace($request->getModule()).'\\controllers\\'.$request->getAction();
+			
+			if (\class_exists($classname))
+			{
+				$actionExists = true;
+			}
+		}
+		
+		if (!$actionExists)
+		{
+			return $this->createRequest('errors', 'error404', array(), $request->getState())->execute();
+		}
+		
+		$module = $this->getComponent('action', $classname);
+		$response = $this->getComponent('response');
+		return $module->execute($request, $response);
+	}
+	
+	public function getModulePath ($module)
+	{
+		$config = $this->getConfig('modulesLocation');
+		
+		$viewsPath = null;
+			
+		switch ($config[$module])
+		{
+			case 'framework':
+				$viewsPath = \FRAMEWORK_DIR.\DIRECTORY_SEPARATOR.'modules'.\DIRECTORY_SEPARATOR.$module;
+				break;
+
+			case 'modules':
+				$viewsPath = \MODULES_DIR.\DIRECTORY_SEPARATOR.$module;
+				break;
+
+			case 'application':
+				$viewsPath = \APP_DIR.\DIRECTORY_SEPARATOR.'modules'.\DIRECTORY_SEPARATOR.$module;
+				break;
+		}
+		
+		return $viewsPath;
+	}
+	
+	public function getModuleNamespace ($module)
+	{
+		$config = $this->getConfig('modulesLocation');
+		
+		$namespace = null;
+			
+		switch ($config[$module])
+		{
+			case 'framework':
+				$namespace = '\\framework\\modules\\'.$module;
+				break;
+
+			case 'modules':
+				$namespace = '\\modules\\'.$module;
+				break;
+
+			case 'application':
+				$namespace = '\\application\\modules\\'.$module;
+				break;
+		}
+		
+		return $namespace;
 	}
 }
