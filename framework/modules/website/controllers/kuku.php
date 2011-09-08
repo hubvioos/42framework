@@ -1,10 +1,10 @@
 <?php
-namespace application\modules\website\controllers;
+namespace framework\modules\website\controllers;
 
 class Kuku extends \framework\core\Controller
 {
 
-        public function _before(\framework\core\Request &$request, \framework\core\Response &$response)
+        public function _before()
         {
             echo "Kuku - Before <br/>";
 
@@ -15,7 +15,7 @@ class Kuku extends \framework\core\Controller
             $this->usesView = false;
         }
 
-        public function _after(\framework\core\Request &$request, \framework\core\Response &$response)
+        public function _after()
         {
             echo "Kuku - After <br/>";
         }

@@ -16,24 +16,24 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
-namespace application\modules\cli\controllers;
+namespace framework\modules\cli\controllers;
 
-class CompileAutoload extends \application\modules\cli\controllers\CliCommand
+class CompileAutoload extends \framework\modules\cli\controllers\CliCommand
 {
 	public function processAction ()
 	{
-		$scanner = new \application\modules\cli\DirectoryScanner;
+		$scanner = new \framework\modules\cli\DirectoryScanner;
 		$scanner->addInclude('*.php');
 		
-		$finder = new \application\modules\cli\ClassFinder;
+		$finder = new \framework\modules\cli\ClassFinder;
 		
-		$found = array_merge($finder->parseMulti($scanner(VENDORS_DIR)), 
-							 $finder->parseMulti($scanner(FRAMEWORK_DIR)), 
-							 $finder->parseMulti($scanner(MODULES_DIR)),
-							 $finder->parseMulti($scanner(APP_DIR)));
+		$found = array_merge($finder->parseMulti($scanner(\VENDORS_DIR)), 
+							 $finder->parseMulti($scanner(\FRAMEWORK_DIR)), 
+							 $finder->parseMulti($scanner(\MODULES_DIR)),
+							 $finder->parseMulti($scanner(\APP_DIR)));
 		
-		$ab = new \application\modules\cli\AutoloadBuilder($found);
-		$ab->setTemplateFile(MODULES_DIR.DS.'cli'.DS.'views'.DS.'autoloadTemplate.php');
-		$ab->save(APP_DIR.DS.'build'.DS.'autoload.php');
+		$ab = new \framework\modules\cli\AutoloadBuilder($found);
+		$ab->setTemplateFile(\MODULES_DIR.\DIRECTORY_SEPARATOR.'cli'.\DIRECTORY_SEPARATOR.'views'.\DIRECTORY_SEPARATOR.'autoloadTemplate.php');
+		$ab->save(\APP_DIR.\DIRECTORY_SEPARATOR.'build'.\DIRECTORY_SEPARATOR.'autoload.php');
 	}
 }

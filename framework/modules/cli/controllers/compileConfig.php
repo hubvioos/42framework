@@ -16,9 +16,10 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
-namespace application\modules\cli\controllers;
 
-class CompileConfig extends \application\modules\cli\controllers\CliCommand
+namespace framework\modules\cli\controllers;
+
+class CompileConfig extends \framework\modules\cli\controllers\CliCommand
 {
 	public function processAction ()
 	{
@@ -31,8 +32,14 @@ class CompileConfig extends \application\modules\cli\controllers\CliCommand
 		
 		$config = array_merge($frameworkConfig, $appConfig);
 		
-		$ab = new \application\modules\cli\ConfigBuilder($config);
-		$ab->setTemplateFile(MODULES_DIR.DS.'cli'.DS.'views'.DS.'configTemplate.php');
-		$ab->save(APP_DIR.DS.'build'.DS.'config.php');
+		// HERE WE GOOOOOOOO
+		$configBuilder->setModulesDirectories($modulesDirectories)
+				->buildConfig();
+		$config = $configBuilder->getConfig();
+
+
+		$ab = new \framework\modules\cli\ConfigBuilder($config);
+		$ab->setTemplateFile(\MODULES_DIR . \DIRECTORY_SEPARATOR . 'cli' . \DIRECTORY_SEPARATOR . 'views' . \DIRECTORY_SEPARATOR . 'configTemplate.php');
+		$ab->save(\APP_DIR . \DIRECTORY_SEPARATOR . 'build' . \DIRECTORY_SEPARATOR . $configFileName . '.php');
 	}
 }

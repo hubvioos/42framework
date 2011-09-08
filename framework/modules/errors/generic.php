@@ -17,19 +17,19 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
-namespace application\modules\errors;
+namespace framework\modules\errors;
 
 abstract class generic extends \framework\core\Controller
 {
 	protected $_response = null;
 	
-	public function _before(\Framework\core\Request &$request, \Framework\core\Response &$response)
+	public function _before()
 	{
-		$this->getContainer()->getHttpResponse()->reset();
+		$this->getComponent('httpResponse')->reset();
 	}
 	
-	public function _after (\Framework\core\Request &$request, \Framework\core\Response &$response)
+	public function _after ()
 	{
-		$this->getContainer()->getHttpResponse()->stopProcess();
+		$this->getComponent('httpResponse')->stopProcess();
 	}
 }

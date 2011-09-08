@@ -16,9 +16,9 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
-namespace application\modules\errors\controllers;
+namespace framework\modules\errors\controllers;
 
-class error503 extends \application\modules\errors\generic
+class error503 extends \framework\modules\errors\generic
 {
 	public function processAction ($request = null)
 	{

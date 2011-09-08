@@ -16,16 +16,16 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
-namespace application\modules\cli\controllers;
+namespace framework\modules\cli\controllers;
 
 class CliCommand extends \framework\core\Controller
 {
 	protected $usesView = false;
 	protected $usesLayout = false;
 
-	protected function _before(\framework\core\Request &$request, \framework\core\Response &$response)
+	protected function _before()
 	{
-		if ($request->getState() != \framework\core\Request::CLI_STATE)
+		if ($this->getRequest()->getState() != \framework\core\Request::CLI_STATE)
 		{
 			//$this->getContainer()->getNewRequest('errors', 'error403', array($request))->execute();
 		}
