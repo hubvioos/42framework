@@ -73,18 +73,25 @@ if (!isset ($config['environment']))
 
 if ($config['environment'] == \framework\core\Core::DEV)
 {
-	require \LIBS_DIR . DIRECTORY_SEPARATOR . 'ConfigBuilder.php';
+    require \FRAMEWORK_DIR.\DIRECTORY_SEPARATOR.'libs'.\DIRECTORY_SEPARATOR.'ConfigBuilder.php';
 
 	$modulesDirectories = array();
 	$modulesDirectories['framework'] = \FRAMEWORK_DIR . \DIRECTORY_SEPARATOR . 'modules';
 	$modulesDirectories['modules'] = \MODULES_DIR;
 	$modulesDirectories['application'] = \APP_DIR . \DIRECTORY_SEPARATOR . 'modules';
+	
+	$variablesNames = array(
+		'framework' => array('config' => 'frameworkConfig', 'routes' => 'routes', 'events' => 'events', 'components' => 'frameworkComponents'),
+		'modules' => array('config' => 'config', 'events' => 'events', 'components' => 'components'),
+		'application' => array('config' => 'appConfig', 'routes' => 'routes', 'events' => 'events', 'components' => 'appComponents')
+	);
 
 	// get the full config, i.e. framework + app + modules
 	$configBuilder = new \framework\libs\ConfigBuilder();
 	$configBuilder->setModulesDirectories($modulesDirectories)
+			->setVariablesNames($variablesNames)
 			->buildConfig();
-
+	
 	$config = $configBuilder->getConfig();
 }
 

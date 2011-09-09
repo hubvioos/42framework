@@ -119,24 +119,32 @@ class Registry extends \ArrayObject
 	 */
 	public function get($key, $toArray = true)
 	{
-		$params = \explode('.', $key);
-		$size = \count($params);
-		$value = $this->offsetGet($params[0]);
+		$value = null;
 		
-		// deep into the array if dotted notation was used
-		if ($size > 1)
+		if($this->offsetExists($key))
 		{
-			for ($i = 1; $i < $size; $i++)
+			$value = $this[$key];
+		}
+		else
+		{
+			$params = \explode('.', $key);
+			$size = \count($params);
+			$value = $this->offsetGet($params[0]);
+
+			// deep into the array if dotted notation was used
+			if ($size > 1)
 			{
-				$value = $value[$params[$i]];
+				for ($i = 1; $i < $size; $i++)
+				{
+					$value = $value[$params[$i]];
+				}
+			}
+
+			if($toArray && $value instanceof self)
+			{
+				$value = $value->toArray();
 			}
 		}
-		
-		if($toArray && $value instanceof self)
-		{
-			$value = $value->toArray();
-		}
-		
 		return $value;
 	}
 	
@@ -149,32 +157,39 @@ class Registry extends \ArrayObject
 	 */
 	public function set($key, $value)
 	{
-		$params = \explode('.', $key);
-		$size = \count($params);
-		
-		if ($size > 1)
-		{	
-			$obj = $this;
-			
-			for ($i = 0; $i < $size; $i++)
-			{
-				if ($i === $size-1)
-				{
-					break;
-				}
-				
-				if(!$this->offsetExists($params[$i]))
-				{
-					$obj->offsetSet($params[$i], new self());
-				}
-				
-				$obj = $obj->offsetGet($params[$i]);
-			}
-			
-			$obj->offsetSet($params[$size-1], $value);
-			return;
+		if($this->offsetExists($key))
+		{
+			$this->offsetSet($key, $value);
 		}
-		
-		$this->offsetSet($params[0], $value);
+		else
+		{
+			$params = \explode('.', $key);
+			$size = \count($params);
+
+			if ($size > 1)
+			{	
+				$obj = $this;
+
+				for ($i = 0; $i < $size; $i++)
+				{
+					if ($i === $size-1)
+					{
+						break;
+					}
+
+					if(!$this->offsetExists($params[$i]))
+					{
+						$obj->offsetSet($params[$i], new self());
+					}
+
+					$obj = $obj->offsetGet($params[$i]);
+				}
+
+				$obj->offsetSet($params[$size-1], $value);
+				return;
+			}
+
+			$this->offsetSet($params[0], $value);
+		}
 	}
 }
