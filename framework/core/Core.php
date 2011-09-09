@@ -28,7 +28,7 @@ class Core extends \framework\core\FrameworkObject
 	const STAGE = 'stage';
 	
 	
-	public function __construct (\framework\core\ComponentsContainer $container)
+	public function __construct (\framework\libs\ComponentsContainer $container)
 	{
 		$this->setContainer($container);
 	}

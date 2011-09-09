@@ -398,8 +398,46 @@ class ConfigBuilder
 			foreach ($components as $componentName => $componentData)
 				$this->_componentsConfig[$module . '.' . $componentName] = $componentData;
 		}
-		return $this->_mergeInternalConfigs();
+		
+		$this->_mergeInternalConfigs();
+		
+				
+		//Get all unique component container
+		foreach ($this->_config['components'] as $key => $component)
+		{
+			if( $component['isUnique']  == true)
+			{
+				$this->_config['components'][$key] = $this->asUniqueInstance($component['callable']);
+			}
+			else
+			{
+				$this->_config['components'] [$key] = $component['callable'];
+			}
+		}
+		
+		return $this;
 	}
+	
+	/**
+	 * Get the unique instance of the specified comonent
+	 * @param collable $callable - The collable component container
+	 * @return collable - The unique instance of the component
+	 */
+	private static function asUniqueInstance ($callable)
+	{
+		return function ($c, $arguments) use ($callable)
+		{
+			static $object = null;
+
+			if ($object === null)
+			{
+				$object = $callable($c, $arguments);
+			}
+
+			return $object;
+		};
+	}
+	
 
 	/**
 	 * Build the full config at once
@@ -484,7 +522,15 @@ class ConfigBuilder
 				}
 				else
 				{
-					$internal = ${$externalVarName};
+					if ($internal === null)
+					{
+						$internal = ${$externalVarName};
+					}
+					else
+					{
+						$internal = \array_merge($internal, ${$externalVarName});
+					}
+					
 				}
 			}
 		}
@@ -618,4 +664,8 @@ class ConfigBuilder
 	}
 
 	// </editor-fold>
+	
+	
+	
+	
 }

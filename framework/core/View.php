@@ -133,4 +133,9 @@ class View extends \framework\core\FrameworkObject
 	{
 		self::setGlobal('title', $title);
 	}
+	
+	public function getHelper()
+	{
+		return call_user_func_array(array(self::$_container,'get'),func_get_args());
+	}
 }

@@ -81,9 +81,9 @@ if ($config['environment'] == \framework\core\Core::DEV)
 	$modulesDirectories['application'] = \APP_DIR . \DIRECTORY_SEPARATOR . 'modules';
 	
 	$variablesNames = array(
-		'framework' => array('config' => 'frameworkConfig', 'routes' => 'routes', 'events' => 'events', 'components' => 'frameworkComponents'),
+		'framework' => array('config' => 'frameworkConfig', 'routes' => 'routes', 'events' => 'events', 'components' => 'fcomponents'),
 		'modules' => array('config' => 'config', 'events' => 'events', 'components' => 'components'),
-		'application' => array('config' => 'appConfig', 'routes' => 'routes', 'events' => 'events', 'components' => 'appComponents')
+		'application' => array('config' => 'appConfig', 'routes' => 'routes', 'events' => 'events', 'components' => 'components')
 	);
 
 	// get the full config, i.e. framework + app + modules
@@ -137,7 +137,7 @@ else
 
 $registry = new \framework\libs\Registry($config);
 
-$container = new \framework\core\ComponentsContainer($registry);
+$container = new \framework\libs\ComponentsContainer($registry);
 $core = $container->getCore();
 
 $core->bootstrap()

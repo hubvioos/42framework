@@ -17,23 +17,34 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-namespace framework\libs;
+namespace framework\core;
 
-class EventManager
+class EventManager extends \framework\core\FrameworkObject
 {
     /**
      * @var array
      */
-	protected $_listeners = array();
+	protected $_listeners = null;//array();
 
     /**
      * @param array $events
      */
-    public function __construct(Array $events = array())
+    public function __construct( $events) // = array())
     {
-    	$this->_listeners = $events;
+    	$this->_listeners = $this->parseEventConfig($events);
     }
-    
+
+	/**
+	 * Get All Event Config
+	 * @param array $eventsConfig - The config of the events
+	 * @return array - The parsed config events parser
+	 */
+	function parseEventConfig( $eventsConfig)
+	{
+		
+		return $eventsConfig;
+	}
+
     /**
      * @param string $eventName
      * @param string $listener

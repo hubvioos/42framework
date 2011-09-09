@@ -2,7 +2,7 @@
 
 
 $appConfig = array(
-    'siteUrl' => 'http://localhost/42framework/',
+    'siteUrl' => 'http://127.0.0.1/f42/',
     'routes' => array('testroute' => array('module' => 'test', 'action' => 'qwerty', 'params' => array())),
 	'events' => array(
 		'afterIndex' => array(

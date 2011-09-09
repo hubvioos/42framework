@@ -23,7 +23,7 @@ class HttpRequest extends \framework\core\FrameworkObject
 {    
 	protected $_url = null;
 	
-    protected $_ipAddress = null;
+	protected $_ipAddress = null;
 	
 	protected $_userAgent = null;
 	
