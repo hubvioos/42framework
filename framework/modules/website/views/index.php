@@ -1,2 +1,1 @@
-<?php if(isset($test)){ echo $test; } ?>
-Welcome on 42Framework index page.
+<?php $this->raiseEvent('test', array('<p>The EventManager Works :)</p>')); ?>

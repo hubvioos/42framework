@@ -58,6 +58,24 @@ class Event
 	{
 		return $this->_parameters;
 	}
+	
+	/**
+	 * Set the name of the event
+	 * @param string - The name of the event
+	 */
+	public function setName($name)
+	{
+		$this->_name = $name;
+	}
+
+	/**
+	 * Set All parameters
+	 * @param array - All the parameters
+	 */
+	public function setParamaters($parameters)
+	{
+		$this->_parameters = $parameters;
+	}
 
 	
 

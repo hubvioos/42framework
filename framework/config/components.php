@@ -97,7 +97,7 @@ $fcomponents = array(
 		'callable' => function ($c, $args)
 			{
 				/* @var $c ApplicationContainer */
-				return new \framework\core\EventManager($c->_config->get('events'));
+				return new \framework\core\EventManager($c->_config['events']);
 			},
 		'isUnique' => true),
 
@@ -162,6 +162,13 @@ $fcomponents = array(
 			'callable' => function ($c, $args)
 			{
 				return new \framework\helpers\HtmlHelper();
+			},
+			'isUnique' => true),
+					
+					 'testevent' =>array(
+			'callable' => function ($c, $args)
+			{
+				return new \framework\helpers\TestEvent($args[0][0]);
 			},
 			'isUnique' => true)
 

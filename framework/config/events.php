@@ -16,27 +16,32 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
-
-$frameworkConfig = array(
-	'environment' => \framework\core\Core::DEV,
-    'errorReporting' => E_ALL|E_STRICT,
-	'displayErrors' => 1,
-	'defaultModule' => 'website',
-    'defaultAction' => 'index',
-	'defaultLayout' => false,
-	'defaultCharset' => 'utf-8',
-	'defaultLanguage' => 'fr',
-	'defaultTimezone' => 'Europe/Paris',
-	'viewExtension' => '.php',
-	'siteUrl' => 'http://localhost/',
-	'routes' => array(),
-	'historySize' => 2,
-	'errorHandlerListeners' => array('framework\\errorHandler\\listeners\\Html'),
-	'viewExtension' => '.php',
-	'applicationFilters' => array(),
-	'viewFilters' => array(), 
-	'dbConnectionParams' => array(
-		'driver' => 'pdo_sqlite',
-		'path' => APP_DIR.DS.'database'.DS.'db.sqlite'
-	),
+$events	 = array(
+		//Event test
+		'test' => array(
+			
+			//With an anonym function
+			array('callable' =>
+					function()
+					{
+						echo 'The Event Manager works with anonymous function :)';
+					},
+				'priority' => 1),
+							
+			//With The Component Container
+			array('callable' => array ('testevent', 'OnMessage'),
+				'params' => array('The Component Container works with the Event Manager :)'),	
+				'priority' => 20),
+							
+			 //With a static class method			
+			array('callable' => '\\framework\\helpers\\TestEvent::OnMessage',
+				'priority' => 3),
+							
+			//With an array
+			array('callable' => array('\\framework\\helpers\\TestEvent', 'OnMessage'),
+				'priority' => 4)
+		)
 );
+			
+
+

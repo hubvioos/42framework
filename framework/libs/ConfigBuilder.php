@@ -365,15 +365,32 @@ class ConfigBuilder
 
 		$this->_findAndGetConfig(\APP_DIR . \DIRECTORY_SEPARATOR . 'config', 'events.php', $this->_variablesNames['application']['events'], $this->_eventsConfig);
 
-		/*
-		 * module events
-		  foreach ($this->_modulesLocation as $moduleName => $level)
-		  {
-		  $this->_findAndGetConfig(
-		  $this->_modulesDirectories[$level] . \DIRECTORY_SEPARATOR . $moduleName . \DIRECTORY_SEPARATOR . 'config', 'events.php', $this->_variablesNames['modules']['events'], $this->_eventsConfig, true, $moduleName);
-		  }
-		 */
+		$this->_mergeInternalConfigs();
+		
+		foreach($this->_eventsConfig as $key => $event)
+		{
+			//Sort the listeners table by priority
+			usort($this->_eventsConfig[$key], array($this, 'compareListenersByPriority')); 
+		}
+	
 		return $this->_mergeInternalConfigs();
+	}
+	
+	/**
+	 * Compare two listeners according their priority level
+	 * @param \framework\libs\Registry $a F
+	 * @param \framework\libs\Registry $b
+	 * @return int - The result of the compraison
+	 */
+	private function compareListenersByPriority ($a, $b)
+	{
+		//Check if the two listeners have the same priority
+		if($a['priority'] === $b['priority'])
+		{
+			throw new \InvalidArgumentException('Two listeners can\'t have the same priority for the same event');
+		}
+		
+		return ($a['priority'] < $b['priority']) ? -1 : 1;
 	}
 
 	/**
@@ -403,19 +420,19 @@ class ConfigBuilder
 		
 				
 		//Get all unique component container
-		foreach ($this->_config['components'] as $key => $component)
+		foreach ($this->_componentsConfig as $key => $component)
 		{
 			if( $component['isUnique']  == true)
 			{
-				$this->_config['components'][$key] = $this->asUniqueInstance($component['callable']);
+				$this->_componentsConfig[$key] = $this->asUniqueInstance($component['callable']);
 			}
 			else
 			{
-				$this->_config['components'] [$key] = $component['callable'];
+				$this->_componentsConfig[$key] = $component['callable'];
 			}
 		}
 		
-		return $this;
+		return $this->_mergeInternalConfigs();
 	}
 	
 	/**
@@ -423,7 +440,7 @@ class ConfigBuilder
 	 * @param collable $callable - The collable component container
 	 * @return collable - The unique instance of the component
 	 */
-	private static function asUniqueInstance ($callable)
+	private function asUniqueInstance ($callable)
 	{
 		return function ($c, $arguments) use ($callable)
 		{
@@ -446,13 +463,13 @@ class ConfigBuilder
 	 * @return framework\libs\ConfigBuilder $this
 	 */
 	public function buildConfig ()
-	{
+	{	
 		return $this->buildMinimalConfig()
 						->buildRouteConfig()
 						->buildMinimalModulesConfig()
 						->buildModulesDependencies()
-						->buildEventsConfig()
-						->buildComponentsConfig();
+						->buildComponentsConfig()
+						->buildEventsConfig();
 	}
 
 	// </editor-fold>
@@ -466,7 +483,12 @@ class ConfigBuilder
 	{
 		// merge framework and application's configs for generic options
 		// in case of duplicate options, application's config overrides framework's config
-		$this->_config = \array_merge($this->_frameworkConfig, $this->_appConfig, array('modules' => $this->_modulesConfig), array('modulesLocation' => $this->_modulesLocation), array('events' => $this->_eventsConfig), array('components' => $this->_componentsConfig), array('routes' => $this->_routesConfig));
+		$this->_config = \array_merge($this->_frameworkConfig, 
+								$this->_appConfig, array('modules' => $this->_modulesConfig),
+								array('modulesLocation' => $this->_modulesLocation), 
+								array('events' => $this->_eventsConfig), 
+								array('components' => $this->_componentsConfig), 
+								array('routes' => $this->_routesConfig));
 
 		return $this;
 	}

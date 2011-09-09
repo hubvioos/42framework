@@ -22,35 +22,26 @@ namespace framework\core;
 class EventManager extends \framework\core\FrameworkObject
 {
     /**
+     *  All listeners
      * @var array
      */
-	protected $_listeners = null;//array();
+    protected $_listeners = null;
 
     /**
      * @param array $events
      */
-    public function __construct( $events) // = array())
+    public function __construct($listenersConfig)
     {
-    	$this->_listeners = $this->parseEventConfig($events);
+		$this->_listeners = $listenersConfig;	
     }
 
-	/**
-	 * Get All Event Config
-	 * @param array $eventsConfig - The config of the events
-	 * @return array - The parsed config events parser
-	 */
-	function parseEventConfig( $eventsConfig)
-	{
-		
-		return $eventsConfig;
-	}
 
     /**
      * @param string $eventName
-     * @param string $listener
+     * @param array $listener
      * @return \framework\events\EventManager
      */
-    public function addListener($eventName, $listener)
+    public function addListener($eventName, Array $listener)
     {
         if (!isset($this->_listeners[$eventName]))
         {
@@ -62,10 +53,10 @@ class EventManager extends \framework\core\FrameworkObject
 
     /**
      * @param string $eventName
-     * @param string $listener
+     * @param array $listener
      * @return \framework\events\EventManager
      */
-    public function removeListener($eventName, $listener = null)
+    public function removeListener($eventName, Array $listener = array())
     {
         if (!isset($this->_listeners[$eventName]))
         {
@@ -103,8 +94,41 @@ class EventManager extends \framework\core\FrameworkObject
         {
             foreach ($this->_listeners[$eventName] as $listener)
             {
-                list($class, $method) = explode("::", $listener);
-                $returnValue = $class::$method($params);
+		//Check if it's directly callable
+		if(\is_callable($listener['callable']))
+		{		
+			$returnValue= call_user_func_array($listener['callable'], $params);
+		}
+		elseif(\is_a($listener['callable'], '\\framework\\libs\\Registry') && !empty($listener['callable']))
+		{
+			//Check if it's an callable array
+			if(\is_callable(array($listener['callable'][0], $listener['callable'][1])))
+			{
+				$returnValue = \call_user_func_array(array($listener['callable'][0], $listener['callable'][1]), $params);
+			}
+			//Check if it's a component
+			else
+			{
+				//Get the component...
+				$component = null;
+				if(isset($listener['params']))
+				{
+					$component = $this->getComponent($listener['callable'][0] , $listener['params']);
+				}
+				else
+				{
+					$component = $this->getComponent($listener['callable'][0]);
+				}
+
+				//...and call the specified method
+				$returnValue = \call_user_func_array(array($component, $listener['callable'][1]) , $params);
+			}
+		}
+		else
+		{
+			throw new \InvalidArgumentException('The argument is not a callable.');
+		}
+   
                 if ($returnValue)
                 {
                     break;

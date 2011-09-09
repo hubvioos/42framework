@@ -92,6 +92,7 @@ class HtmlHelper {
 		'javascriptend' => '</script>'
 	);
 
+
 /**
  * Breadcrumbs.
  *
