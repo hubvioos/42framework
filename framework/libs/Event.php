@@ -27,7 +27,6 @@ namespace framework\libs;
 
 class Event
 {
-
 	/**
 	 * The name of the event
 	 * @var string
@@ -40,6 +39,12 @@ class Event
 	 */
 	protected $_parameters;
 
+
+	public function  __construct ($name, $params = null)
+	{
+		$this->_name = $name;
+		$this->_parameters = $params;
+	}
 
 	/**
 	 * Get the name of the event
@@ -76,9 +81,4 @@ class Event
 	{
 		$this->_parameters = $parameters;
 	}
-
-	
-
-	
-		
 }

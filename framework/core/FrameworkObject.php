@@ -102,6 +102,7 @@ abstract class FrameworkObject
 	
 	public function raiseEvent($name, $params = null)
 	{
-		return $this->getComponent('eventManager')->dispatchEvent($name, $params);
+		$event = $this->getComponent('event', $name, $params);
+		return $this->getComponent('eventManager')->dispatchEvent($event);
 	}
 }

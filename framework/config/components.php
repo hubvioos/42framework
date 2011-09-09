@@ -151,6 +151,15 @@ $fcomponents = array(
 				return new \framework\libs\Session();
 			},
 			'isUnique' => true),
+
+
+		'event' => array(
+			'callable' => function ($c, $args)
+			{
+				return new \framework\libs\Event($args[0], $args[1]);
+			},
+			'isUnique' => false),
+					
 					
 					
 					

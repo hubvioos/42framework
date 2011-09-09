@@ -82,12 +82,13 @@ class EventManager extends \framework\core\FrameworkObject
     }
 
     /**
-     * @param string $eventName
-     * @param mixed $params
+     * @param \framework\libs\Event $event
      * @return mixed
      */
-    public function dispatchEvent($eventName, $params = null)
+    public function dispatchEvent(\framework\libs\Event $event)
     {
+	$eventName = $event->getName();
+	$params = $event->getParamaters();
         $returnValue = null;
         
         if(isset($this->_listeners[$eventName]))
