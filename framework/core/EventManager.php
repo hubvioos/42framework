@@ -23,20 +23,21 @@ class EventManager extends \framework\core\FrameworkObject
 {
     /**
      *  All listeners
-     * @var array
+     * @var \framework\libs\Registry > The event config
      */
     protected $_listeners = null;
 
     /**
-     * @param array $events
+     * @param \framework\libs\Registry $eventsConfig
      */
-    public function __construct($listenersConfig)
+    public function __construct($eventsConfig)
     {
-		$this->_listeners = $listenersConfig;	
+		$this->_listeners = $eventsConfig;	
     }
 
 
     /**
+     * Add one or more Listener(s) 
      * @param string $eventName
      * @param array $listener
      * @return \framework\events\EventManager
@@ -52,6 +53,7 @@ class EventManager extends \framework\core\FrameworkObject
     }
 
     /**
+     * Remove one or more Listener(s)
      * @param string $eventName
      * @param array $listener
      * @return \framework\events\EventManager
@@ -120,7 +122,6 @@ class EventManager extends \framework\core\FrameworkObject
 				{
 					$component = $this->getComponent($listener['callable'][0]);
 				}
-
 				//...and call the specified method
 				$returnValue = \call_user_func_array(array($component, $listener['callable'][1]) , $params);
 			}
@@ -136,11 +137,11 @@ class EventManager extends \framework\core\FrameworkObject
                 }
             }
         }
-
         return $returnValue;
     }
 
     /**
+     * Check if the event has at least one listener 
      * @param string $eventName
      * @return boolean
      */
@@ -150,6 +151,7 @@ class EventManager extends \framework\core\FrameworkObject
     }
 
     /**
+     * Get all listeners attached to a specific event 
      * @param string $eventName
      * @return array
      */
