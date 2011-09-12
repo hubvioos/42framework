@@ -28,40 +28,48 @@ interface CompleteSessionHandler extends \framework\libs\session\SessionHandler
 {
 
 	/**
-	 * Open a session
-	 * Expects a save path and a session name
+	 * Open a session.
+	 * Expects a save path and a session name.
+	 * @param string $savePath
+	 * @param string $sessionName
 	 */
 	public function open($savePath = '', $sessionName = '');
 	
 	/**
-	 * Close the session
-	 * Executed at the end of the script
+	 * Close the session.
+	 * Executed at the end of the script.
 	 */
 	public function close();
 	
 	/**
-	 * Read some data stored in session
-	 * Must return a string (empty if no data could have been read)
-	 * @return string
-	 */
-	public function read();
-	
-	/**
-	 * Store some data in session
-	 * Expects a session id and the data to write
-	 */
-	public function write($sessionId = '', $data = '');
-	
-	/**
-	 * Destroy a session
-	 * Expects a session id
+	 * Destroy a session.
+	 * Expects a session id.
+	 * @param string $sessionId
 	 */
 	public function destroy($sessionId = '');
 	
 	/**
-	 * Garbage collector. Erase the session when it's expired
-	 * Expects the the session's max life time
+	 * Read some data stored in session.
+	 * Expects a session id.
+	 * Must return a string (empty if no data could have been read).
+	 * @param string $sessionId
+	 * @return string
 	 */
-	public function gc($maxLifeTime = 0);
+	public function read($sessionId);
+	
+	/**
+	 * Store some data in session.
+	 * Expects a session id and the data to write.
+	 * @param string $sessionId
+	 * @param mixed $data
+	 */
+	public function write($sessionId = '', $data = '');
+	
+	/**
+	 * Garbage collector. Erase the session when it's expired.
+	 * Expects the the session's max life time.
+	 * @param number $maxLifetime
+	 */
+	public function gc($maxLifetime = 0);
 
 }

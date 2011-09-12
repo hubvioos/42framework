@@ -1,6 +1,6 @@
 <?php 
 /**
- * Copyright (C) 2011 - K√©vin O'NEILL, Fran√ßois KLINGLER - <contact@42framework.com>
+ * Copyright (C) 2011 - Kévin O'NEILL, François KLINGLER - <contact@42framework.com>
  * 
  * 42framework is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,12 +28,6 @@ class Session
 	public function __construct (\framework\libs\session\SessionHandler $handler)
 	{	
 		$this->_handler = $handler;
-		
-		/*
-		\session_set_save_handler(array($this->_handler, 'open'), array($this->_handler, 'close'), 
-				array($this->_handler, 'read'), array($this->_handler, 'write'), 
-				array($this->_handler, 'destroy'), array($this->_handler, 'gc'));
-		 */
 	}
 	
 	public function init ()

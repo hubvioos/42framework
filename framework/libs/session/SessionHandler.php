@@ -28,7 +28,7 @@ interface SessionHandler
 {
 		
 	/**
-	 * Define the manager as session handler
+	 * Define the handler as session handler
 	 */
 	public function setAsSessionHandler();
 }
