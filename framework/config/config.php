@@ -19,10 +19,10 @@
 
 $frameworkConfig = array(
 	'environment' => \framework\core\Core::DEV,
-    'errorReporting' => E_ALL|E_STRICT,
+	'errorReporting' => E_ALL|E_STRICT,
 	'displayErrors' => 1,
 	'defaultModule' => 'website',
-    'defaultAction' => 'index',
+	'defaultAction' => 'index',
 	'defaultLayout' => false,
 	'defaultCharset' => 'utf-8',
 	'defaultLanguage' => 'fr',
@@ -39,4 +39,36 @@ $frameworkConfig = array(
 		'driver' => 'pdo_sqlite',
 		'path' => APP_DIR.DS.'database'.DS.'db.sqlite'
 	),
+	'defaultCacheSysteml' => 'Apc',
+	'cache' => array(
+		'Apc' => array(
+			'engine' => 'Apc',
+			'prefix' => '42f_', //APP.			
+			'duration' => 3600,
+			'probability' => 100,
+		),
+		'File' => array(
+			'engine' => 'File',
+			'path' => '',
+			'prefix' => '42f_',
+			'lock' => false,
+			'serialize' => true,
+			'isWindows' => false
+		),
+		'Memcache' => array(
+			'engine' => 'Memcache',
+			'prefix' => '42f', //APP_DIR
+			'servers' => array('127.0.0.1'),
+			'duration' => 3600,
+			'compress' => false
+		),
+		'Xcache' => array(
+			'engine' => 'Xcache',
+			'prefix' => '42f_', //APP_DIR
+			'PHP_AUTH_USER' => 'user',
+			'PHP_AUTH_PW' => 'password'
+		)
+	)
+		
+		
 );

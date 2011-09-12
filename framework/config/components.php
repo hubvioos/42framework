@@ -159,6 +159,21 @@ $fcomponents = array(
 				return new \framework\libs\Event($args[0], $args[1]);
 			},
 			'isUnique' => false),
+
+
+		'cache' => array(
+			'callable' => function ($c, $args)
+			{
+				if(!\array_key_exists($args[0], $c->_config['cache']))
+				{
+					throw new \InvalidArgumentException('The cache configuration  ' . $args[0] . ' doesn\'t exist');
+				}
+				
+				return new \framework\libs\Cache($args[0], $c->_config['cache'][$args[0]]);
+			},
+			'isUnique' => false),
+					
+
 					
 					
 					
@@ -172,9 +187,9 @@ $fcomponents = array(
 			{
 				return new \framework\helpers\HtmlHelper();
 			},
-			'isUnique' => true),
+			'isUnique' => false),
 					
-					 'testevent' =>array(
+		 'testevent' =>array(
 			'callable' => function ($c, $args)
 			{
 				return new \framework\helpers\TestEvent($args[0][0]);
