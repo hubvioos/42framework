@@ -30,7 +30,7 @@
  */
 namespace framework\libs\session;
 
-class LightRedisHandler implements \framework\libs\session\SessionHandler
+class LightRedisHandler implements \framework\libs\session\LightSessionHandler
 {
 	protected $_savePath = '';
 	

@@ -30,7 +30,7 @@
  */
 namespace framework\libs\session;
 
-class LightMemecachedHandler implements \framework\libs\session\SessionHandler
+class LightMemecachedHandler implements \framework\libs\session\LightSessionHandler
 {
 	protected $_savePath = '';
 	
