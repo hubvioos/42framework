@@ -18,27 +18,31 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 /**
- * Library MemcacheHandler
- *
- * This library requires Memcache to be installed on your server.
- * See http://uk3.php.net/manual/en/book.memcache.php for installation and documentation.
+ * Library RedisHandler
+ * 
+ * This library requires Redis to be installed on your server.
+ * See https://github.com/nicolasff/phpredis for installation and documentation
+ * 
  * @author mickael
  */
+
 namespace framework\libs\session;
 
 
-class MemcacheSessionException extends \Exception
+class RedisSessionException extends \Exception
 {
 	
 }
 
-class MemcacheHandler implements \framework\libs\session\CompleteSessionHandler
+
+class RedisHandler implements \framework\libs\session\CompleteSessionHandler
 {
+
 	/**
-	 * Whether or not the handler has been constructed from an already configured Memcached object
+	 * Whether or not the handler has been constructed from an already configured Redis object
 	 * @var boolean 
 	 */
-	protected $_hasAlreadyConfiguredMemcacheObject = false;
+	protected $_hasAlreadyConfiguredRedisObject = false;
 
 	/**
 	 * The severs' list
@@ -53,59 +57,53 @@ class MemcacheHandler implements \framework\libs\session\CompleteSessionHandler
 	protected $_lifetime = 0;
 	
 	/**
-	 * The default parameters for the servers used by the Memcache object
+	 * The default parameters for the servers used by the Redis object
 	 * @var array 
 	 */
 	protected $_defaultServerParams = array(
 		'host' => '127.0.0.1', 
-		'port' => 11211, 
-		'persistent' => true, 
-		'weight' => 1, 
-		'timeout' => 1, 
-		'retry_interval' => 15, 
-		'status' => true, 
-		'failure_callback' => '\\framework\\libs\\session\\MemcacheHandler::defaultCallback', 
-		'timeoutms' => 1500
+		'port' => 6379, 
+		'timeout' => 0
 	);
 	
 	/**
-	 * The memcache instance
-	 * @var \Memcache 
+	 * The redis instance
+	 * @var \Redis 
 	 */
-	protected $_memcache = null;
+	protected $_redis = null;
 	
 	/**
 	 * The session name
 	 * @var string 
 	 */
 	protected $_sessionName = '';
-	
+
 	/**
 	 * Constructor
-	 * @param Memcache|array $memcache An already configured Memcache object or a array containing the servers info
+	 * @param Redis|array $redis An already configured Redis object or a array containing the servers info
 	 * @param number $lifetime The session's lifetime (seconds). Should not be more than 2592000 (30 days)
-	 * @param array $defaultServerParams The default parameters for the memcache servers. Will be ignored of the first argument is an already configured Memcache object
+	 * @param array $defaultServerParams The default parameters for the redis servers. Will be ignored of the first argument is an already configured Redis object
 	 */
-	public function __construct ($memcache, $lifetime = 0, array $defaultServerParams = array())
+	public function __construct ($redis, $lifetime = 0, array $defaultServerParams = array())
 	{		
 		$this->setLifetime($lifetime);
 		
-		if ($memcache instanceof \Memcache)
+		if ($redis instanceof \Redis)
 		{
-			$this->_hasAlreadyConfiguredMemcacheObject = true;
-			$this->_memcache = $memcache;
+			$this->_hasAlreadyConfiguredRedisObject = true;
+			$this->_redis = $redis;
 			return; 
 		}
-		elseif(\is_array($memcache))
+		elseif(\is_array($redis))
 		{
 			if(count($defaultServerParams) > 0)
 			{
 				$this->setDefaultServerParams($defaultServerParams);
 			}
 			
-			$this->_memcache = new \Memcache;
+			$this->_redis = new \Redis;
 			
-			foreach($memcache as $server)
+			foreach($redis as $server)
 			{
 				$this->_servers = $server;
 			}
@@ -114,8 +112,8 @@ class MemcacheHandler implements \framework\libs\session\CompleteSessionHandler
 		}
 		else
 		{
-			throw new \framework\libs\session\MemcacheSessionException(
-					'Wrong first parameter "'. \gettype($memcache) 
+			throw new \framework\libs\session\RedisSessionException(
+					'Wrong first parameter "'. \gettype($redis) 
 					.'" for session handler, session cannot be initilised');
 		}
 	}
@@ -137,29 +135,26 @@ class MemcacheHandler implements \framework\libs\session\CompleteSessionHandler
 	}
 
 	/**
-	 * Set the default parameters for the Memcache servers.
-	 * WARNING : will be inefficient if the MemcacheHandler has be constructed with an already configured Memcache object!
-	 * Keys can be : 'host', 'port', 'persistent', 'weight', 'timeout', 
-	 * 'retry_interval', 'status', 'failure_callback'  and 'timeoutms'.
-	 * See http://uk3.php.net/manual/en/memcache.addserver.php for the meaning of each one.
-	 * @link http://fr.php.net/manual/en/memcache.addserver.php
+	 * Set the default parameters for the Redis servers.
+	 * WARNING : will be inefficient if the RedisHandler has be constructed with an already configured Redis object!
+	 * Keys can be : 'host', 'port', or 'timeout' 
 	 * @param array $defaultServerParams
-	 * @return MemcacheHandler 
+	 * @return \framework\libs\session\RedisHandler
 	 */
 	public function setDefaultServerParams (array $defaultServerParams)
 	{
-		if($this->_hasAlreadyConfiguredMemcacheObject === false)
+		if($this->_hasAlreadyConfiguredRedisObject === false)
 		{
 			$this->_defaultServerParams = array_merge($this->_defaultServerParams, $defaultServerParams);
 
-			$this->_memcache = new \Memcache;
+			$this->_redis = new \Redis;
 			// apply these default parameters
 			$this->_configureServers();
 		}
 		
 		return $this;
 	}
-	
+
 	/**
 	 * Open a session.
 	 * Expects a save path and a session name.
@@ -171,14 +166,12 @@ class MemcacheHandler implements \framework\libs\session\CompleteSessionHandler
 	{
 		try
 		{
-			if($this->_hasAlreadyConfiguredMemcacheObject === false)
+			if($this->_hasAlreadyConfiguredRedisObject === false)
 			{
 				foreach($this->_servers as $server)
 				{
-					// connect to the Memcache servers
-					$this->_memcache->addserver($server['host'], $server['port'], $server['persistent'], 
-								$server['weight'], $server['timeout'], $server['retry_interval'], 
-								$server['status'], $server['failure_callback'], $server['timeoutms']);
+					// connect to the Redis servers
+					$this->_redis->connect($server['host'], $server['port'], $server['timeout']);
 				}
 			}
 			if($sessionName !== '')
@@ -187,14 +180,14 @@ class MemcacheHandler implements \framework\libs\session\CompleteSessionHandler
 			}
 			else
 			{
-				throw new \framework\libs\session\MemcacheSessionException('The session name cannot be empty');
+				throw new \framework\libs\session\RedisSessionException('The session name cannot be empty');
 			}
 		}
-		catch (Exception $e)
+		catch(\Exception $e)
 		{
-			throw new \framework\libs\session\RedisSessionException('The session could not be opened', $e->getCode(), $e);
+			throw new \framework\libs\session\RedisSessionException('The session could not be opened.', $e->getCode(), $e);
 		}
- 
+		
 		return true;
 	}
 	
@@ -205,7 +198,7 @@ class MemcacheHandler implements \framework\libs\session\CompleteSessionHandler
 	 */
 	public function close ()
 	{
-		$this->_memcache->close();
+		$this->_redis->close();
 		return true;
 	}
 
@@ -217,9 +210,9 @@ class MemcacheHandler implements \framework\libs\session\CompleteSessionHandler
 	 */
 	public function destroy ($sessionId = '')
 	{
-		if($sessionId !== '')
+		if($sessionId !== '' && $this->_redis->exists($this->_sessionName.$sessionId))
 		{
-			$this->_memcache->delete($this->_sessionName.$sessionId);
+			$this->_redis->del($this->_sessionName.$sessionId);
 		}
 		
 		session_destroy();
@@ -235,7 +228,7 @@ class MemcacheHandler implements \framework\libs\session\CompleteSessionHandler
 	 */
 	public function read ($sessionId = '')
 	{
-		$data = $this->_memcache->get($this->_sessionName.$sessionId);
+		$data = $this->_redis->get($this->_sessionName.$sessionId);
 		
 		if($data !== false)
 		{
@@ -256,11 +249,7 @@ class MemcacheHandler implements \framework\libs\session\CompleteSessionHandler
 	{
 		if($sessionId !== '')
 		{
-			if($this->_memcache->replace($this->_sessionName.$sessionId, $data, null, $this->_lifetime) === false)
-			{
-				// add the item if we couldn't have replaced it (i.e. if it doesn't already exists)
-				$this->_memcache->add($this->_sessionName.$sessionId, $data, null, $this->_lifetime);
-			}
+			$this->_redis->setex($this->_sessionName.$sessionId, $this->_lifetime, $data);
 		}
 		
 		return true;
@@ -273,26 +262,12 @@ class MemcacheHandler implements \framework\libs\session\CompleteSessionHandler
 	 */
 	public function gc ($maxLifetime = 0)
 	{
-		// memcache has its own GC
+		// redis has its own GC
 	}
 	
 	public function __destruct ()
 	{
-		$this->_memcache->close();
-	}
-	
-	/**
-	 * Use the handler as session handler
-	 */
-	public function setAsSessionHandler ()
-	{
-		ini_set('session.gc_probability', 0);
-		ini_set('session.gc_divisor', 0);
-		
-		\session_set_save_handler(
-				array(&$this, 'open'), array(&$this, 'close'), array(&$this, 'read'), 
-				array(&$this, 'write'), array(&$this, 'destroy'), array(&$this, 'gc')
-		);
+		$this->_redis->close();
 	}
 	
 	/**
@@ -323,10 +298,17 @@ class MemcacheHandler implements \framework\libs\session\CompleteSessionHandler
 			}
 		}
 	}
-	
-	public static function defaultCallback($host, $port)
+
+	public function setAsSessionHandler ()
 	{
-		throw new \framework\libs\session\MemcacheErrorException(
-				'The memcache host '.$host.':'.$port.' reported an error.');
+		ini_set('session.gc_probability', 0);
+		ini_set('session.gc_divisor', 0);
+		
+		\session_set_save_handler(
+				array(&$this, 'open'), array(&$this, 'close'), array(&$this, 'read'), 
+				array(&$this, 'write'), array(&$this, 'destroy'), array(&$this, 'gc')
+		);
 	}
+
+
 }

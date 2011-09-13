@@ -75,6 +75,9 @@ class LightMemecachedHandler implements \framework\libs\session\LightSessionHand
 	
 	public function setAsSessionHandler ()
 	{
+		ini_set( 'session.gc_probability', 0);
+		ini_set( 'session.gc_divisor', 0);
+			
 		ini_set('session.save_handler', 'memcache');
 		ini_set('session.save_path', $this->_savePath);
 	}

@@ -54,7 +54,7 @@ class LightRedisHandler implements \framework\libs\session\LightSessionHandler
 	/**
 	 * Set the session's save path from a list of servers
 	 * @param array|string $servers The list of servers. Can be an array or a comma-separated string.
-	 * @return LightMemecachedHandler 
+	 * @return \framework\libs\session\LightRedisHandler
 	 */
 	public function setSavePath ($servers)
 	{
