@@ -20,6 +20,8 @@
 /**
  * Library MemcacheHandler
  *
+ * This library requires Memcache to be installed on your server.
+ * See http://uk3.php.net/manual/en/book.memcache.php for installation and documentation.
  * @author mickael
  */
 namespace framework\libs\session;

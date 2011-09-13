@@ -18,19 +18,19 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 /**
- * Library LightMemecachedHandler
+ * Library LightRedisHandler
  * 
- * This library requires Memcache to be installed on your server.
- * See http://uk3.php.net/manual/en/book.memcache.php for installation and documentation.
+ * This library requires Redis to be installed on your server.
+ * See https://github.com/nicolasff/phpredis for installation and documentation.
  * 
- * This is a minimal session handler using memcached.
- * It does nothing but using PHP's default parameters for session handling using memcached.
- * @see http://uk3.php.net/manual/en/memcache.examples-overview.php#example-3693
+ * This is a minimal session handler using Redis.
+ * It does nothing but using PHP's default parameters for session handling using Redis.
+ * @link https://github.com/nicolasff/phpredis
  * @author mickael
  */
 namespace framework\libs\session;
 
-class LightMemecachedHandler implements \framework\libs\session\SessionHandler
+class LightRedisHandler implements \framework\libs\session\SessionHandler
 {
 	protected $_savePath = '';
 	
@@ -75,7 +75,7 @@ class LightMemecachedHandler implements \framework\libs\session\SessionHandler
 	
 	public function setAsSessionHandler ()
 	{
-		ini_set('session.save_handler', 'memcache');
+		ini_set('session.save_handler', 'redis');
 		ini_set('session.save_path', $this->_savePath);
 	}
 
