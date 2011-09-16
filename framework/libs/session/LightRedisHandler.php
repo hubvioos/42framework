@@ -41,8 +41,6 @@ class LightRedisHandler implements \framework\libs\session\LightSessionHandler
 	public function __construct ($servers)
 	{
 		$this->setServers($servers);
-		
-		$this->_savePath = \rtrim($this->_savePath, ', ');
 	}
 	
 	
@@ -64,6 +62,8 @@ class LightRedisHandler implements \framework\libs\session\LightSessionHandler
 			{
 				$this->_savePath .= $server.', ';
 			}
+			
+			$this->_savePath = \rtrim($this->_savePath, ', ');
 		}
 		else
 		{

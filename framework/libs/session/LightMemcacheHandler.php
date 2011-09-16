@@ -41,8 +41,6 @@ class LightMemcacheHandler implements \framework\libs\session\LightSessionHandle
 	public function __construct ($servers)
 	{
 		$this->setServers($servers);
-		
-		$this->_savePath = \rtrim($this->_savePath, ', ');
 	}
 	
 	
@@ -64,6 +62,8 @@ class LightMemcacheHandler implements \framework\libs\session\LightSessionHandle
 			{
 				$this->_savePath .= $server.', ';
 			}
+		
+			$this->_savePath = \rtrim($this->_savePath, ', ');
 		}
 		else
 		{
