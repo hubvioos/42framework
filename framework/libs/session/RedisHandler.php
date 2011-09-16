@@ -88,34 +88,42 @@ class RedisHandler implements \framework\libs\session\CompleteSessionHandler
 	{		
 		$this->setLifetime($lifetime);
 		
-		if ($redis instanceof \Redis)
+		if(\class_exists('\\Redis') === false)
 		{
-			$this->_hasAlreadyConfiguredRedisObject = true;
-			$this->_redis = $redis;
-			return; 
-		}
-		elseif(\is_array($redis))
-		{
-			if(count($defaultServerParams) > 0)
-			{
-				$this->setDefaultServerParams($defaultServerParams);
-			}
-			
-			$this->_redis = new \Redis;
-			
-			foreach($redis as $server)
-			{
-				$this->_servers[] = $server;
-			}
-			
-			$this->_configureServers();
+			throw new \framework\libs\session\RedisSessionException('Unable to find class "Redis"');
 		}
 		else
 		{
-			throw new \framework\libs\session\RedisSessionException(
-					'Wrong first parameter "'. \gettype($redis) 
-					.'" for session handler, session cannot be initilised');
+			if ($redis instanceof \Redis)
+			{
+				$this->_hasAlreadyConfiguredRedisObject = true;
+				$this->_redis = $redis;
+				return; 
+			}
+			elseif(\is_array($redis))
+			{
+				if(count($defaultServerParams) > 0)
+				{
+					$this->setDefaultServerParams($defaultServerParams);
+				}
+
+				$this->_redis = new \Redis;
+
+				foreach($redis as $server)
+				{
+					$this->_servers[] = $server;
+				}
+
+				$this->_configureServers();
+			}
+			else
+			{
+				throw new \framework\libs\session\RedisSessionException(
+						'Wrong first parameter "'. \gettype($redis) 
+						.'" for session handler, session cannot be initilised');
+			}
 		}
+		
 	}
 	
 	/**
@@ -133,7 +141,16 @@ class RedisHandler implements \framework\libs\session\CompleteSessionHandler
 			$this->_lifetime = 0;
 		}
 	}
-
+	
+	/**
+	 * Set the session name
+	 * @param string $sessionName 
+	 */
+	public function setSessionName ($sessionName)
+	{
+		$this->_sessionName = $sessionName;
+	}
+	
 	/**
 	 * Set the default parameters for the Redis servers.
 	 * WARNING : will be inefficient if the RedisHandler has be constructed with an already configured Redis object!
@@ -210,9 +227,9 @@ class RedisHandler implements \framework\libs\session\CompleteSessionHandler
 	 */
 	public function destroy ($sessionId = '')
 	{
-		if($sessionId !== '' && $this->_redis->exists($this->_sessionName.$sessionId))
+		if($sessionId !== '' && $this->_redis->exists($this->_key($sessionId)))
 		{
-			$this->_redis->del($this->_sessionName.$sessionId);
+			$this->_redis->del($this->_key($sessionId));
 		}
 		
 		session_destroy();
@@ -228,7 +245,7 @@ class RedisHandler implements \framework\libs\session\CompleteSessionHandler
 	 */
 	public function read ($sessionId = '')
 	{
-		$data = $this->_redis->get($this->_sessionName.$sessionId);
+		$data = $this->_redis->get($this->_key($sessionId));
 		
 		if($data !== false)
 		{
@@ -249,7 +266,7 @@ class RedisHandler implements \framework\libs\session\CompleteSessionHandler
 	{
 		if($sessionId !== '')
 		{
-			$this->_redis->setex($this->_sessionName.$sessionId, $this->_lifetime, $data);
+			$this->_redis->setex($this->_key($sessionId), $this->_lifetime, $data);
 		}
 		
 		return true;
@@ -265,16 +282,11 @@ class RedisHandler implements \framework\libs\session\CompleteSessionHandler
 		// redis has its own GC
 	}
 	
-	public function __destruct ()
-	{
-		$this->_redis->close();
-	}
-	
 	/**
 	 * Configure the servers
 	 */
 	private function _configureServers()
-	{
+	{		
 		// check every server
 		foreach ($this->_servers as $index => $server)
 		{
@@ -285,14 +297,15 @@ class RedisHandler implements \framework\libs\session\CompleteSessionHandler
 				if(!isset($server[$param]))
 				{
 					// remove the server if it has no host
-					if($param == 'host')
+					if($param === 'host')
 					{
 						unset($this->_servers[$index]);
+						continue 2;
 					}
 					// or set the parameter to its default value
 					else
-					{	
-						$server[$param] = $defaultValue;
+					{
+						$this->_servers[$index][$param] = $defaultValue;
 					}
 				}
 			}
@@ -311,4 +324,14 @@ class RedisHandler implements \framework\libs\session\CompleteSessionHandler
 	}
 
 
+	/**
+	 * Compute a unique key
+	 * @param mixed $key
+	 * @return string 
+	 */
+	private function _key($key)
+	{
+		return '_session.'.$this->_sessionName.'.'.$key;
+	}
+	
 }
