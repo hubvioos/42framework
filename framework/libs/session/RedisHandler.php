@@ -105,7 +105,7 @@ class RedisHandler implements \framework\libs\session\CompleteSessionHandler
 			
 			foreach($redis as $server)
 			{
-				$this->_servers = $server;
+				$this->_servers[] = $server;
 			}
 			
 			$this->_configureServers();

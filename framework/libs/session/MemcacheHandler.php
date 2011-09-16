@@ -117,7 +117,7 @@ class MemcacheHandler implements \framework\libs\session\CompleteSessionHandler
 
 				foreach($memcache as $server)
 				{
-					$this->_servers = $server;
+					$this->_servers[] = $server;
 				}
 
 				$this->_configureServers();
@@ -147,6 +147,15 @@ class MemcacheHandler implements \framework\libs\session\CompleteSessionHandler
 		}
 	}
 
+	/**
+	 * Set the session name
+	 * @param string $sessionName 
+	 */
+	public function setSessionName ($sessionName)
+	{
+		$this->_sessionName = $sessionName;
+	}		
+	
 	/**
 	 * Set the default parameters for the Memcache servers.
 	 * WARNING : will be inefficient if the MemcacheHandler has be constructed with an already configured Memcache object!

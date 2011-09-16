@@ -97,7 +97,7 @@ class MemcachedHandler implements \framework\libs\session\CompleteSessionHandler
 
 				foreach($memcached as $server)
 				{
-					$this->_servers = $server;
+					$this->_servers[] = $server;
 				}
 			}
 			else
