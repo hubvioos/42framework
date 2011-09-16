@@ -40,7 +40,7 @@ class LightRedisHandler implements \framework\libs\session\LightSessionHandler
 	 */
 	public function __construct ($servers)
 	{
-		$this->setSavePath($servers);
+		$this->setServers($servers);
 		
 		$this->_savePath = \rtrim($this->_savePath, ', ');
 	}
@@ -56,7 +56,7 @@ class LightRedisHandler implements \framework\libs\session\LightSessionHandler
 	 * @param array|string $servers The list of servers. Can be an array or a comma-separated string.
 	 * @return \framework\libs\session\LightRedisHandler
 	 */
-	public function setSavePath ($servers)
+	public function setServers ($servers)
 	{
 		if(is_array($servers))
 		{
