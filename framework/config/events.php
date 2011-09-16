@@ -20,6 +20,12 @@ $events	 = array(
 		//Event test
 		'test' => array(
 			
+			//With The Component Container
+			array('callable' => array ('testevent', 'OnMessage'),
+				'params' => array('The Component Container works with the Event Manager :)'),	
+				'priority' => 1),
+							
+			
 			//With an anonym function
 			array('callable' =>
 					function()
@@ -28,11 +34,7 @@ $events	 = array(
 					},
 				'priority' => 1),
 							
-			//With The Component Container
-			array('callable' => array ('testevent', 'OnMessage'),
-				'params' => array('The Component Container works with the Event Manager :)'),	
-				'priority' => 20),
-							
+
 			 //With a static class method			
 			array('callable' => '\\framework\\helpers\\TestEvent::OnMessage',
 				'priority' => 3),

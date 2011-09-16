@@ -387,7 +387,7 @@ class ConfigBuilder
 		//Check if the two listeners have the same priority
 		if($a['priority'] === $b['priority'])
 		{
-			throw new \InvalidArgumentException('Two listeners can\'t have the same priority for the same event');
+			return 1;
 		}
 		
 		return ($a['priority'] < $b['priority']) ? -1 : 1;
