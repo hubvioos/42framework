@@ -37,11 +37,11 @@ $events	 = array(
 
 			 //With a static class method			
 			array('callable' => '\\framework\\helpers\\TestEvent::OnMessage',
-				'priority' => 3),
+				'priority' => 1),
 							
 			//With an array
 			array('callable' => array('\\framework\\helpers\\TestEvent', 'OnMessage'),
-				'priority' => 4)
+				'priority' => 1)
 		)
 );
 			

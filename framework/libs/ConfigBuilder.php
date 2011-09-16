@@ -378,7 +378,7 @@ class ConfigBuilder
 	
 	/**
 	 * Compare two listeners according their priority level
-	 * @param \framework\libs\Registry $a F
+	 * @param \framework\libs\Registry $a 
 	 * @param \framework\libs\Registry $b
 	 * @return int - The result of the compraison
 	 */
@@ -387,7 +387,7 @@ class ConfigBuilder
 		//Check if the two listeners have the same priority
 		if($a['priority'] === $b['priority'])
 		{
-			return 1;
+			return -1;
 		}
 		
 		return ($a['priority'] < $b['priority']) ? -1 : 1;

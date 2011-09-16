@@ -1,5 +1,4 @@
 <?php 
-		$this->raiseEvent('test', array('aaa', "aaa"));
 
 /* @var $cache \framework\libs\cache\MemcacheEngine */
 $cache = $this->getComponent('cache', 'Memcache');
