@@ -64,8 +64,7 @@ class MemcacheHandler implements \framework\libs\session\CompleteSessionHandler
 		'timeout' => 1, 
 		'retry_interval' => 15, 
 		'status' => true, 
-		'failure_callback' => '\\framework\\libs\\session\\MemcacheHandler::defaultCallback', 
-		'timeoutms' => 1500
+		'failure_callback' => '\\framework\\libs\\session\\MemcacheHandler::defaultCallback'
 	);
 	
 	/**
@@ -119,7 +118,7 @@ class MemcacheHandler implements \framework\libs\session\CompleteSessionHandler
 				{
 					$this->_servers[] = $server;
 				}
-
+				
 				$this->_configureServers();
 			}
 			else
@@ -196,9 +195,9 @@ class MemcacheHandler implements \framework\libs\session\CompleteSessionHandler
 				foreach($this->_servers as $server)
 				{
 					// connect to the Memcache servers
-					$this->_memcache->addserver($server['host'], $server['port'], $server['persistent'], 
+					$this->_memcache->addServer($server['host'], $server['port'], $server['persistent'], 
 								$server['weight'], $server['timeout'], $server['retry_interval'], 
-								$server['status'], $server['failure_callback'], $server['timeoutms']);
+								$server['status'], $server['failure_callback']);
 				}
 			}
 			if($sessionName !== '')
@@ -239,10 +238,9 @@ class MemcacheHandler implements \framework\libs\session\CompleteSessionHandler
 	{
 		if($sessionId !== '')
 		{
-			$this->_memcache->delete($this->_sessionName.$sessionId);
+			$this->_memcache->delete($this->_key($sessionId));
 		}
 		
-		session_destroy();
 		return true;
 	}	
 
@@ -255,7 +253,7 @@ class MemcacheHandler implements \framework\libs\session\CompleteSessionHandler
 	 */
 	public function read ($sessionId = '')
 	{
-		$data = $this->_memcache->get($this->_sessionName.$sessionId);
+		$data = $this->_memcache->get($this->_key($sessionId));
 		
 		if($data !== false)
 		{
@@ -276,10 +274,10 @@ class MemcacheHandler implements \framework\libs\session\CompleteSessionHandler
 	{
 		if($sessionId !== '')
 		{
-			if($this->_memcache->replace($this->_sessionName.$sessionId, $data, null, $this->_lifetime) === false)
+			if($this->_memcache->replace($this->_key($sessionId), $data, null, $this->_lifetime) === false)
 			{
 				// add the item if we couldn't have replaced it (i.e. if it doesn't already exists)
-				$this->_memcache->add($this->_sessionName.$sessionId, $data, null, $this->_lifetime);
+				$this->_memcache->add($this->_key($sessionId), $data, null, $this->_lifetime);
 			}
 		}
 		
@@ -294,11 +292,6 @@ class MemcacheHandler implements \framework\libs\session\CompleteSessionHandler
 	public function gc ($maxLifetime = 0)
 	{
 		// memcache has its own GC
-	}
-	
-	public function __destruct ()
-	{
-		$this->_memcache->close();
 	}
 	
 	/**
@@ -319,7 +312,7 @@ class MemcacheHandler implements \framework\libs\session\CompleteSessionHandler
 	 * Configure the servers
 	 */
 	private function _configureServers()
-	{
+	{		
 		// check every server
 		foreach ($this->_servers as $index => $server)
 		{
@@ -330,14 +323,15 @@ class MemcacheHandler implements \framework\libs\session\CompleteSessionHandler
 				if(!isset($server[$param]))
 				{
 					// remove the server if it has no host
-					if($param == 'host')
+					if($param === 'host')
 					{
 						unset($this->_servers[$index]);
+						continue 2;
 					}
 					// or set the parameter to its default value
 					else
-					{	
-						$server[$param] = $defaultValue;
+					{
+						$this->_servers[$index][$param] = $defaultValue;
 					}
 				}
 			}
@@ -346,7 +340,17 @@ class MemcacheHandler implements \framework\libs\session\CompleteSessionHandler
 	
 	public static function defaultCallback($host, $port)
 	{
-		throw new \framework\libs\session\MemcacheErrorException(
+		throw new \framework\libs\session\MemcacheSessionException(
 				'The memcache host '.$host.':'.$port.' reported an error.');
+	}
+	
+	/**
+	 * Compute a unique key
+	 * @param mixed $key
+	 * @return string 
+	 */
+	private function _key($key)
+	{
+		return '_session.'.$this->_sessionName.'.'.$key;
 	}
 }

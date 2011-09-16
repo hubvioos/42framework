@@ -66,17 +66,17 @@ class MemcachedHandler implements \framework\libs\session\CompleteSessionHandler
 	
 	/**
 	 * Constructor
-	 * @param Memcached|array $memcached An already configured Memcached object or a array containing the servers info
+	 * @param \Memcached|array $memcached An already configured Memcached object or a array containing the servers info
 	 * @param number $lifetime The session's lifetime (seconds). Should not be more than 2592000 (30 days)
 	 * @param array $defaultServerParams The default parameters for the memcached servers. Will be ignored of the first argument is an already configured Memcached object
 	 */
 	public function __construct ($memcached, $lifetime = 0)
 	{
-		if(\extension_loaded('memcache'))
+		if(\extension_loaded('memcached') === false)
 		{
-			throw new \framework\libs\session\MemcachedSessionException('Memcache must be loaded');
+			throw new \framework\libs\session\MemcachedSessionException('Memcached must be loaded');
 		}
-		elseif (\class_exists('Memcached'))
+		elseif (\class_exists('\\Memcached') === false)
 		{
 			throw new \framework\libs\session\MemcachedSessionException('Unable to find class "Memcached"');
 		}
@@ -126,6 +126,16 @@ class MemcachedHandler implements \framework\libs\session\CompleteSessionHandler
 	}
 	
 	/**
+	 * Set the session name
+	 * @param string $sessionName
+	 */
+	public function setSessionName ($sessionName)
+	{
+		$this->_sessionName = $sessionName;
+	}
+
+		
+	/**
 	 * Open a session.
 	 * Expects a save path and a session name.
 	 * @param string $savePath
@@ -165,7 +175,7 @@ class MemcachedHandler implements \framework\libs\session\CompleteSessionHandler
 	 */
 	public function close ()
 	{
-		$this->_memcached->close();
+		// the connection is automatically closed
 		return true;
 	}
 
@@ -179,10 +189,9 @@ class MemcachedHandler implements \framework\libs\session\CompleteSessionHandler
 	{
 		if($sessionId !== '')
 		{
-			$this->_memcached->delete($this->_sessionName.$sessionId);
+			$this->_memcached->delete($this->_key($sessionId));
 		}
 		
-		session_destroy();
 		return true;
 	}	
 
@@ -195,9 +204,9 @@ class MemcachedHandler implements \framework\libs\session\CompleteSessionHandler
 	 */
 	public function read ($sessionId = '')
 	{
-		$data = $this->_memcached->get($this->_sessionName.$sessionId);
+		$data = $this->_memcached->get($this->_key($sessionId));
 		
-		if($this->_memcached->getResultCode() === Memcached::RES_SUCCESS)
+		if($this->_memcached->getResultCode() === \Memcached::RES_SUCCESS)
 		{
 			return $data;
 		}
@@ -216,7 +225,7 @@ class MemcachedHandler implements \framework\libs\session\CompleteSessionHandler
 	{
 		if($sessionId !== '')
 		{
-			$this->_memcached->set($this->_sessionName.$sessionId, $data, $this->_lifetime);
+			$this->_memcached->set($this->_key($sessionId), $data, $this->_lifetime);
 		}
 		
 		return true;
@@ -232,11 +241,6 @@ class MemcachedHandler implements \framework\libs\session\CompleteSessionHandler
 		// memcached has its own GC
 	}
 	
-	public function __destruct ()
-	{
-		$this->_memcached->close();
-	}
-	
 	/**
 	 * Use the handler as session handler
 	 */
@@ -249,5 +253,15 @@ class MemcachedHandler implements \framework\libs\session\CompleteSessionHandler
 				array(&$this, 'open'), array(&$this, 'close'), array(&$this, 'read'), 
 				array(&$this, 'write'), array(&$this, 'destroy'), array(&$this, 'gc')
 		);
+	}
+	
+	/**
+	 * Compute a unique key
+	 * @param mixed $key
+	 * @return string 
+	 */
+	private function _key($key)
+	{
+		return '_session.'.$this->_sessionName.'.'.$key;
 	}
 }
