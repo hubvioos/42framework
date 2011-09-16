@@ -87,36 +87,47 @@ class MemcacheHandler implements \framework\libs\session\CompleteSessionHandler
 	 * @param array $defaultServerParams The default parameters for the memcache servers. Will be ignored of the first argument is an already configured Memcache object
 	 */
 	public function __construct ($memcache, $lifetime = 0, array $defaultServerParams = array())
-	{		
-		$this->setLifetime($lifetime);
-		
-		if ($memcache instanceof \Memcache)
+	{
+		if(\extension_loaded('memcache') === false)
 		{
-			$this->_hasAlreadyConfiguredMemcacheObject = true;
-			$this->_memcache = $memcache;
-			return; 
+			throw new \framework\libs\session\MemcacheSessionException('Memcache must be loaded');
 		}
-		elseif(\is_array($memcache))
+		elseif(\class_exists('Memcache') === false)
 		{
-			if(count($defaultServerParams) > 0)
-			{
-				$this->setDefaultServerParams($defaultServerParams);
-			}
-			
-			$this->_memcache = new \Memcache;
-			
-			foreach($memcache as $server)
-			{
-				$this->_servers = $server;
-			}
-			
-			$this->_configureServers();
+			throw new \framework\libs\session\MemcacheSessionException('Unable to find class "Memcache"');
 		}
 		else
 		{
-			throw new \framework\libs\session\MemcacheSessionException(
-					'Wrong first parameter "'. \gettype($memcache) 
-					.'" for session handler, session cannot be initilised');
+			$this->setLifetime($lifetime);
+
+			if ($memcache instanceof \Memcache)
+			{
+				$this->_hasAlreadyConfiguredMemcacheObject = true;
+				$this->_memcache = $memcache;
+				return; 
+			}
+			elseif(\is_array($memcache))
+			{
+				if(count($defaultServerParams) > 0)
+				{
+					$this->setDefaultServerParams($defaultServerParams);
+				}
+
+				$this->_memcache = new \Memcache;
+
+				foreach($memcache as $server)
+				{
+					$this->_servers = $server;
+				}
+
+				$this->_configureServers();
+			}
+			else
+			{
+				throw new \framework\libs\session\MemcacheSessionException(
+						'Wrong first parameter "'. \gettype($memcache) 
+						.'" for session handler, session cannot be initilised');
+			}
 		}
 	}
 	

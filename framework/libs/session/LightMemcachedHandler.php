@@ -18,20 +18,22 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 /**
- * Library LightMemecachedHandler
- * 
- * This library requires Memcache to be installed on your server.
- * See http://uk3.php.net/manual/en/book.memcache.php for installation and documentation.
+ * Library LightMemcachedHandler
+ *
+ * This library requires Memcached to be installed on your server.
+ * See http://www.php.net/manual/en/book.memcached.php for installation and documentation.
  * 
  * This is a minimal session handler using memcached.
  * It does nothing but using PHP's default parameters for session handling using memcached.
- * @see http://uk3.php.net/manual/en/memcache.examples-overview.php#example-3693
+ * @see http://uk.php.net/manual/en/memcached.sessions.php
  * @author mickael
  */
+
 namespace framework\libs\session;
 
-class LightMemecachedHandler implements \framework\libs\session\LightSessionHandler
+class LightMemcachedHandler implements \framework\libs\session\LightSessionHandler
 {
+
 	protected $_savePath = '';
 	
 	/**
@@ -40,7 +42,7 @@ class LightMemecachedHandler implements \framework\libs\session\LightSessionHand
 	 */
 	public function __construct ($servers)
 	{
-		$this->setSavePath($servers);
+		$this->setServers($servers);
 		
 		$this->_savePath = \rtrim($this->_savePath, ', ');
 	}
@@ -54,9 +56,9 @@ class LightMemecachedHandler implements \framework\libs\session\LightSessionHand
 	/**
 	 * Set the session's save path from a list of servers
 	 * @param array|string $servers The list of servers. Can be an array or a comma-separated string.
-	 * @return LightMemecachedHandler 
+	 * @return \framework\libs\session\LightMemcachedHandler
 	 */
-	public function setSavePath ($servers)
+	public function setServers ($servers)
 	{
 		if(is_array($servers))
 		{
@@ -78,9 +80,8 @@ class LightMemecachedHandler implements \framework\libs\session\LightSessionHand
 		ini_set( 'session.gc_probability', 0);
 		ini_set( 'session.gc_divisor', 0);
 			
-		ini_set('session.save_handler', 'memcache');
+		ini_set('session.save_handler', 'memcached');
 		ini_set('session.save_path', $this->_savePath);
 	}
-
 
 }
