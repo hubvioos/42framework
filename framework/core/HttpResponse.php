@@ -83,9 +83,7 @@ class HttpResponse extends \framework\core\Response
 	
 	public function stopProcess()
 	{
-		$appFilter = new \framework\filters\appFilters\ApplicationFilter();
-		$request = $this->getComponent('httpRequest');
-		$appFilter->_after($request, $this);
+		$this->getComponent('core')->render(true);
 	}
 
 	/**

@@ -172,6 +172,13 @@ $fcomponents = array(
 				return new \framework\libs\Cache($args[0], $c->_config['cache'][$args[0]]);
 			},
 			'isUnique' => false),
+		
+		'gacela' => array(
+			'callable' => function ($c, $args)
+			{
+				return \framework\Gacela\Gacela::instance();
+			},
+			'isUnique' => true),
 					
 
 					

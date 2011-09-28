@@ -121,7 +121,15 @@ class Core extends \framework\core\FrameworkObject
 		
 		$this->raiseEvent('afterApp');
     	
-    	if ($this->viewGetGlobal('layout') === null)
+    	$this->render();
+	}
+	
+	public function render ($stop = false)
+	{
+		$request = $this->getComponent('httpRequest');
+		$response = $this->getComponent('httpResponse');
+		
+		if ($this->viewGetGlobal('layout') === null)
 		{
 			$this->viewSetGlobal('layout', $this->getConfig('defaultLayout'));
 		}
@@ -149,11 +157,15 @@ class Core extends \framework\core\FrameworkObject
 			$request->updateHistory();
 		}
 		
-		//exit();
+		if ($stop)
+		{
+			exit ();
+		}
 		
 		return $this;
 	}
-	
+
+
 	public function duplicateContentPolicy ($url, $path, $params)
 	{
 		// Redirect to root if we use the default module and action.
