@@ -129,14 +129,18 @@ class Registry extends \ArrayObject
 		{
 			$params = \explode('.', $key);
 			$size = \count($params);
-			$value = $this->offsetGet($params[0]);
-
-			// deep into the array if dotted notation was used
-			if ($size > 1)
+			
+			if($this->offsetExists($params[0]))
 			{
-				for ($i = 1; $i < $size; $i++)
+				$value = $this->offsetGet($params[0]);
+
+				// deep into the array if dotted notation was used
+				if ($size > 1)
 				{
-					$value = $value[$params[$i]];
+					for ($i = 1; $i < $size; $i++)
+					{
+						$value = $value[$params[$i]];
+					}
 				}
 			}
 
