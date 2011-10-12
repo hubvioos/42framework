@@ -403,7 +403,8 @@ class ConfigBuilder
 
 		$this->_findAndGetConfig(\APP_DIR . \DIRECTORY_SEPARATOR . 'config', 'components.php', $this->_variablesNames['application']['components'], $this->_componentsConfig);
 
-		$modulesComponents = null;
+		$modulesComponents = array();
+		
 		foreach ($this->_modulesLocation as $moduleName => $level)
 		{
 			$this->_findAndGetConfig(
