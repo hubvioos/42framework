@@ -7,3 +7,5 @@ doc/*
 .buildpath
 .settings/*
 .DS_STORE
+nbproject/*
+/nbproject/private/

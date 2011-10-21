@@ -22,35 +22,38 @@ namespace framework\libs;
 class History
 {	
 	/**
-	 * @var $_history \Framework\Libs\Session
+	 * @var $_history array
 	 */
 	protected $_history = null;
 	
 	protected $_historySize = null;
 	
+	protected $_sessionNamespace = null;
+
+
 	/**
 	 * @param \Framework\Libs\Session $session
 	 * @param integer $historySize
 	 */
-	public function __construct (Session $session, $historySize)
+	public function __construct ($sessionNamespace, $historySize)
 	{
-		$this->_history = $session;	
+		$this->_history = (isset($_SESSION[$sessionNamespace])) ? $_SESSION[$sessionNamespace] : array();
+		$this->_sessionNamespace = $sessionNamespace;
 		$this->_historySize = $historySize;
 	}
 	
 	public function update (Array $values = array())
 	{
-		$size = sizeof($this->_history);
-		
 		foreach ($this->_history as $key => $value)
 		{
-			if ($key != 0 && $size >= $this->_historySize)
-			{				
-				$this->_history[$size-$key] = $this->_history[$size-$key-1];
-			}
+			$this->_history[$key+1] = $this->_history[$key];
 		}
+		
 		$this->_history[0] = $values;
-		$this->_history->save();
+		
+		$this->_history = \array_splice($this->_history, 0, $this->_historySize);
+		
+		$_SESSION[$this->_sessionNamespace] = $this->_history;
 	}
 	
 	public function get ($offset = null)

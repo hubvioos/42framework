@@ -19,21 +19,25 @@
 
 namespace framework\libs;
 
-class Route
+class Route 
 {
 	protected static $_routes = array();
+	protected static $_config = null;
 	
 	const INT_PARAM         = '\d+';
 	const ALPHANUM_PARAM    = '\w+';
 	const WORD_PARAM        = '[a-zA-Z]+';
 	
-	public function __construct ($routes)
+	public function __construct (\ArrayAccess $config)
 	{
-		if (!is_array($routes))
+		$routes = array();
+		
+		if (isset($config['routes']))
 		{
-			$routes = array();
+			$routes = $config['routes'];
 		}
 		self::$_routes = $routes;
+		self::$_config = $config;
 	}
 	
 	public function getRoutes()
@@ -66,9 +70,10 @@ class Route
 		return $path;
 	}
 	
-	public function urlToPath($url, $defaultModule, $defaultAction) 
+	// public function urlToPath($url, $defaultModule, $defaultAction) 
+	public function urlToPath($url) 
 	{
-	    if (!is_string($url) || !is_string($defaultModule) || !is_string($defaultAction))
+	    if (!is_string($url))
 		{
 			throw new \InvalidArgumentException(__METHOD__ . ' : Invalid params');
 		}
@@ -78,7 +83,8 @@ class Route
 	    $routed = false;
 	    $redirect = false;
 	    
-	    $defaultPath = $defaultModule . '/' . $defaultAction;
+	    // $defaultPath = $defaultModule . '/' . $defaultAction;
+	    $defaultPath = self::$_config['defaultModule'].'/'.self::$_config['defaultAction'];
 		
 		/*
 		 * Redirect to the default path if empty
@@ -137,32 +143,45 @@ class Route
 		    }
 		}
 		
-		/*
-		 * Redirect to the default path if missing arguments.
-		 *
-		 */
-		 
 		$explodedUrl = explode('/', $path);
 		
-		if (sizeof($explodedUrl) == 1)
+		// Redirections if missing arguments
+		if (count($explodedUrl) == 1)
 		{
-		    if ($explodedUrl[0] === $defaultAction)
-		    {
-		        $path = $defaultPath;
-		    }
-		    else
-		    {
-                $path = $explodedUrl[0] . '/' . $defaultAction;
-            }
+			$incompletePath = $explodedUrl[0];
+			
+			if($incompletePath === self::$_config['defaultAction'])
+			{
+				$path = $defaultPath;
+			}
+			else
+			{
+				// if the incomplete path is the name of a module
+				// and if this module has a default action configured
+				if(isset(self::$_config['modules'][$incompletePath]))
+				{
+					// check if a default action if configured or go to the generic defaultAction
+					if(isset(self::$_config['modules'][$incompletePath]['defaultAction']))
+					{
+						$path = $incompletePath . '/' . self::$_config['modules'][$incompletePath]['defaultAction'];
+					}
+					else
+					{
+						$path = $incompletePath . '/' . self::$_config['defaultAction'];
+					}
+				}
+				else
+				{
+					$path = $defaultPath;
+				}
+			}
 		}
-        
-	    
 		return $path;
 	}
 	
 	public function pathToUrl($path)
 	{	
-	    $url = $path;
+		$url = $path;
 	    
 	    $found = null;
 	    
@@ -206,7 +225,7 @@ class Route
     			{
     			    array_shift($match[0]);
 
-					$url = $routeUrl;
+					$url = \stripslashes($routeUrl);
 
     			    // And we replace each arg by its value.
     			    foreach($args[0] as $key => $value)
@@ -219,7 +238,8 @@ class Route
 			}
 			else // If the route is static
 			{
-			    if (!empty($routeParams['params']))
+			    //if (!empty($routeParams['params']))
+			    if (count($routeParams['params']) > 0)
 			    {
 			        $regex .= '/' . implode($routeParams['params']);
 			    }

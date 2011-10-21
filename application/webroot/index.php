@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Copyright (C) 2010 - Kévin O'NEILL, François KLINGLER - <contact@42framework.com>
  * 
@@ -17,81 +18,128 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-define('DS', DIRECTORY_SEPARATOR);
-define('WEBROOT', __DIR__);
-define('APPLICATION_DIR', dirname(WEBROOT));
-define('FRAMEWORK_DIR', dirname(APPLICATION_DIR).DS.'framework');
-define('MODULES_DIR', APPLICATION_DIR.DS.'modules');
-define('BUILD_DIR', APPLICATION_DIR.DS.'build');
-define('LOG_DIR', APPLICATION_DIR.DS.'log');
-define('VENDORS_DIR', dirname(APPLICATION_DIR).DS.'vendors');
+/**
+ * Defines the path to the server root folder
+ */
+\define('WEBROOT', __DIR__);
+
+/**
+ * Defines the path to the application folder
+ */
+\define('APP_DIR', \dirname(\WEBROOT));
+
+/**
+ * Defines the path to the framework folder
+ */
+\define('FRAMEWORK_DIR', \dirname(\APP_DIR).\DIRECTORY_SEPARATOR.'framework');
+
+/**
+ * Defines the path to the folder containing build files
+ */
+\define('BUILD_DIR', \APP_DIR.\DIRECTORY_SEPARATOR.'build');
+
+/**
+ * Defines the path to the folder containing log files
+ */
+\define('LOG_DIR', \APP_DIR.\DIRECTORY_SEPARATOR.'log');
+
+/**
+ * Defines the path to modules folder
+ */
+\define('MODULES_DIR', \dirname(\APP_DIR).\DIRECTORY_SEPARATOR.'modules');
+
+/**
+ * Definess the path to vendors folder
+ */
+\define('VENDORS_DIR', \dirname(\APP_DIR).\DIRECTORY_SEPARATOR.'vendors');
+
+\define('DS', \DIRECTORY_SEPARATOR);
 
 $autoload = array();
 $config = array();
 
-if (file_exists(BUILD_DIR.DS.'autoload.php'))
+require \FRAMEWORK_DIR.\DIRECTORY_SEPARATOR.'core'.\DIRECTORY_SEPARATOR.'FrameworkObject.php';
+require \FRAMEWORK_DIR.\DIRECTORY_SEPARATOR.'core'.\DIRECTORY_SEPARATOR.'Core.php';
+
+if (\file_exists(\BUILD_DIR.\DIRECTORY_SEPARATOR.'config.php'))
 {
-	include BUILD_DIR.DS.'autoload.php';
+	include \BUILD_DIR.\DIRECTORY_SEPARATOR.'config.php';
 }
 
-if (file_exists(BUILD_DIR.DS.'config.php'))
+if (!isset ($config['environment']))
 {
-	include BUILD_DIR.DS.'config.php';
-}
-else
-{
-	include FRAMEWORK_DIR.DS.'config'.DS.'config.php';
-	$frameworkConfig = $config;
-	$config = array();
-	include APPLICATION_DIR.DS.'config'.DS.'config.php';
-	$config = \array_merge($frameworkConfig, $config);
+	$config['environment'] = \framework\core\Core::DEV;
 }
 
-require FRAMEWORK_DIR.DS.'libs'.DS.'ClassLoader.php';
-require FRAMEWORK_DIR.DS.'libs'.DS.'StaticClassLoader.php';
+if ($config['environment'] == \framework\core\Core::DEV)
+{
+    require \FRAMEWORK_DIR.\DIRECTORY_SEPARATOR.'libs'.\DIRECTORY_SEPARATOR.'ConfigBuilder.php';
 
-if ($config['environment'] == 'production')
+	$modulesDirectories = array();
+	$modulesDirectories['framework'] = \FRAMEWORK_DIR . \DIRECTORY_SEPARATOR . 'modules';
+	$modulesDirectories['modules'] = \MODULES_DIR;
+	$modulesDirectories['application'] = \APP_DIR . \DIRECTORY_SEPARATOR . 'modules';
+	
+	$variablesNames = array(
+		'framework' => array('config' => 'frameworkConfig', 'routes' => 'routes', 'events' => 'events', 'components' => 'fcomponents'),
+		'modules' => array('config' => 'config', 'events' => 'events', 'components' => 'components'),
+		'application' => array('config' => 'appConfig', 'routes' => 'routes', 'events' => 'events', 'components' => 'components')
+	);
+
+	// get the full config, i.e. framework + app + modules
+	$configBuilder = new \framework\libs\ConfigBuilder();
+	$configBuilder->setModulesDirectories($modulesDirectories)
+			->setVariablesNames($variablesNames)
+			->buildConfig();
+	
+	$config = $configBuilder->getConfig();
+}
+
+/**
+ * Defines the execution mode
+ */
+\define('ENV', $config['environment']);
+
+if (\file_exists(\BUILD_DIR.\DIRECTORY_SEPARATOR.'autoload.php'))
+{
+	include \BUILD_DIR.\DIRECTORY_SEPARATOR.'autoload.php';
+}
+
+require \FRAMEWORK_DIR.\DIRECTORY_SEPARATOR.'libs'.\DIRECTORY_SEPARATOR.'ClassLoader.php';
+require \FRAMEWORK_DIR.\DIRECTORY_SEPARATOR.'libs'.\DIRECTORY_SEPARATOR.'StaticClassLoader.php';
+
+if (\ENV != \framework\core\Core::DEV)
 {
 	$loader = new \framework\libs\StaticClassLoader($autoload);
 	$loader->register();
 }
 else
 {
-	$loader = new \framework\libs\ClassLoader('framework', FRAMEWORK_DIR);
-	$loader->register();
-	$loader = new \framework\libs\ClassLoader('application', APPLICATION_DIR);
+	$loader = new \framework\libs\ClassLoader('framework', \FRAMEWORK_DIR);
 	$loader->register();
 	
-	$loader = new \framework\libs\ClassLoader('Doctrine\ORM', VENDORS_DIR.DS.'doctrine'.DS.'lib'.DS.'Doctrine'.DS.'ORM');
+	$loader = new \framework\libs\ClassLoader('modules', \MODULES_DIR);
 	$loader->register();
 	
-	$loader = new \framework\libs\ClassLoader('Doctrine\ORM', VENDORS_DIR.DS.'doctrine'.DS.'lib'.DS.'Doctrine'.DS.'ORM');
+	$loader = new \framework\libs\ClassLoader('application', \APP_DIR);
 	$loader->register();
-	
-	$loader = new \framework\libs\ClassLoader('Doctrine\Common', VENDORS_DIR.DS.'doctrine'.DS.'lib'.DS.'vendor'.DS.'doctrine-common'.DS.'lib'.DS.'Doctrine'.DS.'Common');
-	$loader->register();
-	
-	$loader = new \framework\libs\ClassLoader('Doctrine\DBAL', VENDORS_DIR.DS.'doctrine'.DS.'lib'.DS.'vendor'.DS.'doctrine-dbal'.DS.'lib'.DS.'Doctrine'.DS.'DBAL');
-	$loader->register();
-	
-	$loader = new \framework\libs\ClassLoader('Symfony\Component', VENDORS_DIR.DS.'doctrine'.DS.'lib'.DS.'vendor'.DS.'Symfony'.DS.'Component');
-	$loader->register();
-	
+
 	$loader = new \framework\libs\StaticClassLoader($autoload);
 	$loader->register();
-	
+
 	$vendorsAutoload = array();
 	
-	include FRAMEWORK_DIR.DS.'config'.DS.'vendorsAutoload.php';
+	include \FRAMEWORK_DIR.\DIRECTORY_SEPARATOR.'config'.\DIRECTORY_SEPARATOR.'vendorsAutoload.php';
 	
 	$loader = new \framework\libs\StaticClassLoader($vendorsAutoload);
 	$loader->register();
 }
 
-$config = new \framework\libs\Registry($config);
-$container = new \framework\core\ComponentsContainer($config);
+$registry = new \framework\libs\Registry($config);
 
-$core = $container->get('core');
+$container = new \framework\libs\ComponentsContainer($registry);
+$core = $container->getCore();
 
-$core	->bootstrap()
+$core->bootstrap()
 		->run();
+

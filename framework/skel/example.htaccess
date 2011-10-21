@@ -1,0 +1,12 @@
+Options +FollowSymLinks
+RewriteEngine on
+
+# hot-linking is not allowed !
+RewriteCond %{HTTP_REFERER} !^$
+RewriteCond %{HTTP_REFERER} !^http://(www.)?domain.com/.*$ [NC]
+RewriteRule .(gif|jpg|swf|flv|png)$ /dev/null [R=302,L]
+#RewriteRule .*\.(gif|jpg)$ - [F,L]
+
+# serve assets normally
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule    ^(.*)$  index.php?url=$1 [QSA,L]

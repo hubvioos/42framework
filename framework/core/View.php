@@ -32,11 +32,13 @@ class View extends \framework\core\FrameworkObject
 	public function __construct ($module, $file, $vars = false)
 	{
 		$config = $this->getConfig();
-		$this->_file = MODULES_DIR.DS.$module.DS.'views'.DS.$file.$config['viewExtension'];
+		
+		$this->_file = $this->getComponent('dispatcher')->getModulePath($module);
+		$this->_file .= \DIRECTORY_SEPARATOR.'views'.\DIRECTORY_SEPARATOR.$file.$config['viewExtension'];
 		
 		if (!file_exists($this->_file))
 		{
-			$globalFile = APPLICATION_DIR.DS.'views'.DS.$file.$config['viewExtension'];
+			$globalFile = \APP_DIR.\DIRECTORY_SEPARATOR.'views'.\DIRECTORY_SEPARATOR.$file.$config['viewExtension'];
 			if (file_exists($globalFile))
 			{
 				$this->_file = $globalFile;
@@ -85,12 +87,20 @@ class View extends \framework\core\FrameworkObject
 	{
 		if ($this->_renderedView === null)
 		{
-			extract(self::$_globalsVars);
-			extract($this->_vars);
-			
-			ob_start();
-			include $this->_file;
-			$this->_renderedView = ob_get_clean();
+			try
+			{
+				extract(self::$_globalsVars);
+				extract($this->_vars);
+				
+				\ob_start();
+				include $this->_file;
+				$this->_renderedView = \ob_get_clean();
+			}
+			catch (\Exception $e)
+			{
+				\ob_end_clean();
+				$this->_renderedView = $e->__toString();
+			}
 		}
 		return $this->_renderedView;
 	}
@@ -119,8 +129,13 @@ class View extends \framework\core\FrameworkObject
 				'params' => $params));
 	}
 	
-	public function setTilte($title)
+	public function setTitle($title)
 	{
 		self::setGlobal('title', $title);
+	}
+	
+	public function getHelper()
+	{
+		return call_user_func_array(array(self::$_container,'get'),func_get_args());
 	}
 }
