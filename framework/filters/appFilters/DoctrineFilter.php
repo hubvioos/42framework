@@ -21,6 +21,27 @@ namespace framework\filters\appFilters;
 
 class DoctrineFilter extends \framework\filters\Filter
 {
+	public function _before (&$request, &$response)
+	{
+		if ($this->getConfig('environment') != 'production')
+		{
+			$loader = new \framework\libs\ClassLoader('Doctrine\ORM', VENDORS_DIR.DS.'doctrine'.DS.'lib'.DS.'Doctrine'.DS.'ORM');
+			$loader->register();
+
+			$loader = new \framework\libs\ClassLoader('Doctrine\ORM', VENDORS_DIR.DS.'doctrine'.DS.'lib'.DS.'Doctrine'.DS.'ORM');
+			$loader->register();
+
+			$loader = new \framework\libs\ClassLoader('Doctrine\Common', VENDORS_DIR.DS.'doctrine'.DS.'lib'.DS.'vendor'.DS.'doctrine-common'.DS.'lib'.DS.'Doctrine'.DS.'Common');
+			$loader->register();
+
+			$loader = new \framework\libs\ClassLoader('Doctrine\DBAL', VENDORS_DIR.DS.'doctrine'.DS.'lib'.DS.'vendor'.DS.'doctrine-dbal'.DS.'lib'.DS.'Doctrine'.DS.'DBAL');
+			$loader->register();
+
+			$loader = new \framework\libs\ClassLoader('Symfony\Component', VENDORS_DIR.DS.'doctrine'.DS.'lib'.DS.'vendor'.DS.'Symfony'.DS.'Component');
+			$loader->register();
+		}
+	}
+	
 	public function _after(&$request, &$response)
 	{
 		if($this->getContainer()->getAccessCounter('entityManager') >= 1)

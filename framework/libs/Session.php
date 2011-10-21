@@ -19,22 +19,13 @@
 
 namespace framework\libs;
 
-class Session extends \framework\libs\Registry
+class Session
 {
-	protected $_namespace = null;
-	
 	protected static $_isStarted = false;
 	
-	public function __construct ($namespace = 'default')
+	public function __construct ()
 	{	
-		$this->init();
-			
-		if (!isset($_SESSION[$namespace]) || !is_array($_SESSION[$namespace]))
-		{
-			$_SESSION[$namespace] = array();
-		}
-		$this->_namespace = $namespace;
-		parent::__construct($_SESSION[$namespace]);
+		
 	}
 	
 	public function init ()
@@ -48,9 +39,16 @@ class Session extends \framework\libs\Registry
 		return $this;
 	}
 
-	public function destroy ()
+	public function destroy ($namespace = null)
 	{	
-		$_SESSION[$this->_namespace] = null;
+		if ($namespace !== null)
+		{
+			unset($_SESSION[$namespace]);
+		}
+		else
+		{
+			$this->destroyAll();
+		}
 	}
 	
 	public function destroyAll ()
@@ -60,15 +58,5 @@ class Session extends \framework\libs\Registry
 		self::$_isStarted = false;
 		
 		return $this;
-	}
-	
-	public function getNamespace ()
-	{
-		return $this->_namespace;
-	}
-	
-	public function save()
-	{
-		$_SESSION[$this->_namespace] = $this->toArray();
 	}
 }

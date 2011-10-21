@@ -23,7 +23,7 @@ class HttpRequest extends \framework\core\FrameworkObject
 {    
 	protected $_url = null;
 	
-    protected $_ipAddress = '0.0.0.0';
+	protected $_ipAddress = null;
 	
 	protected $_userAgent = null;
 	
@@ -33,13 +33,11 @@ class HttpRequest extends \framework\core\FrameworkObject
 	
 	protected $_acceptEncoding = null;
 	
-	protected $_isAjax = false;
+	protected $_isAjax = null;
 	
-	protected $_isSecure = false;
+	protected $_isSecure = null;
 	
 	protected $_isCli = false;
-	
-	protected $_request = null;
 	
 	/**
 	 * @var \Framework\History
@@ -47,44 +45,172 @@ class HttpRequest extends \framework\core\FrameworkObject
 	protected $_history = null;
 	
 	public function __construct (\framework\libs\History $history)
-	{	
-		if (isset($_SERVER['HTTP_X_FORWARDED_FOR']))
-		{
-			$this->_ipAddress = $_SERVER['HTTP_X_FORWARDED_FOR'];
-		}
-		elseif (isset($_SERVER['HTTP_CLIENT_IP']))
-		{
-			$this->_ipAddress = $_SERVER['HTTP_CLIENT_IP'];
-		}
-		elseif (isset($_SERVER['REMOTE_ADDR']))
-		{
-			$this->_ipAddress = $_SERVER['REMOTE_ADDR'];
-		}
-	
-		if (!filter_var($this->_ipAddress, FILTER_VALIDATE_IP))
-		{
-			$this->_ipAddress = '0.0.0.0';
-		}
-	
-		$this->_userAgent = (!isset($_SERVER['HTTP_USER_AGENT'])) ? null : $_SERVER['HTTP_USER_AGENT'];
-	
-		$this->_acceptCharset = (!isset($_SERVER['HTTP_ACCEPT_CHARSET'])) ? $this->getConfig('defaultCharset') : $this->_extractValue(
-			$_SERVER['HTTP_ACCEPT_CHARSET']);
-	
-		$this->_acceptEncoding = (!isset($_SERVER['HTTP_ACCEPT_ENCODING'])) ? null : $this->_extractValue($_SERVER['HTTP_ACCEPT_ENCODING']);
-	
-		$this->_acceptLanguage = (!isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) ? $this->getConfig('defaultLanguage') : $this->_extractValue(
-			$_SERVER['HTTP_ACCEPT_LANGUAGE']);
-	
-		$this->_isSecure = (!empty($_SERVER['HTTPS']) && filter_var($_SERVER['HTTPS'], FILTER_VALIDATE_BOOLEAN));
-	
-		$this->_isAjax = (isset($_SERVER['HTTP_X_REQUESTED_WITH']) AND strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
-		
-		$this->_url = (!isset($_GET['url'])) ? null : $_GET['url'];
-				
+	{			
 		$this->_history = $history;
 	}
+	
+	public function updateHistory ()
+	{
+		if ($this->getUrl(true) != $this->getPreviousUrl())
+		{
+			return $this->_history->update(array(
+				'url' => $this->getUrl(true),
+				'ipAddress' => $this->getIpAddress(),
+				'userAgent' => $this->getUserAgent()
+				));
+		}
+	}
+	
+	public function getHistory ()
+	{
+		return $this->_history->get();
+	}
 
+	public function getPreviousUrl ()
+	{
+		$previous = $this->_history->getPrevious();
+		
+		if ($previous !== null && isset($previous['url']))
+		{
+			return $previous['url'];
+		}
+		
+		return null;
+	}
+
+	public function getPreviousIpAddress ()
+	{
+		$previous = $this->_history->getPrevious();
+		
+		if ($previous !== null && isset($previous['ipAddress']))
+		{
+			return $previous['ipAddress'];
+		}
+		
+		return null;
+	}
+
+	public function getPreviousUserAgent ()
+	{
+		$previous = $this->_history->getPrevious();
+		
+		if ($previous !== null && isset($previous['userAgent']))
+		{
+			return $previous['userAgent'];
+		}
+		
+		return null;
+	}
+	
+	public function getUrl ($absolute = false)
+	{
+		if ($this->_url === null)
+		{
+			$this->_url = (!isset($_GET['url'])) ? null : $_GET['url'];
+		}
+		
+		if ($absolute === false)
+		{
+			return $this->_url;
+		}
+		
+		return $this->getConfig('siteUrl') . $this->_url;
+	}
+	
+	public function getIpAddress ()
+	{
+		if ($this->_ipAddress === null)
+		{
+			if (isset($_SERVER['HTTP_CLIENT_IP']))
+			{
+				$this->_ipAddress = $_SERVER['HTTP_CLIENT_IP'];
+			}
+			elseif (isset($_SERVER['REMOTE_ADDR']))
+			{
+				$this->_ipAddress = $_SERVER['REMOTE_ADDR'];
+			}
+
+			if (!filter_var($this->_ipAddress, FILTER_VALIDATE_IP))
+			{
+				$this->_ipAddress = '0.0.0.0';
+			}
+		}
+		
+		return $this->_ipAddress;
+	}
+	
+	public function getUserAgent ()
+	{
+		if ($this->_userAgent === null)
+		{
+			$this->_userAgent = (!isset($_SERVER['HTTP_USER_AGENT'])) ? null : $_SERVER['HTTP_USER_AGENT'];
+		}
+		
+		return $this->_userAgent;
+	}
+	
+	public function getAcceptCharset ()
+	{
+		if ($this->_acceptCharset === null)
+		{
+			$this->_acceptCharset = (!isset($_SERVER['HTTP_ACCEPT_CHARSET'])) ? $this->getConfig('defaultCharset') : $this->_extractValue(
+			$_SERVER['HTTP_ACCEPT_CHARSET']);
+		}
+		
+		return $this->_acceptCharset;
+	}
+	
+	public function getAcceptLanguage ()
+	{
+		if ($this->_acceptLanguage === null)
+		{
+			$this->_acceptLanguage = (!isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) ? $this->getConfig('defaultLanguage') : $this->_extractValue(
+			$_SERVER['HTTP_ACCEPT_LANGUAGE']);
+		}
+		
+		return $this->_acceptLanguage;
+	}
+	
+	public function getAcceptEncoding ()
+	{
+		if ($this->_acceptEncoding === null)
+		{
+			$this->_acceptEncoding = (!isset($_SERVER['HTTP_ACCEPT_ENCODING'])) ? null : $this->_extractValue($_SERVER['HTTP_ACCEPT_ENCODING']);
+		}
+		
+		return $this->_acceptEncoding;
+	}
+	
+	public function isSecure ()
+	{
+		if ($this->_isSecure === null)
+		{
+			$this->_isSecure = (!empty($_SERVER['HTTPS']) && filter_var($_SERVER['HTTPS'], FILTER_VALIDATE_BOOLEAN));
+		}
+		
+		return $this->_isSecure;
+	}
+	
+	public function isAjax ()
+	{
+		if ($this->_isAjax === null)
+		{
+			$this->_isAjax = (isset($_SERVER['HTTP_X_REQUESTED_WITH']) AND strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
+		}
+		
+		return $this->_isAjax;
+	}
+	
+	public function isCli()
+	{
+		return $this->_isCli;
+	}
+	
+	public function setCli($isCli)
+	{
+		$this->_isCli = $isCli;
+	}
+	
 	protected function _extractValue ($str)
 	{
 		$arr = array();
@@ -101,115 +227,5 @@ class HttpRequest extends \framework\core\FrameworkObject
 			}
 		}
 		return $arr;
-	}
-	
-	public function updateHistory (Array $values = array())
-	{
-		if ($this->getUrl(true) != $this->getPreviousUrl())
-		{
-			return $this->_history->update($values);
-		}
-	}
-	
-	public function getHistory ()
-	{
-		return $this->_history->get();
-	}
-
-	public function getPreviousUrl ()
-	{
-		$previous = $this->_history->getPrevious();
-		if ($previous !== null)
-		{
-			return (isset($previous['url'])) ? $previous['url'] : null;
-		}
-		
-		return null;
-	}
-
-	public function getPreviousIpAddress ()
-	{
-		$previous = $this->_history->getPrevious();
-		if ($previous !== null)
-		{
-			return (isset($previous['ipAddress'])) ? $previous['ipAddress'] : null;
-		}
-		
-		return null;
-	}
-
-	public function getPreviousUserAgent ()
-	{
-		$previous = $this->_history->getPrevious();
-		if ($previous !== null)
-		{
-			return (isset($previous['userAgent'])) ? $previous['userAgent'] : null;
-		}
-		
-		return null;
-	}
-	
-	public function getUrl ($absolute = false)
-	{
-		if ($absolute === false)
-		{
-			return $this->_url;
-		}
-		return $this->getConfig('siteUrl') . $this->_url;
-	}
-	
-	public function getIpAddress ()
-	{
-		return $this->_ipAddress;
-	}
-	
-	public function getUserAgent ()
-	{
-		return $this->_userAgent;
-	}
-	
-	public function getAcceptCharset ()
-	{
-		return $this->_acceptCharset;
-	}
-	
-	public function getAcceptLanguage ()
-	{
-		return $this->_acceptLanguage;
-	}
-	
-	public function getAcceptEncoding ()
-	{
-		return $this->_acceptEncoding;
-	}
-	
-	public function isSecure ()
-	{
-		return $this->_isSecure;
-	}
-	
-	public function isAjax ()
-	{
-		return $this->_isAjax;
-	}
-	
-	public function getRequest()
-	{
-		return $this->_request;
-	}
-	
-	public function setRequest(Request $request)
-	{
-		$this->_request = $request;
-	}
-	
-	public function isCli()
-	{
-		return $this->_isCli;
-	}
-	
-	public function setCli($isCli)
-	{
-		$this->_isCli = $isCli;
 	}
 }

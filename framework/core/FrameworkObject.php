@@ -24,7 +24,7 @@ namespace framework\core;
 abstract class FrameworkObject
 {
 	/**
-	 * @var \framework\core\ComponentsContainer
+	 * @var \framework\libs\ComponentsContainer
 	 */
 	protected static $_container = null;
 
@@ -33,15 +33,15 @@ abstract class FrameworkObject
 	{
 		if ($key === null)
 		{
-			return self::$_container->config;
+			return self::$_container->_config;
 		}
 		
-		return self::$_container->config->get($key, $toArray);
+		return self::$_container->_config->get($key, $toArray);
 	}
 	
 	public function setConfig($key, $value)
 	{
-		self::$_container->config->set($key, $value);
+		self::$_container->_config->set($key, $value);
 	}
 	
 	public function getComponent()
@@ -50,15 +50,15 @@ abstract class FrameworkObject
 	}
 		
 	/**
-	 * @param \framework\core\ComponentsContainer $container
+	 * @param \framework\libs\ComponentsContainer $container
 	 */
-	public function setContainer(\framework\core\ComponentsContainer $container)
+	public function setContainer(\framework\libs\ComponentsContainer $container)
 	{
 		self::$_container = $container;
 	}
 	
 	/**
-	 * @return \framework\core\ComponentsContainer
+	 * @return \framework\libs\ComponentsContainer
 	 */
 	public function getContainer()
 	{
@@ -102,6 +102,7 @@ abstract class FrameworkObject
 	
 	public function raiseEvent($name, $params = null)
 	{
-		return $this->getComponent('eventManager')->dispatchEvent($name, $params);
+		$event = $this->getComponent('event', $name, $params);
+		return $this->getComponent('eventManager')->dispatchEvent($event);
 	}
 }

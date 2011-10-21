@@ -46,9 +46,7 @@ class Request extends \framework\core\FrameworkObject
 	
 	public function execute ()
 	{
-		$module = $this->getComponent('action', $this->_module, $this->_action);
-		$response = $this->getComponent('response');
-		return $module->execute($this, $response);
+		return $this->getComponent('dispatcher')->dispatch($this);
 	}
 	
 	/**
