@@ -85,7 +85,7 @@ class View extends \framework\core\FrameworkObject
 
 	public function render ()
 	{
-		if ($this->renderedView === null)
+		if ($this->_renderedView === null)
 		{
 			try
 			{
@@ -102,7 +102,7 @@ class View extends \framework\core\FrameworkObject
 				$this->_renderedView = $e->__toString();
 			}
 		}
-		return $this->renderedView;
+		return $this->_renderedView;
 	}
 	
 	public function getRenderedView()
