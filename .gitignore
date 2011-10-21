@@ -1,5 +1,5 @@
 *~
-/application/build/*
+application/build/*
 */*.orig
 doc/*
 .project
@@ -7,5 +7,5 @@ doc/*
 .buildpath
 .settings/*
 .DS_STORE
-nbproject/
+nbproject/*
 /nbproject/private/
