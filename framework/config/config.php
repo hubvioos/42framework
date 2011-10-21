@@ -39,16 +39,6 @@ $frameworkConfig = array(
 		'driver' => 'pdo_sqlite',
 		'path' => APP_DIR.DS.'database'.DS.'db.sqlite'
 	),
-	'datasources' => array(
-		'db' => array(
-			'type' => 'database',
-			'schema' => 'gacela',
-			'host' => 'localhost',
-			'password' => 'root',
-			'user' => 'root',
-			'dbtype' => 'mysql'
-		)
-	),
 	'defaultCacheSysteml' => 'Apc',
 	'cache' => array(
 		'Apc' => array(
