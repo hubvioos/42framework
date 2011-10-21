@@ -1,4 +1,5 @@
-<?php 
+<?php
+
 /**
  * Copyright (C) 2011 - K√©vin O'NEILL, Fran√ßois KLINGLER - <contact@42framework.com>
  * 
@@ -17,20 +18,26 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-namespace framework\filters;
+namespace framework\libs;
 
-abstract class Filter extends \framework\core\FrameworkObject
+abstract class Filter
 {
+
 	public function execute (&$request, &$response, FilterChain &$filterChain)
 	{
 		$this->_before($request, $response);
 		$filterChain->execute($request, $response);
 		$this->_after($request, $response);
 	}
-	
+
 	public function _before (&$request, &$response)
-	{}
-	
+	{
+		
+	}
+
 	public function _after (&$request, &$response)
-	{}
+	{
+		
+	}
+
 }
