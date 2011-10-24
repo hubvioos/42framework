@@ -42,6 +42,8 @@ class Core extends \framework\core\FrameworkObject
 		$this->getComponent('errorHandler');
 
 		$this->getComponent('session')->init();
+		
+		$this->getComponent('router')->init($this->getConfig('routes', true));
 
 		// Timezone
 		\date_default_timezone_set($this->getConfig('defaultTimezone'));
@@ -71,11 +73,25 @@ class Core extends \framework\core\FrameworkObject
 			$url = $request->getUrl();
 
 			// $path = $this->getComponent('route')->urlToPath($url, $config['defaultModule'], $config['defaultAction']);
-			$path = $this->getComponent('route')->urlToPath($url);
+			/* $path = $this->getComponent('route')->urlToPath($url);
 
-			$params = $this->getComponent('route')->pathToParams($path);
+			  $params = $this->getComponent('route')->pathToParams($path);
 
-			$this->duplicateContentPolicy($url, $path, $params);
+			  $this->duplicateContentPolicy($url, $path, $params);
+			 */
+			
+			$params = $this->getComponent('router')->match($request->getMethod(), $url);
+
+			if (!isset($params['params']))
+			{
+				$params['params'] = array();
+			}
+			else
+			{
+				$params['params'] = \explode('/', $params['params']);
+			}
+			
+			//$this->duplicateContentPolicy($url, $path, $params);
 
 			$state = \framework\core\Request::FIRST_REQUEST;
 
