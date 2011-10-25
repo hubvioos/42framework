@@ -121,13 +121,15 @@ class View extends \framework\core\FrameworkObject
 		return $this->render();
 	}
 	
-	/*public function getLink($module, $action, $params = array ())
+	public function getLink($params = array (), $routeName = null)
 	{
-		return $this->getConfig('siteUrl').$this->getComponent('route')->paramsToUrl(
-				array('module' => $module, 
-				'action' => $action, 
-				'params' => $params));
-	}*/
+		return $this->getConfig('siteUrl').\urldecode($this->getComponent('router')->url($params, $routeName));
+	}
+	
+	public function getBlock ()
+	{
+		
+	}
 	
 	public function setTitle($title)
 	{
