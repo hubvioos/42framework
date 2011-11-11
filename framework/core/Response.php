@@ -1,4 +1,5 @@
-<?php 
+<?php
+
 /**
  * Copyright (C) 2011 - K√©vin O'NEILL, Fran√ßois KLINGLER - <contact@42framework.com>
  * 
@@ -21,38 +22,29 @@ namespace framework\core;
 
 class Response extends \framework\core\FrameworkObject
 {
+
 	const SUCCESS = 1;
 	const ERROR = 2;
 	const OUTSIDE_ACCESS_FORBIDDEN = 3;
-	
+
 	/**
 	 * Contains the response
 	 * @var mixed
 	 */
-	protected $_response = null;
-	
+	protected $_content = null;
 	protected $_status = null;
-	
+
+	public function getContent ()
+	{
+		return $this->_content;
+	}
+
 	/**
 	 * @return \Framework\Response
 	 */
-	public function clear ()
+	public function setContent ($value)
 	{
-		$this->set(null);
-		return $this;
-	}
-	
-	public function get ()
-	{
-		return $this->_response;
-	}
-	
-	/**
-	 * @return \Framework\Response
-	 */
-	public function set ($value)
-	{
-		$this->_response = $value;
+		$this->_content = $value;
 		return $this;
 	}
 
@@ -64,18 +56,11 @@ class Response extends \framework\core\FrameworkObject
 	/**
 	 * @return \Framework\Response
 	 */
-	public function resetStatus ()
-	{
-		$this->_status = null;
-		return $this;
-	}
-	
-	/**
-	 * @return \Framework\Response
-	 */
 	public function reset ()
 	{
-		return $this->clear()->resetStatus();
+		$this->_content = null;
+		$this->_status = null;
+		return $this;
 	}
 
 	/**
@@ -86,4 +71,5 @@ class Response extends \framework\core\FrameworkObject
 		$this->_status = $status;
 		return $this;
 	}
+
 }

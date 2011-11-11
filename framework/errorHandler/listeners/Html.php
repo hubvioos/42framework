@@ -42,15 +42,15 @@ class Html extends \framework\core\FrameworkObject implements \framework\errorHa
 		
 		$rc = implode('<br />'.PHP_EOL, $lines);
 		
-		$response = $this->getContainer()->getHttpResponse()->status(500);
+		$response = $this->getContainer()->getHttpResponse()->setStatus(500);
 			
 		if (ini_get('display_errors'))
 		{
-			$response->set($rc);
+			$response->setContent($rc);
 		}
 		else
 		{
-			$response->set('Oops! An error occured!');
+			$response->setContent('Oops! An error occured!');
 		}
 		$this->viewSetGlobal('layout', false);
 		$response->stopProcess();

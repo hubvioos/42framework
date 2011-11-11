@@ -14,18 +14,11 @@ $fcomponents = array(
 		},
 		'isUnique' => true),
 
-	'filterChain' => array(
-		'callable' => function ($c, $args)
-		{
-			return new \framework\filters\FilterChain();
-		},
-		'isUnique' => false),
-
 	'httpRequest' => array(
 		'callable' => function ($c, $args)
 		{
 			/* @var $c ApplicationContainer */
-			return new \framework\core\HttpRequest($c->getHistory());
+			return new \framework\core\http\Request($c->getHistory());
 		},
 		'isUnique' => true),
 
@@ -33,7 +26,7 @@ $fcomponents = array(
 		'callable' => function ($c, $args)
 		{
 			/* @var $c ApplicationContainer */
-			return new \framework\core\HttpResponse();
+			return new \framework\core\http\Response();
 		},
 		'isUnique' => true),
 
@@ -122,7 +115,7 @@ $fcomponents = array(
 			'callable' => function ($c, $args)
 			{
 				/* @var $c ApplicationContainer */
-				return new \framework\libs\History('_history', $c->_config['historySize']);
+				return new \framework\core\http\History('_history', $c->_config['historySize']);
 			},
 			'isUnique' => true),
 
