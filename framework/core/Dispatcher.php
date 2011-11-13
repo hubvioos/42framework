@@ -1,4 +1,5 @@
-<?php 
+<?php
+
 /**
  * Copyright (C) 2011 - K√©vin O'NEILL, Fran√ßois KLINGLER - <contact@42framework.com>
  * 
@@ -21,77 +22,100 @@ namespace framework\core;
 
 class Dispatcher extends \framework\core\FrameworkObject
 {
+
 	public function dispatch (\framework\core\Request $request)
 	{
-		$config = $this->getConfig('modulesLocation');
+		$this->raiseEvent('framework.beforeDispatch', $request);
 		
-		$actionExists = false;
+		$classname = $this->getAction($request->getModule(), $request->getAction(), $request);
 		
-		if (isset ($config[$request->getModule()]))
+		if (!$classname)
 		{
-			$classname = $this->getModuleNamespace($request->getModule()).'\\controllers\\'.$request->getAction();
-			
-			if (\class_exists($classname))
-			{
-				$actionExists = true;
-			}
+			return $this->createRequest(array('module' => 'errors', 'action' => 'error404'), $request->getState())->execute();
 		}
-		
-		if (!$actionExists)
-		{
-			return $this->createRequest('errors', 'error404', array(), $request->getState())->execute();
-		}
-		
+
 		$module = $this->getComponent('action', $classname);
 		$response = $this->getComponent('response');
+		$response->setFormat($request->getFormat());
+		
 		return $module->execute($request, $response);
 	}
-	
+
 	public function getModulePath ($module)
 	{
 		$config = $this->getConfig('modulesLocation');
-		
+
 		$viewsPath = null;
-			
+
 		switch ($config[$module])
 		{
 			case 'framework':
-				$viewsPath = \FRAMEWORK_DIR.\DIRECTORY_SEPARATOR.'modules'.\DIRECTORY_SEPARATOR.$module;
+				$viewsPath = \FRAMEWORK_DIR . \DIRECTORY_SEPARATOR . 'modules' . \DIRECTORY_SEPARATOR . $module;
 				break;
 
 			case 'modules':
-				$viewsPath = \MODULES_DIR.\DIRECTORY_SEPARATOR.$module;
+				$viewsPath = \MODULES_DIR . \DIRECTORY_SEPARATOR . $module;
 				break;
 
 			case 'application':
-				$viewsPath = \APP_DIR.\DIRECTORY_SEPARATOR.'modules'.\DIRECTORY_SEPARATOR.$module;
+				$viewsPath = \APP_DIR . \DIRECTORY_SEPARATOR . 'modules' . \DIRECTORY_SEPARATOR . $module;
 				break;
 		}
-		
+
 		return $viewsPath;
 	}
-	
+
 	public function getModuleNamespace ($module)
 	{
 		$config = $this->getConfig('modulesLocation');
-		
+
 		$namespace = null;
-			
+
 		switch ($config[$module])
 		{
 			case 'framework':
-				$namespace = '\\framework\\modules\\'.$module;
+				$namespace = '\\framework\\modules\\' . $module;
 				break;
 
 			case 'modules':
-				$namespace = '\\modules\\'.$module;
+				$namespace = '\\modules\\' . $module;
 				break;
 
 			case 'application':
-				$namespace = '\\application\\modules\\'.$module;
+				$namespace = '\\application\\modules\\' . $module;
 				break;
 		}
-		
+
 		return $namespace;
 	}
+
+	protected function getAction ($module, $action, \framework\core\Request $request)
+	{
+		$modulesLocation = $this->getConfig('modulesLocation');
+
+		$classname = false;
+
+		if (isset($modulesLocation[$module]))
+		{
+			$classname = $this->getModuleNamespace($module) . '\\controllers\\' . $action;
+
+			if (!\class_exists($classname))
+			{
+				$moduleConfig = $this->getConfig('modules.' . $module);
+
+				if (isset($moduleConfig['extends']))
+				{
+					$classname = $this->getAction($moduleConfig['extends'], $action, $request);
+					
+					if ($classname)
+					{
+						$request->set('module', $moduleConfig['extends']);
+					}
+				}
+			}
+		}
+
+		return $classname;
+	}
+
 }

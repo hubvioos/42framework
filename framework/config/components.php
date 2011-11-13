@@ -29,12 +29,10 @@ $fcomponents = array(
 	'request' => array(
 		'callable' => function ($c, $args)
 		{
-			$module = $args[0];
-			$action = $args[1];
-			$params = isset($args[2]) ? $args[2] : array();
-			$state = isset($args[3]) ? $args[3] : null;
+			$params = $args[0];
+			$state = isset($args[1]) ? $args[1] : null;
 
-			return new \framework\core\Request($module, $action, $params, $state);
+			return new \framework\core\Request($params, $state);
 		},
 		'isUnique' => false),
 	'response' => array(
@@ -72,8 +70,9 @@ $fcomponents = array(
 			$module = $args[0];
 			$action = $args[1];
 			$vars = isset($args[2]) ? $args[2] : false;
+			$format = isset($args[3]) ? $args[3] : null;
 
-			return new \framework\core\View($module, $action, $vars);
+			return new \framework\core\View($module, $action, $vars, $format);
 		},
 		'isUnique' => false),
 	'eventManager' => array(

@@ -1,4 +1,5 @@
-<?php 
+<?php
+
 /**
  * Copyright (C) 2011 - K√©vin O'NEILL, Fran√ßois KLINGLER - <contact@42framework.com>
  * 
@@ -21,34 +22,51 @@ namespace framework\core;
 
 class View extends \framework\core\FrameworkObject
 {
-	protected $_file;
 
+	protected $_file;
+	protected $_format = null;
 	protected $_vars = array();
-	
 	protected $_renderedView = null;
-	
 	protected static $_globalsVars = array();
 
-	public function __construct ($module, $file, $vars = false)
+	public function __construct ($module, $file, $vars = false, $format = null)
 	{
-		$config = $this->getConfig();
-		
+		$viewExtension = $this->getConfig('viewExtension');
+
+		$this->_format = $format;
+
 		$this->_file = $this->getComponent('dispatcher')->getModulePath($module);
-		$this->_file .= \DIRECTORY_SEPARATOR.'views'.\DIRECTORY_SEPARATOR.$file.$config['viewExtension'];
-		
-		if (!file_exists($this->_file))
+
+		if ($this->_format !== null)
 		{
-			$globalFile = \APP_DIR.\DIRECTORY_SEPARATOR.'views'.\DIRECTORY_SEPARATOR.$file.$config['viewExtension'];
-			if (file_exists($globalFile))
+			$this->_file .= \DIRECTORY_SEPARATOR . 'views' . \DIRECTORY_SEPARATOR . $this->_format . \DIRECTORY_SEPARATOR . $file . $viewExtension;
+		}
+		else
+		{
+			$this->_file .= \DIRECTORY_SEPARATOR . 'views' . \DIRECTORY_SEPARATOR . $file . $viewExtension;
+		}
+
+		if (!\file_exists($this->_file))
+		{
+			if ($this->_format !== null)
+			{
+				$globalFile = \APP_DIR . \DIRECTORY_SEPARATOR . 'views' . \DIRECTORY_SEPARATOR . $this->_format . \DIRECTORY_SEPARATOR . $file . $viewExtension;
+			}
+			else
+			{
+				$globalFile = \APP_DIR . \DIRECTORY_SEPARATOR . 'views' . \DIRECTORY_SEPARATOR . $file . $viewExtension;
+			}
+
+			if (\file_exists($globalFile))
 			{
 				$this->_file = $globalFile;
 			}
 			else
 			{
-				throw new \RuntimeException('View not found : '.$this->_file);
+				throw new \RuntimeException('View not found : ' . $this->_file);
 			}
 		}
-		
+
 		if ($vars !== false)
 		{
 			$this->_vars = $vars;
@@ -59,8 +77,8 @@ class View extends \framework\core\FrameworkObject
 	{
 		$this->_vars[$name] = $value;
 	}
-	
-	public function __get($name)
+
+	public function __get ($name)
 	{
 		if (!isset($this->_vars[$name]))
 		{
@@ -68,13 +86,13 @@ class View extends \framework\core\FrameworkObject
 		}
 		return $this->_vars[$name];
 	}
-	
+
 	public static function setGlobal ($name, $value)
 	{
 		self::$_globalsVars[$name] = $value;
 	}
-	
-	public static function getGlobal($name)
+
+	public static function getGlobal ($name)
 	{
 		if (!isset(self::$_globalsVars[$name]))
 		{
@@ -89,9 +107,9 @@ class View extends \framework\core\FrameworkObject
 		{
 			try
 			{
-				extract(self::$_globalsVars);
-				extract($this->_vars);
-				
+				\extract(self::$_globalsVars);
+				\extract($this->_vars);
+
 				\ob_start();
 				include $this->_file;
 				$this->_renderedView = \ob_get_clean();
@@ -104,13 +122,13 @@ class View extends \framework\core\FrameworkObject
 		}
 		return $this->_renderedView;
 	}
-	
-	public function getRenderedView()
+
+	public function getRenderedView ()
 	{
 		return $this->_renderedView;
 	}
-	
-	public function setRenderedView($view)
+
+	public function setRenderedView ($view)
 	{
 		$this->_renderedView = $view;
 		return $this;
@@ -120,24 +138,27 @@ class View extends \framework\core\FrameworkObject
 	{
 		return $this->render();
 	}
-	
-	public function getLink($params = array (), $routeName = null)
+
+	public function getLink ($routeName = null, $params = array())
 	{
-		return $this->getConfig('siteUrl').\urldecode($this->getComponent('router')->url($params, $routeName));
+		return $this->getConfig('siteUrl') . \urldecode($this->getComponent('router')->url($params, $routeName));
 	}
-	
-	public function getBlock ()
+
+	public function getBlock ($block, $params = array(), $format = null)
 	{
-		
+		list($module, $action) = \explode('/', $block);
+
+		return $this->createView($module, $action, $params, $format);
 	}
-	
-	public function setTitle($title)
+
+	public function setTitle ($title)
 	{
 		self::setGlobal('title', $title);
 	}
-	
-	public function getHelper()
+
+	public function getHelper ()
 	{
-		return call_user_func_array(array(self::$_container,'get'),func_get_args());
+		return $this->getComponent(func_get_args());
 	}
+
 }

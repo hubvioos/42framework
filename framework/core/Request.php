@@ -20,10 +20,6 @@ namespace framework\core;
 
 class Request extends \framework\core\FrameworkObject
 {
-	protected $_module = null;
-
-	protected $_action = null;
-
 	protected $_params = array();
 	
 	protected $_state = null;
@@ -32,14 +28,8 @@ class Request extends \framework\core\FrameworkObject
 	const CLI_STATE = -50;
 	const FIRST_REQUEST = -100;
 
-	public function __construct ($module, $action, Array $params = array(), $state = self::DEFAULT_STATE)
+	public function __construct (Array $params = array(), $state = self::DEFAULT_STATE)
 	{
-		if ($state === null)
-		{
-			$state = self::DEFAULT_STATE;
-		}
-		$this->_module = $module;
-		$this->_action = $action;
 		$this->_params = $params;
 		$this->_state = $state;
 	}
@@ -54,7 +44,7 @@ class Request extends \framework\core\FrameworkObject
 	 */
 	public function getModule ()
 	{
-		return $this->_module;
+		return $this->get('module');
 	}
 
 	/**
@@ -62,7 +52,18 @@ class Request extends \framework\core\FrameworkObject
 	 */
 	public function getAction ()
 	{
-		return $this->_action;
+		return $this->get('action');
+	}
+	
+	public function getFormat ()
+	{
+		return $this->get('format');
+	}
+	
+	public function setFormat ($value)
+	{
+		$this->set('format', $value);
+		return $this;
 	}
 
 	/**
@@ -76,5 +77,37 @@ class Request extends \framework\core\FrameworkObject
 	public function getState ()
 	{
 		return $this->_state;
+	}
+	
+	public function setState ($state)
+	{
+		$this->_state = $state;
+		return $this;
+	}
+
+
+	public function __get ($key)
+	{
+		return $this->get($key, null);
+	}
+	
+	public function __set ($key, $value)
+	{
+		return $this->set($key, $value);
+	}
+	
+	public function get ($key, $default = null)
+	{
+		if (isset($this->_params[$key]))
+		{
+			return $this->_params[$key];
+		}
+		return $default;
+	}
+	
+	public function set ($key, $value)
+	{
+		$this->_params[$key] = $value;
+		return $this;
 	}
 }

@@ -62,6 +62,7 @@ class Router
 	public function route ($name, $route, array $defaults = array())
 	{
 		$route = new \framework\libs\router\Route($route);
+		$route->defaults($defaults);
 		$this->_routes[$name] = $route->name($name);
 		return $route;
 	}
@@ -95,9 +96,11 @@ class Router
 		// Loop over set routes to find a match
 		// Order matters - Looping will stop when first suitable match is found
 		$routes = $this->routes();
-		foreach ($routes as $routeName => $route)
+		foreach (\array_values($routes) as $route)
 		{
-			if ($params = $this->routeMatch($route, $method, $url))
+			$params = $this->routeMatch($route, $method, $url);
+			
+			if ($params)
 			{
 				// Check condition callback if set
 				$cb = $route->condition();

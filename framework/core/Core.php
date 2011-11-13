@@ -42,11 +42,13 @@ class Core extends \framework\core\FrameworkObject
 		$this->getComponent('errorHandler');
 
 		$this->getComponent('session')->init();
-		
+
 		$this->getComponent('router')->init($this->getConfig('routes', true));
 
 		// Timezone
 		\date_default_timezone_set($this->getConfig('defaultTimezone'));
+
+		$this->raiseEvent('framework.bootstrap');
 
 		return $this;
 	}
@@ -58,8 +60,13 @@ class Core extends \framework\core\FrameworkObject
 	 */
 	public function run ()
 	{
+		$this->raiseEvent('framework.beforeApp');
+		
 		$request = $this->getComponent('httpRequest');
 		$response = $this->getComponent('httpResponse');
+
+		$params = array();
+		$state = null;
 
 		if ($request->isCli())
 		{
@@ -69,52 +76,6 @@ class Core extends \framework\core\FrameworkObject
 			$state = \framework\core\Request::CLI_STATE;
 		}
 		else
-		{
-			$url = $request->getUrl();
-
-			// $path = $this->getComponent('route')->urlToPath($url, $config['defaultModule'], $config['defaultAction']);
-			/* $path = $this->getComponent('route')->urlToPath($url);
-
-			  $params = $this->getComponent('route')->pathToParams($path);
-
-			  $this->duplicateContentPolicy($url, $path, $params);
-			 */
-			
-			$params = $this->getComponent('router')->match($request->getMethod(), $url);
-
-			if (!isset($params['params']))
-			{
-				$params['params'] = array();
-			}
-			else
-			{
-				$params['params'] = \explode('/', $params['params']);
-			}
-			
-			//$this->duplicateContentPolicy($url, $path, $params);
-
-			$state = \framework\core\Request::FIRST_REQUEST;
-
-			// Views variables
-			$this->viewSetGlobal('messages', $this->getComponent('message')->getAll());
-			$this->getComponent('message')->clearAll();
-		}
-		$execute = $this->createRequest($params['module'], $params['action'], $params['params'], $state);
-
-		$this->raiseEvent('beforeApp');
-
-		$executeResponse = $execute->execute();
-
-		if ($executeResponse->getStatus() == \framework\core\Response::SUCCESS)
-		{
-			$response->setContent($executeResponse->getContent());
-		}
-		else
-		{
-			$this->createRequest('errors', 'error404')->execute();
-		}
-
-		if (!$request->isCli())
 		{
 			$previousIpAddress = $request->getPreviousIp();
 			$previousUserAgent = $request->getPreviousUserAgent();
@@ -129,17 +90,46 @@ class Core extends \framework\core\FrameworkObject
 				$this->getComponent('message')
 						->set('It seems that your session has been stolen, we destroyed it for security reasons. 
 						Check your environment security.', 'warning');
-				$this->getResponse()->redirect($this->getConfig('siteUrl'), 301, true);
+				$this->getResponse()->redirect($this->getConfig('siteUrl'), 302, true);
 			}
-		}
+			
+			// Views variables
+			$this->viewSetGlobal('messages', $this->getComponent('message')->getAll());
+			$this->getComponent('message')->clearAll();
 
-		$this->raiseEvent('afterApp');
+			$url = $request->getUrl();
+
+			$params = $this->getComponent('router')->match($request->getMethod(), $url);
+
+			$this->duplicateContentPolicy($url, $params);
+
+			$state = \framework\core\Request::FIRST_REQUEST;
+		}
+		
+		$execute = $this->createRequest($params, $state);
+
+		$this->raiseEvent('framework.beforeExecute', $execute);
+
+		$executeResponse = $execute->execute();
+		
+		$this->raiseEvent('framework.afterExecute', $executeResponse);
+
+		if ($executeResponse->getStatus() == \framework\core\Response::SUCCESS)
+		{
+			$response->setContent($executeResponse->getContent());
+		}
+		else
+		{
+			$this->createRequest(array('module' => 'errors', 'action' => 'error404'))->execute();
+		}
 
 		$this->render();
 	}
 
 	public function render ($stop = false)
 	{
+		$this->raiseEvent('framework.beforeRender');
+		
 		$request = $this->getComponent('httpRequest');
 		$response = $this->getComponent('httpResponse');
 
@@ -156,8 +146,6 @@ class Core extends \framework\core\FrameworkObject
 			$response->setContent($this->createView($this->getConfig('defaultModule'), $this->viewGetGlobal('layout')));
 		}
 
-		$this->raiseEvent('beforeView');
-
 		$content = $response->getContent();
 
 		if ($content !== null)
@@ -171,10 +159,10 @@ class Core extends \framework\core\FrameworkObject
 		{
 			$content = '';
 		}
-		
+
 		$response->setContent($content);
 
-		$this->raiseEvent('afterView', $content);
+		$this->raiseEvent('framework.afterRender', $content);
 
 		$response->send();
 
@@ -182,6 +170,8 @@ class Core extends \framework\core\FrameworkObject
 		{
 			$request->updateHistory();
 		}
+		
+		$this->raiseEvent('framework.afterApp');
 
 		if ($stop)
 		{
@@ -191,23 +181,17 @@ class Core extends \framework\core\FrameworkObject
 		return $this;
 	}
 
-	public function duplicateContentPolicy ($url, $path, $params)
+	public function duplicateContentPolicy ($url, $params)
 	{
+		$router = $this->getComponent('router');
+		
 		// Redirect to root if we use the default module and action.
-		if ($url != ''
-				&& $params['module'] == $this->getConfig('defaultModule')
-				&& $params['action'] == $this->getConfig('defaultAction')
-				&& empty($params['params'])
-		)
+		if ($params['module'] == $this->getConfig('defaultModule')
+			&& $params['action'] == $this->getConfig('defaultAction')
+			&& $url != '' 
+			&& $router->matchedRoute()->name() != 'default')
 		{
 			$this->getComponent('httpResponse')->redirect($this->getConfig('siteUrl'), 301, true);
-		}
-		// Avoid duplicate content of the routes.
-		else if ($url != $this->getComponent('route')->pathToUrl($path)
-				&& $url != '')
-		{
-			$this->getComponent('httpResponse')
-					->redirect($this->getConfig('siteUrl') . $this->getComponent('route')->pathToUrl($path), 301, true);
 		}
 
 		// Avoid duplicate content with just a "/" after the URL

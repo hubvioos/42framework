@@ -1,5 +1,5 @@
 <?php 
-namespace framework\modules\hello\controllers;
+namespace application\modules\hello\controllers;
 
 class Index extends \framework\core\Controller
 {

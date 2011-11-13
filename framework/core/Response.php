@@ -33,6 +33,7 @@ class Response extends \framework\core\FrameworkObject
 	 */
 	protected $_content = null;
 	protected $_status = null;
+	protected $_format = null;
 
 	public function getContent ()
 	{
@@ -69,6 +70,20 @@ class Response extends \framework\core\FrameworkObject
 	public function setStatus ($status)
 	{
 		$this->_status = $status;
+		return $this;
+	}
+	
+	public function getFormat ()
+	{
+		return $this->_format;
+	}
+
+	/**
+	 * @return \Framework\Response
+	 */
+	public function setFormat ($value)
+	{
+		$this->_format = $value;
 		return $this;
 	}
 

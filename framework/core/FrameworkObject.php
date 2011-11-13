@@ -65,14 +65,14 @@ abstract class FrameworkObject
 		return self::$_container;
 	}
 	
-	public function createRequest($module, $action, $params = array(), $state = null)
+	public function createRequest($params = array(), $state = null)
 	{
-		return $this->getComponent('request', $module, $action, $params, $state);
+		return $this->getComponent('request', $params, $state);
 	}
 	
-	public function createView($module, $action, $vars = false)
+	public function createView($module, $action, $vars = false, $format = null)
 	{
-		return $this->getComponent('view', $module, $action, $vars);
+		return $this->getComponent('view', $module, $action, $vars, $format);
 	}
 	
 		

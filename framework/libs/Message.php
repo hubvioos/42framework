@@ -21,7 +21,8 @@ namespace framework\libs;
 class Message
 {	
 	protected $_namespace = null;
-	
+
+
 	public function __construct($namespace)
 	{
 		$this->_namespace = $namespace;
@@ -34,6 +35,11 @@ class Message
 	
 	public function set ($value, $category = 'notice')
 	{
+		if (!isset ($_SESSION[$this->_namespace][$category]))
+		{
+			$_SESSION[$this->_namespace][$category] = array();
+		}
+		
 		$_SESSION[$this->_namespace][$category][] = $value;
 	}
 	
