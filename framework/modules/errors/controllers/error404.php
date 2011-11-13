@@ -22,7 +22,7 @@ class error404 extends \framework\modules\errors\generic
 {
 	public function processAction ($request = null)
 	{
-		$this->getComponent('httpResponse')->status(404)->set(
+		$this->getComponent('httpResponse')->setStatus(404)->setContent(
 				$this->createView('errors', 'error404', array('requestedUrl' => $this->getComponent('httpRequest')->getUrl(true))));		
 	}
 }

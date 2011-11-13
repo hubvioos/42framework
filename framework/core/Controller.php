@@ -78,7 +78,7 @@ class ControllerDependencyException extends \Exception
 	}
 }
 
-class Controller extends \framework\core\FrameworkObject
+abstract class Controller extends \framework\core\FrameworkObject
 {
 
 	/**
@@ -118,7 +118,7 @@ class Controller extends \framework\core\FrameworkObject
 	/**
 	 * Executes the action corresponding to the current request
 	 *
-	 * @param Framework\Request $request
+	 * @param framework\core\Request $request
 	 */
 	public function execute (Request &$request, Response &$response)
 	{
@@ -132,18 +132,25 @@ class Controller extends \framework\core\FrameworkObject
 		else
 		{
 			// check if the module's dependencies are not unsatisfied (they can be SCHRODINGER !)
-			if ($this->getConfig()->get('modules.'.$request->getModule().'.dependenciesSatisfied') !== \framework\libs\ConfigBuilder::DEPENDENCIES_UNSATISFIED)
+			if ($this->getConfig('modules.'.$request->getModule().'.dependenciesSatisfied') !== \framework\libs\ConfigBuilder::DEPENDENCIES_UNSATISFIED)
 			{
 				//Preparation to "before" and "after" events lauching
 				//$classPath = 'application\\modules\\' . $request->getModule() . '\\controllers\\' . $request->getAction();
-				$beforeName = 'before' . ucfirst($request->getAction());
-				$afterName = 'after' . ucfirst($request->getAction());
-
+				$beforeName = $request->getModule().'.before' . \ucfirst($request->getAction());
+				$afterName = $request->getModule().'.after' . \ucfirst($request->getAction());
+				
+				$methodName = 'process'.\ucfirst($this->getComponent('httpRequest')->getMethod());
+				
+				if (!\method_exists($this, $methodName))
+				{
+					$methodName = 'processAction';
+				}
+				
 				//Launch Before event
 				$this->raiseEvent($beforeName);
-
+				
 				if ($this->_before() !== false
-						&& call_user_func_array(array($this, 'processAction'), $this->_request->getParams()) !== false
+						&& $this->{$methodName}($this->_request) !== false
 						&& $this->_after() !== false
 				)
 				{
@@ -161,7 +168,7 @@ class Controller extends \framework\core\FrameworkObject
 						{
 							$this->setView($this->_request->getAction());
 						}
-						$this->_response->setContent($this->createView($this->_request->getModule(), $this->_view, $this->_vars));
+						$this->_response->setContent($this->createView($this->_request->getModule(), $this->_view, $this->_vars, $this->_response->getFormat()));
 					}
 
 					$this->_response->setStatus(\framework\core\Response::SUCCESS);
@@ -212,7 +219,7 @@ class Controller extends \framework\core\FrameworkObject
 
 	public function setMessage ($message, $category = 'notice')
 	{
-		$this->getContainer()->getMessage()->set($message, $category);
+		$this->getComponent('message')->set($message, $category);
 	}
 
 	/**

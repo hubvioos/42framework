@@ -22,7 +22,7 @@ class error403 extends \framework\modules\errors\generic
 {
 	public function processAction ($request = null)
 	{
-		$this->getComponent('httpResponse')->status(403)->set(
+		$this->getComponent('httpResponse')->setStatus(403)->setContent(
 				$this->createView('errors', 'error403'));
 	}
 }

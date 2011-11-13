@@ -22,7 +22,7 @@ class error503 extends \framework\modules\errors\generic
 {
 	public function processAction ($request = null)
 	{
-		$this->getComponent('httpResponse')->status(503)->set(
+		$this->getComponent('httpResponse')->setStatus(503)->setContent(
 				$this->createView('errors', 'error503'));
 	}
 }

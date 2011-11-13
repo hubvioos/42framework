@@ -2,7 +2,7 @@
 
 namespace framework\modules\website\controllers;
 
-class Index extends \framework\core\Controller
+class Test extends \framework\core\Controller
 {
 
 	public function _before ()

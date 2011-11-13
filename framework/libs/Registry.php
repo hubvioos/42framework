@@ -143,12 +143,13 @@ class Registry extends \ArrayObject
 					}
 				}
 			}
-
-			if($toArray && $value instanceof self)
-			{
-				$value = $value->toArray();
-			}
 		}
+		
+		if($toArray && $value instanceof self)
+		{
+			$value = $value->toArray();
+		}
+			
 		return $value;
 	}
 	
