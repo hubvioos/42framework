@@ -24,6 +24,7 @@ class View extends \framework\core\FrameworkObject
 {
 
 	protected $_file;
+	protected $_extension = '.php';
 	protected $_format = null;
 	protected $_vars = array();
 	protected $_renderedView = null;
@@ -31,30 +32,21 @@ class View extends \framework\core\FrameworkObject
 
 	public function __construct ($module, $file, $vars = false, $format = null)
 	{
-		$viewExtension = $this->getConfig('viewExtension');
-
+		$this->_extension = $this->getConfig('viewExtension');
+		
 		$this->_format = $format;
 
-		$this->_file = $this->getComponent('dispatcher')->getModulePath($module);
+		$this->_file = $this->getComponent('dispatcher')->getViewPath($module, $file, $this->_extension, $this->_format);
 
-		if ($this->_format !== null)
-		{
-			$this->_file .= \DIRECTORY_SEPARATOR . 'views' . \DIRECTORY_SEPARATOR . $this->_format . \DIRECTORY_SEPARATOR . $file . $viewExtension;
-		}
-		else
-		{
-			$this->_file .= \DIRECTORY_SEPARATOR . 'views' . \DIRECTORY_SEPARATOR . $file . $viewExtension;
-		}
-
-		if (!\file_exists($this->_file))
+		if (!$this->_file)
 		{
 			if ($this->_format !== null)
 			{
-				$globalFile = \APP_DIR . \DIRECTORY_SEPARATOR . 'views' . \DIRECTORY_SEPARATOR . $this->_format . \DIRECTORY_SEPARATOR . $file . $viewExtension;
+				$globalFile = \APP_DIR . \DIRECTORY_SEPARATOR . 'views' . \DIRECTORY_SEPARATOR . $this->_format . \DIRECTORY_SEPARATOR . $file . $this->_extension;
 			}
 			else
 			{
-				$globalFile = \APP_DIR . \DIRECTORY_SEPARATOR . 'views' . \DIRECTORY_SEPARATOR . $file . $viewExtension;
+				$globalFile = \APP_DIR . \DIRECTORY_SEPARATOR . 'views' . \DIRECTORY_SEPARATOR . $file . $this->_extension;
 			}
 
 			if (\file_exists($globalFile))

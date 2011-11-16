@@ -26,9 +26,9 @@ class Dispatcher extends \framework\core\FrameworkObject
 	public function dispatch (\framework\core\Request $request)
 	{
 		$this->raiseEvent('framework.beforeDispatch', $request);
-		
-		$classname = $this->getAction($request->getModule(), $request->getAction(), $request);
-		
+
+		$classname = $this->getAction($request->getModule(), $request->getAction());
+
 		if (!$classname)
 		{
 			return $this->createRequest(array('module' => 'errors', 'action' => 'error404'), $request->getState())->execute();
@@ -37,7 +37,7 @@ class Dispatcher extends \framework\core\FrameworkObject
 		$module = $this->getComponent('action', $classname);
 		$response = $this->getComponent('response');
 		$response->setFormat($request->getFormat());
-		
+
 		return $module->execute($request, $response);
 	}
 
@@ -89,7 +89,7 @@ class Dispatcher extends \framework\core\FrameworkObject
 		return $namespace;
 	}
 
-	protected function getAction ($module, $action, \framework\core\Request $request)
+	protected function getAction ($module, $action)
 	{
 		$modulesLocation = $this->getConfig('modulesLocation');
 
@@ -105,17 +105,45 @@ class Dispatcher extends \framework\core\FrameworkObject
 
 				if (isset($moduleConfig['extends']))
 				{
-					$classname = $this->getAction($moduleConfig['extends'], $action, $request);
-					
-					if ($classname)
-					{
-						$request->set('module', $moduleConfig['extends']);
-					}
+					$classname = $this->getAction($moduleConfig['extends'], $action);
 				}
 			}
 		}
 
 		return $classname;
+	}
+
+	public function getViewPath ($module, $file, $extension, $format = null)
+	{
+		$modulesLocation = $this->getConfig('modulesLocation');
+
+		$filepath = false;
+
+		if (isset($modulesLocation[$module]))
+		{
+			$filepath = $this->getModulePath($module) . \DIRECTORY_SEPARATOR . 'views' . \DIRECTORY_SEPARATOR;
+			
+			if ($format !== null)
+			{
+				$filepath .= $format . \DIRECTORY_SEPARATOR . $file . $extension;
+			}
+			else
+			{
+				$filepath .= $file . $extension;
+			}
+
+			if (!\file_exists($filepath))
+			{
+				$moduleConfig = $this->getConfig('modules.' . $module);
+
+				if (isset($moduleConfig['extends']))
+				{
+					$filepath = $this->getView($moduleConfig['extends'], $file, $extension);
+				}
+			}
+		}
+
+		return $filepath;
 	}
 
 }
