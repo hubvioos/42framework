@@ -1,3 +1,3 @@
 Options +FollowSymLinks
 RewriteEngine on
-RewriteRule    ^(.*)$  ./application/webroot/$1
+RewriteRule    ^(.*)$  ./framework/skel/webroot/$1

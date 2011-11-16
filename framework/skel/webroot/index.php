@@ -26,12 +26,12 @@
 /**
  * Defines the path to the application folder
  */
-\define('APP_DIR', \dirname(\WEBROOT));
+\define('APP_DIR', \dirname(\WEBROOT).\DIRECTORY_SEPARATOR.'application');
 
 /**
  * Defines the path to the framework folder
  */
-\define('FRAMEWORK_DIR', \dirname(\APP_DIR).\DIRECTORY_SEPARATOR.'framework');
+\define('FRAMEWORK_DIR', \dirname(\dirname(\APP_DIR)));
 
 /**
  * Defines the path to the folder containing build files
@@ -81,9 +81,9 @@ if ($config['environment'] == \framework\core\Core::DEV)
 	$modulesDirectories['application'] = \APP_DIR . \DIRECTORY_SEPARATOR . 'modules';
 	
 	$variablesNames = array(
-		'framework' => array('config' => 'frameworkConfig', 'routes' => 'routes', 'events' => 'events', 'components' => 'fcomponents'),
+		'framework' => array('config' => 'config', 'routes' => 'routes', 'events' => 'events', 'components' => 'components'),
 		'modules' => array('config' => 'config', 'events' => 'events', 'components' => 'components'),
-		'application' => array('config' => 'appConfig', 'routes' => 'routes', 'events' => 'events', 'components' => 'components')
+		'application' => array('config' => 'config', 'routes' => 'routes', 'events' => 'events', 'components' => 'components')
 	);
 
 	// get the full config, i.e. framework + app + modules

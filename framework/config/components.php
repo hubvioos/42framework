@@ -1,6 +1,6 @@
 <?php
 
-$fcomponents = array(
+$components = array(
 	/**
 	 * Core
 	 * 

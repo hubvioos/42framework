@@ -17,7 +17,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-$frameworkConfig = array(
+$config = array(
 	'environment' => \framework\core\Core::DEV,
 	'errorReporting' => E_ALL|E_STRICT,
 	'displayErrors' => 1,
@@ -32,7 +32,6 @@ $frameworkConfig = array(
 	'routes' => array(),
 	'historySize' => 2,
 	'errorHandlerListeners' => array('framework\\errorHandler\\listeners\\Html'),
-	'viewExtension' => '.php',
 	'applicationFilters' => array(),
 	'viewFilters' => array(), 
 	'dbConnectionParams' => array(
