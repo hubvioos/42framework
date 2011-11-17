@@ -165,5 +165,47 @@ $fcomponents = array(
 		{
 			return new \framework\helpers\TestEvent($args[0][0]);
 		},
-		'isUnique' => true)
+		'isUnique' => true),
+				
+	/**
+	 * ORM			
+	 */
+				
+	/* ADAPTERS */
+	'OrientDBDateAdapter' => array(
+		'callable' => function($c, $args)
+		{
+			return new \framework\orm\types\adapters\OrientDBDateAdapter();
+		},
+		'isUnique' => true
+	),
+	'OrientDBBooleanAdapter' => array(
+		'callable' => function($c, $args)
+		{
+			return new \framework\orm\types\adapters\OrientDBBooleanAdapter();
+		},
+		'isUnique' => true
+	),
+	/* TYPES */
+	'OrientDBDateTime' => array(
+		'callable' => function($c, $args)
+		{
+			return new \framework\orm\types\OrientDBDate($c->getComponent('OrientDBDateAdapter'));
+		},
+		'isUnique' => true
+	),
+	'OrientDBDate' => array(
+		'callable' => function($c, $args)
+		{
+			return $c->getComponent('OrientDBDateTime');
+		},
+		'isUnique' => true
+	),
+	'OrientDBBoolean' => array(
+		'callable' => function($c, $args)
+		{
+			return new \framework\orm\types\OrientDBBoolean($c->getComponent('OrientDBBooleanAdapter'));
+		},
+		'isUnique' => true
+	)
 );
