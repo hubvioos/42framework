@@ -65,14 +65,14 @@ abstract class FrameworkObject
 		return self::$_container;
 	}
 	
-	public function createRequest($module, $action, $params = array(), $state = null)
+	public function createRequest($params = array(), $state = null)
 	{
-		return $this->getComponent('request', $module, $action, $params, $state);
+		return $this->getComponent('request', $params, $state);
 	}
 	
-	public function createView($module, $action, $vars = false)
+	public function createView($module, $action, $vars = false, $format = null)
 	{
-		return $this->getComponent('view', $module, $action, $vars);
+		return $this->getComponent('view', $module, $action, $vars, $format);
 	}
 	
 		
@@ -104,5 +104,36 @@ abstract class FrameworkObject
 	{
 		$event = $this->getComponent('event', $name, $params);
 		return $this->getComponent('eventManager')->dispatchEvent($event);
+	}
+	
+	public function addPlugin ($name, $plugin)
+	{
+		if (\is_callable($plugin))
+		{
+			$this->setConfig('plugin.'.$name, $plugin);
+		}
+		else
+		{
+			throw new \InvalidArgumentException('A plugin must be callable !');
+		}
+		
+		return $this;
+	}
+	
+	public function removePlugin ($name)
+	{
+		unset(self::$_container->_config['plugin'][$name]);
+		return $this;
+	}
+	
+	public function __call ($method, $arguments)
+	{
+		if (isset(self::$_container->_config['plugin'][$method]))
+		{
+			$plugin = self::$_container->_config['plugin'][$method];
+			return \call_user_func_array($plugin, $arguments);
+		}
+		
+		throw new \InvalidArgumentException('Method '.$method.' doesn\'t exist !');
 	}
 }

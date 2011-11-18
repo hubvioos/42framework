@@ -10,7 +10,7 @@ class Index extends \framework\core\Controller
 		
 	}
 
-	public function processAction ()
+	public function processGet (\framework\core\Request $request)
 	{
 		
 	}
