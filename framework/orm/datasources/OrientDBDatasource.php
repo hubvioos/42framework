@@ -413,18 +413,35 @@ class OrientDBDatasource implements \framework\orm\datasources\interfaces\IConne
 
 				switch ($dataType)
 				{
-					case \framework\orm\types\OrientDBDate::TYPE_IDENTIFIER :
-						$dataValue = '"' . $dataValue . '"';
+					case \framework\orm\types\OrientDBDateTime::TYPE_IDENTIFIER :
+						$dataValue = $this->_quote($dataValue);
 						break;
+					
 					case \framework\orm\types\OrientDBBoolean::TYPE_IDENTIFIER :
 						break;
-					case \framework\orm\types\Type::TYPE_TRANSPARENT :
+					
+					case \framework\orm\types\Type::UNKNOWN :
 						if (\is_string($dataValue))
 						{
-							$dataValue = '"' . \addslashes($dataValue) . '"';
+							$dataValue = $this->_quote($dataValue);
+							break;
 						}
+						
+						throw new \framework\orm\datasources\OrientDBDatasourceException('Bad type for value "' . $dataValue.'"');
 						break;
+						
 					default:
+						if(\in_array($dataType, \framework\orm\types\Type::NUMERIC_TYPES))
+						{
+							break;
+						}
+						
+						if(\in_array($dataType, \framework\orm\types\Type::TEXT_TYPES))
+						{
+							$dataValue = $this->_quote($dataValue);
+							break;
+						}
+						
 						throw new \framework\orm\datasources\OrientDBDatasourceException('Unknown type ' . $dataType);
 						break;
 				}
@@ -571,9 +588,19 @@ class OrientDBDatasource implements \framework\orm\datasources\interfaces\IConne
 	 * Get the full host, i.e. host:port
 	 * @return string
 	 */
-	private function _getFullHost ()
+	protected function _getFullHost ()
 	{
 		return $this->_host . ':' . $this->_port;
+	}
+	
+	/**
+	 * Properly quote a string (i.e. escape the '"' character since it's the one we use to enclose string in requests).
+	 * @param string $string The string to quote
+	 * @return string 
+	 */
+	protected function _quote($string)
+	{
+		return '"'.  \str_replace('"', '\\"', $string).'"';
 	}
 
 	/**

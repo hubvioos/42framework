@@ -172,10 +172,10 @@ $fcomponents = array(
 	 */
 				
 	/* ADAPTERS */
-	'OrientDBDateAdapter' => array(
+	'OrientDBDateTimeAdapter' => array(
 		'callable' => function($c, $args)
 		{
-			return new \framework\orm\types\adapters\OrientDBDateAdapter();
+			return new \framework\orm\types\adapters\OrientDBDateTimeAdapter();
 		},
 		'isUnique' => true
 	),
@@ -190,7 +190,7 @@ $fcomponents = array(
 	'OrientDBDateTime' => array(
 		'callable' => function($c, $args)
 		{
-			return new \framework\orm\types\OrientDBDate($c->getComponent('OrientDBDateAdapter'));
+			return new \framework\orm\types\OrientDBDateTime($c->getComponent('OrientDBDateTimeAdapter'));
 		},
 		'isUnique' => true
 	),

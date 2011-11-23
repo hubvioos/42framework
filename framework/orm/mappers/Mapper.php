@@ -29,7 +29,7 @@ class MapperException extends \Exception
  * Class NewMapper
  * 
  * This class is the base class every mapper has to inherit in order to work properly.
- * It extends \framework\core\FrameworkObject so the common this->getComponent() 
+ * It extends \framework\core\FrameworkObject so the common $this->getComponent() 
  * and $this->getConfig() are easily accessible
  */
 abstract class Mapper extends \framework\core\FrameworkObject implements \framework\orm\mappers\IMapper
@@ -60,16 +60,15 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	 * 		'id'		=> array(
 	 * 							'storageField'	=> NULL, // value is not explicitely stored in the datasaource
 	 * 							'primary'		=> true,
-	 *
-	 * 							'type'			=> 'int'
+	 * 							'type'			=> \framework\orm\types\Type::TYPE_TRANSPARENT // value doesn't need to be converted
 	 * 						),
 	 * 		'title'		=> array(
 	 * 							'storageField'	=> 'post_title',
-	 * 							'type'			=> 'string'
+	 * 							'type'			=> \framework\orm\types\Type::TYPE_TRANSPARENT
 	 * 						),
 	 * 		'content'	=> array(
 	 * 							'storageField'	=> 'post_content',
-	 * 							'type'			=> 'string'
+	 * 							'type'			=> \framework\orm\types\Type::TYPE_TRANSPARENT
 	 * 						),
 	 * 		'user'		=> array(
 	 * 							'storageField'	=> 'post_user_id',
@@ -118,7 +117,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 		{
 			if (!\array_key_exists('type', $spec))
 			{
-				$this->fields[$name]['type'] = \framework\orm\types\Type::TYPE_TRANSPARENT;
+				$this->fields[$name]['type'] = \framework\orm\types\Type::UNKNOWN;
 			}
 		}
 
@@ -326,7 +325,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 			if (\method_exists($model, $setter))
 			{
 				// if a particular type if specified, convert it to a PHP format
-				if ($spec['type'] !== \framework\orm\types\Type::TYPE_TRANSPARENT)
+				if ($spec['type'] !== \framework\orm\types\Type::UNKNOWN)
 				{
 					$model->$setter($this->getComponent($spec['type'])->convertToPHP($map[$name]['value']));
 				}
@@ -363,7 +362,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 			if (\method_exists($model, $getter))
 			{
 				// if a particular type is specified, convert the value to a datasource-friendly format
-				if ($spec['type'] !== \framework\orm\types\Type::TYPE_TRANSPARENT)
+				if ($spec['type'] !== \framework\orm\types\Type::UNKNOWN)
 				{
 					$map[$name]['value'] = $this->getComponent($spec['type'])->convertToStorage($model->$getter());
 				}
