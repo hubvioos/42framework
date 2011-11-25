@@ -246,7 +246,6 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 
 		if ($model->getId() === NULL)
 		{
-			echo 'no ID<br />';
 			$response = $this->datasource->create($this->getEntityIdentifier(), $this->modelToMap($model));
 
 			if ($response !== false)

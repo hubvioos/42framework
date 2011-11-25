@@ -30,7 +30,9 @@ abstract class Type extends \framework\core\FrameworkObject
 	// Unknown type
 	const UNKNOWN = 0;
 	
-	/* NUMERIC TYPES */
+	/** 
+	 * NUMERIC TYPES 
+	 */
 	const INTEGER = 'integer';
 	const INT = 'int';
 	const TINYINT = 'tinyint';
@@ -44,7 +46,9 @@ abstract class Type extends \framework\core\FrameworkObject
 	const DECIMAL = 'decimal';
 	const REAL = 'real';
 	
-	/* TEXT TYPES */
+	/**
+	 * TEXTUAL TYPES 
+	 */
 	const STRING = 'string';
 	const TEXT = 'test';
 	const MEDIUMTEXT = 'mediumtext';
@@ -54,40 +58,60 @@ abstract class Type extends \framework\core\FrameworkObject
 	const VARCHAR2 = 'varchar';
 	const ENUM = 'enum';
 	
-	/* BOOLEAN TYPES */
+	/** 
+	 * BOOLEAN TYPES 
+	 */
 	const BOOL = 'bool';
 	const BOOLEAN = 'boolean';
 	
-	/* TIMESTAMP TYPES */
+	/** 
+	 * TIMESTAMP TYPES 
+	 */
 	const TIMESTAMP = 'timestamp';
 	
 	/**
-	 * TEXT TYPES that should be properly quoted.
-	 */
-	const TEXT_TYPES = array(
-		
-	);
-	
-	/**
-	 * NUMERIC TYPES that don't need to be quoted.
+	 * All the numeric types that don't need to be quoted.
+	 * @var array
 	 */
 	const NUMERIC_TYPES = array(
-		
+		self::INTEGER,
+		self::INT,
+		self::TINYINT,
+		self::SMALLINT,
+		self::MEDIUMINT,
+		self::BIGINT,
+		self::FLOAT,
+		self::DOUBLE,
+		self::LONG,
+		self::SHORT,
+		self::DECIMAL,
+		self::REAL
 	);
 	
 	/**
-	 * BOOLEAN TYPES
+	 * All the textual types that should be properly quoted.
+	 * @var array
+	 */
+	const TEXTUAL_TYPES = array(
+		self::STRING,
+		self::TEXT,
+		self::MEDIUMTEXT,
+		self::TINYTEXT,
+		self::CHAR,
+		self::VARCHAR,
+		self::VARCHAR2,
+		self::ENUM
+	);
+	
+	/**
+	 * All the boolean types.
+	 * @var array
 	 */
 	const BOOLEAN_TYPES = array(
-		
+		self::BOOL,
+		self::BOOLEAN
 	);
 	
-	/**
-	 * Every type that doesn't need a special processing when retrieved from the datasource.
-	 */
-	const TRANSPARENT_TYPES = array(
-		// all of the above
-	);
 	
 	protected $adapter = NULL;
 	
@@ -96,28 +120,49 @@ abstract class Type extends \framework\core\FrameworkObject
 		$this->adapter = $adapter;
 	}
 	
+	/**
+	 * Convert a value to a PHP friendly format / type.
+	 * @param mixed $value
+	 * @return mixed 
+	 */
 	public function convertToPHP($value)
 	{
 		return $this->adapter->convertToPHP($value);
 	}
 	
+	/**
+	 * Convert a value to a datasource friendly format / type.
+	 * @param mixed $value
+	 * @return mixed 
+	 */
 	public function convertToStorage($value)
 	{
 		return $this->adapter->convertToStorage($value);
 	}
 	
+	/**
+	 * Get the type adapter used for the conversions.
+	 * @return \framework\orm\types\adapters\IAdapter 
+	 */
 	public function getAdapter ()
 	{
 		return $this->adapter;
 	}
 
+	/**
+	 * Set the type adapter to use for the conversions.
+	 * @param \framework\orm\types\adapters\IAdapter $adapter 
+	 */
 	public function setAdapter (\framework\orm\types\adapters\IAdapter $adapter)
 	{
 		$this->adapter = $adapter;
 	}
 
 	
-	
+	public function __destruct()
+	{
+		$this->adapter = NULL;
+	}
 
 }
 

@@ -436,7 +436,7 @@ class OrientDBDatasource implements \framework\orm\datasources\interfaces\IConne
 							break;
 						}
 						
-						if(\in_array($dataType, \framework\orm\types\Type::TEXT_TYPES))
+						if(\in_array($dataType, \framework\orm\types\Type::TEXTUAL_TYPES))
 						{
 							$dataValue = $this->_quote($dataValue);
 							break;
