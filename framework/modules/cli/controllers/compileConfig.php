@@ -23,8 +23,8 @@ class CompileConfig extends \framework\modules\cli\controllers\CliCommand
 {
 	public function processAction ()
 	{
-		$config = array();
-		require FRAMEWORK_DIR.DS.'config'.DS.'config.php';
+		/*$config = array();
+		require \FRAMEWORK_DIR.DS.'config'.DS.'config.php';
 		$frameworkConfig = $config;
 		
 		require APP_DIR.DS.'config'.DS.'config.php';
@@ -32,14 +32,19 @@ class CompileConfig extends \framework\modules\cli\controllers\CliCommand
 		
 		$config = array_merge($frameworkConfig, $appConfig);
 		
+		
 		// HERE WE GOOOOOOOO
 		$configBuilder->setModulesDirectories($modulesDirectories)
 				->buildConfig();
 		$config = $configBuilder->getConfig();
-
-
+		 */
+		
+		$config = $this->getConfig()->toArray();
+		
 		$ab = new \framework\modules\cli\ConfigBuilder($config);
-		$ab->setTemplateFile(\MODULES_DIR . \DIRECTORY_SEPARATOR . 'cli' . \DIRECTORY_SEPARATOR . 'views' . \DIRECTORY_SEPARATOR . 'configTemplate.php');
-		$ab->save(\APP_DIR . \DIRECTORY_SEPARATOR . 'build' . \DIRECTORY_SEPARATOR . $configFileName . '.php');
+		$ab->setTemplateFile(\FRAMEWORK_DIR.\DIRECTORY_SEPARATOR.'modules' . \DIRECTORY_SEPARATOR . 'cli' . \DIRECTORY_SEPARATOR . 'views' . \DIRECTORY_SEPARATOR . 'configTemplate.php');
+		$ab->save(\APP_DIR . \DIRECTORY_SEPARATOR . 'build' . \DIRECTORY_SEPARATOR . 'config.php');
+		
+		echo "Configuration générée !\n";
 	}
 }

@@ -31,7 +31,7 @@ class Dispatcher extends \framework\core\FrameworkObject
 
 		if (!$classname)
 		{
-			return $this->createRequest(array('module' => 'errors', 'action' => 'error404'), $request->getState())->execute();
+			throw new \framework\core\http\exception\NotFoundException();
 		}
 
 		$module = $this->getComponent('action', $classname);
@@ -118,7 +118,7 @@ class Dispatcher extends \framework\core\FrameworkObject
 		$modulesLocation = $this->getConfig('modulesLocation');
 
 		$filepath = false;
-
+		
 		if (isset($modulesLocation[$module]))
 		{
 			$filepath = $this->getModulePath($module) . \DIRECTORY_SEPARATOR . 'views' . \DIRECTORY_SEPARATOR;
@@ -134,6 +134,8 @@ class Dispatcher extends \framework\core\FrameworkObject
 
 			if (!\file_exists($filepath))
 			{
+				$filepath = false;
+				
 				$moduleConfig = $this->getConfig('modules.' . $module);
 
 				if (isset($moduleConfig['extends']))

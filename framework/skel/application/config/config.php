@@ -1,3 +1,3 @@
 <?php
 
-$config = array();
+$config = array('siteUrl' => 'http://localhost/42framework/');

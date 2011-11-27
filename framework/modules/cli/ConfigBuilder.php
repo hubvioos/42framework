@@ -23,12 +23,13 @@ class ConfigBuilder extends \framework\modules\cli\AutoloadBuilder
 {
 	public function render ()
 	{
-		$entries = $this->formatEntries($this->classes);
+		//$entries = $this->formatEntries($this->classes);
+		$entries = \var_export($this->classes, true);
 		
 		$replace = array_merge($this->variables, 
 			array(
 				'___CREATED___' => date($this->dateformat, $this->timestamp ? $this->timestamp : time()), 
-				'___CLASSLIST___' => join(',' . $this->linebreak . $this->indent, $entries), 
+				'___CLASSLIST___' => $entries,//\implode(',' . $this->linebreak . $this->indent, $entries), 
 				'___BASEDIR___' => $this->baseDir ? '__DIR__ . ' : '', 
 				'___AUTOLOAD___' => uniqid('autoload')));
 		return str_replace(array_keys($replace), array_values($replace), $this->template);
@@ -37,6 +38,7 @@ class ConfigBuilder extends \framework\modules\cli\AutoloadBuilder
 	protected function formatEntries($config)
 	{
 		$entries = array();
+		
 		foreach ($config as $key => $value)
 		{
 			if (is_array($value))
@@ -82,6 +84,7 @@ class ConfigBuilder extends \framework\modules\cli\AutoloadBuilder
 				$entries[] = "'$key' => array()";
 			}
 		}
+		
 		return $entries;
 	}
 }
