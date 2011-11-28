@@ -38,8 +38,6 @@ class Collection extends \ArrayObject
 	const SORT_ASC = 'asc';
 	const SORT_DESC = 'desc';
 	
-	protected $collection = array();
-	
 	public function __construct ($array = array())
 	{
 		if(\count($array) > 0)
@@ -50,7 +48,12 @@ class Collection extends \ArrayObject
 			}
 		}
 	}
-
+	
+	public function add($element)
+	{
+		$this[] = $element;
+		return $this;
+	}
 	
 	public function sort($property, $order = self::SORT_ASC)
 	{

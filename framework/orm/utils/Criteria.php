@@ -52,38 +52,33 @@ class Criteria
 		
 	}
 	
-	protected function _addCriterion($operator, array $args)
+	protected function _addCriterion($operator, $args)
 	{
-		$this->constraints[] = array_merge(array($operator), $args);
+		$this->constraints[$operator] = $args;
 
 		return $this;
 	}
 
-	public function criteria(\Gacela\Criteria $criteria, $or = false)
-	{
-		return $this->_addCriterion($criteria, array($or));
-	}
-
-
+	
 	
 	public function lessThan($field, $value)
 	{
-		return $this->_addCriterion(self::LESS_THAN, func_get_args());
+		return $this->_addCriterion(self::LESS_THAN, array($field, $value));
 	}
 	
 	public function equals($field, $value)
 	{
-		return $this->_addCriterion(self::EQUALS, func_get_args());
+		return $this->_addCriterion(self::EQUALS, array($field, $value));
 	}
 	
 	public function greaterThan($field, $value)
 	{
-		return $this->_addCriterion(self::GREATER_THAN, func_get_args());
+		return $this->_addCriterion(self::GREATER_THAN, array($field, $value));
 	}
 
 	public function notEquals($field, $value)
 	{
-		return $this->_addCriterion(self::NOT_EQUALS, func_get_args());
+		return $this->_addCriterion(self::NOT_EQUALS, array($field, $value));
 	}
 	
 	
@@ -91,12 +86,12 @@ class Criteria
 	
 	public function in($field, array $values)
 	{
-		return $this->_addCriterion(self::IN, func_get_args());
+		return $this->_addCriterion(self::IN, array($field, $values));
 	}
 
 	public function notIn($field, array $values)
 	{
-		return $this->_addCriterion(self::NOT_IN, func_get_args());
+		return $this->_addCriterion(self::NOT_IN, array($field, $values));
 	}
 	
 	
@@ -104,12 +99,12 @@ class Criteria
 	
 	public function isNull($field)
 	{
-		return $this->_addCriterion(self::IS_NULL, func_get_args());
+		return $this->_addCriterion(self::IS_NULL, $field);
 	}
 
 	public function isNotNull($field)
 	{
-		return $this->_addCriterion(self::IS_NOT_NULL, func_get_args());
+		return $this->_addCriterion(self::IS_NOT_NULL, $field);
 	}
 
 	
@@ -117,12 +112,12 @@ class Criteria
 	
 	public function like($field, $value)
 	{
-		return $this->_addCriterion(self::LIKE, func_get_args());
+		return $this->_addCriterion(self::LIKE, array($field, $value));
 	}
 
 	public function notLike($field, $value)
 	{
-		return $this->_addCriterion(self::NOT_LIKE, func_get_args());
+		return $this->_addCriterion(self::NOT_LIKE, array($field, $value));
 	}	
 	
 	
@@ -130,12 +125,12 @@ class Criteria
 	
 	public function limit($start, $count)
 	{
-		return $this->_addCriterion(self::LIMIT, func_get_args());
+		return $this->_addCriterion(self::LIMIT, array($start, $count));
 	}
 	
 	
 	
-	public function get()
+	public function getConstraints()
 	{
 		return $this->constraints;
 	}
