@@ -18,6 +18,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+namespace framework\orm\utils;
+
 /**
  * Description of Criteria
  *
@@ -131,7 +133,7 @@ class Criteria
 	
 	
 	public function getConstraints()
-	{
+	{		
 		return $this->constraints;
 	}
 	
