@@ -401,15 +401,6 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	}
 
 	/**
-	 * Get the key used to retrieve the model from the components container.
-	 * @return string
-	 */
-	public final function getModelName ()
-	{
-		return $this->modelName;
-	}
-
-	/**
 	 * Get the fields mapping configuration
 	 * @return array 
 	 */
@@ -418,7 +409,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 		return $this->fields;
 	}
 
-	public function getAttachedModel ($id)
+	public final function getAttachedModel ($id)
 	{
 		if (\array_key_exists($id, $this->attachedModels))
 		{
@@ -459,9 +450,11 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	 * (i.e. table name, cluster ID, collection name, ect...)
 	 * @return string|int
 	 */
-	public function getEntityIdentifier ()
-	{
-		return $this->modelName;
-	}
+	public abstract function getEntityIdentifier ();
 
+	/**
+	 * Get the key used to retrieve the model from the components container.
+	 * @return string
+	 */
+	public abstract function getModelName ();
 }
