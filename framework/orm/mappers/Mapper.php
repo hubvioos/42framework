@@ -112,6 +112,11 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 		{
 			throw new \framework\orm\mappers\MapperException('No fields specified.');
 		}
+		
+		
+		$this->fields = new \framework\orm\utils\Map($this->fields);
+		$this->fields->removeProperty('value');
+		/*
 
 		foreach ($this->fields as $name => $spec)
 		{
@@ -120,7 +125,8 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 				$this->fields[$name]['type'] = \framework\orm\types\Type::UNKNOWN;
 			}
 		}
-
+		*/
+		
 		$this->init();
 	}
 
@@ -257,7 +263,6 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 		}
 		else
 		{
-			echo 'ID<br />';
 			$response = $this->datasource->update($model->getId(), $this->getEntityIdentifier(), $this->modelToMap($model));
 
 			if ($response === true)
@@ -307,11 +312,13 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	
 	/**
 	 * Transform a datasource map to a PHP-friendly model
-	 * @param array $map 
+	 * @param array|\ArrayObject $map 
 	 * @return \framework\orm\models\IAttachableModel
 	 */
-	protected function mapToModel (array $map)
+	protected function mapToModel ($map)
 	{
+		$map = new \framework\orm\utils\Map($map);
+		
 		// get a new model's instance
 		$model = $this->getComponent($this->getModelName());
 		$setter = '';
@@ -346,11 +353,11 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	/**
 	 * Transform a PHP model to map of datasource-friendly values.
 	 * @param \framework\orm\models\IAttachableModel $model 
-	 * @return array
+	 * @return \framework\orm\utils\Map
 	 */
 	protected function modelToMap (\framework\orm\models\IAttachableModel $model)
 	{
-		$map = array();
+		$map = new \framework\orm\utils\Map();
 		$getter = '';
 
 		foreach ($this->fields as $name => $spec)
@@ -371,8 +378,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 					$map[$name]['value'] = $model->$getter();
 				}
 
-				// if no storage field is provided, use the property name as field name
-				$map[$name]['storageField'] = \array_key_exists('storageField', $spec) ? $spec['storageField'] : $name;
+				$map[$name]['storageField'] = $spec['storageField'];
 				$map[$name]['type'] = $spec['type'];
 			}
 			else

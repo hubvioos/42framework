@@ -77,12 +77,12 @@ class Map extends \ArrayObject
 	
 	/**
 	 * Add a property by specifying every parameter.
-	 * @param type $name The property name.
-	 * @param type $type The property type.
-	 * @param type $value The property value.
-	 * @param type $storageField The property storage field's name. The property's name is used by default. If set to NULL, the property won't be stored in the datasource.
-	 * @param type $primary Whether or not the property is the primary key. 'false' is used by default.
-	 * @param type $relation The type of the relation for this property.
+	 * @param string $name The property name.
+	 * @param string $type The property type.
+	 * @param mixed $value The property value.
+	 * @param string $storageField The property storage field's name. The property's name is used by default. If set to NULL, the property won't be stored in the datasource.
+	 * @param bool $primary Whether or not the property is the primary key. 'false' is used by default.
+	 * @param string $relation The type of the relation for this property.
 	 */
 	public function addProperty($name, $type, $value, $storageField = '', $primary = false, $relation = NULL)
 	{
@@ -111,13 +111,28 @@ class Map extends \ArrayObject
 	
 	/**
 	 * Remove a property.
-	 * @param type $name The name of the property to remove.
+	 * @param string $name The name of the property to remove.
 	 */
 	public function removeProperty($name)
 	{
 		if($this->offsetExists($name))
 		{
 			$this->offsetUnset($name);
+		}
+	}
+	
+	/**
+	 * Remove a specification from all the properties.
+	 * @param string $specification 
+	 */
+	public function removeSpecification($specification)
+	{
+		foreach($this as $property => $specs)
+		{
+			if(\array_key_exists($specification, $specs))
+			{
+				unset($this[$property][$specification]);
+			}
 		}
 	}
 
