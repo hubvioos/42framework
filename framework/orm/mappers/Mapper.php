@@ -216,13 +216,13 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	{
 		$data = $this->datasource->findAll($criteria);
 
-		if ($data == array())
+		if (\count($data) == 0)
 		{
 			return $data;
 		}
 		else
 		{
-			$results = array();
+			$results = new \framework\orm\utils\Collection();
 
 			foreach ($data as $map)
 			{

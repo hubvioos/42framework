@@ -485,15 +485,14 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 	 * @param string|int The identifier of the entity where to look for (table name, cluster ID, ...)
 	 * @param array $inherits
 	 * @param array $dependents 
-	 * @return array The elements in an array
+	 * @return \framework\orm\utils\Collection The Collection of elements
 	 */
 	public function find ($primary, $entity, array $inherits = array(), array $dependents = array())
 	{
-		$found = array();
+		$found = new \framework\orm\utils\Collection();
 		$record = null;
-		$asArray = null;
 
-		if (!is_array($primary))
+		if (!\is_array($primary))
 		{
 			$primary = array($primary);
 		}
