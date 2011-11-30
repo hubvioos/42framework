@@ -44,6 +44,10 @@ class Criteria
 	
 	const LIMIT = 'limit';
 	
+	const CRITERIA = 'criteria';
+	
+	const ASSOCIATION_OR = 'or';
+	const ASSOCIATION_AND = 'and';
 	
 	protected $constraints = array();
 	
@@ -51,7 +55,7 @@ class Criteria
 	
 	public function __construct ()
 	{
-		
+		$this->constraints[self::CRITERIA] = array();
 	}
 	
 	protected function _addCriterion($operator, $args)
@@ -61,6 +65,12 @@ class Criteria
 		return $this;
 	}
 
+	
+	public function criteria($criteria, $association = self::ASSOCIATION_OR)
+	{
+		$this->constraints[self::CRITERIA] = \array_merge($this->constraints[self::CRITERIA], array($criteria, $association));
+		return $this;
+	}
 	
 	
 	public function lessThan($field, $value)

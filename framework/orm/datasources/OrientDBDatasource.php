@@ -563,7 +563,7 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 	 * @param array $inherits
 	 * @param array $dependents 
 	 */
-	public function findAll (\framework\orm\Criteria $criteria = null, array $inherits = array(), array $dependents = array())
+	public function findAll (\framework\orm\utils\Criteria $criteria = null, array $inherits = array(), array $dependents = array())
 	{
 		
 	}
