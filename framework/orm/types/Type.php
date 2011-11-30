@@ -68,50 +68,7 @@ abstract class Type extends \framework\core\FrameworkObject
 	 * TIMESTAMP TYPES 
 	 */
 	const TIMESTAMP = 'timestamp';
-	
-	/**
-	 * All the numeric types that don't need to be quoted.
-	 * @var array
-	 */
-	const NUMERIC_TYPES = array(
-		self::INTEGER,
-		self::INT,
-		self::TINYINT,
-		self::SMALLINT,
-		self::MEDIUMINT,
-		self::BIGINT,
-		self::FLOAT,
-		self::DOUBLE,
-		self::LONG,
-		self::SHORT,
-		self::DECIMAL,
-		self::REAL
-	);
-	
-	/**
-	 * All the textual types that should be properly quoted.
-	 * @var array
-	 */
-	const TEXTUAL_TYPES = array(
-		self::STRING,
-		self::TEXT,
-		self::MEDIUMTEXT,
-		self::TINYTEXT,
-		self::CHAR,
-		self::VARCHAR,
-		self::VARCHAR2,
-		self::ENUM
-	);
-	
-	/**
-	 * All the boolean types.
-	 * @var array
-	 */
-	const BOOLEAN_TYPES = array(
-		self::BOOL,
-		self::BOOLEAN
-	);
-	
+
 	
 	protected $adapter = NULL;
 	

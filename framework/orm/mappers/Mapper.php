@@ -60,15 +60,15 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	 * 		'id'		=> array(
 	 * 							'storageField'	=> NULL, // value is not explicitely stored in the datasaource
 	 * 							'primary'		=> true,
-	 * 							'type'			=> \framework\orm\types\Type::TYPE_TRANSPARENT // value doesn't need to be converted
+	 * 							'type'			=> \framework\orm\types\Type::INTEGER
 	 * 						),
 	 * 		'title'		=> array(
 	 * 							'storageField'	=> 'post_title',
-	 * 							'type'			=> \framework\orm\types\Type::TYPE_TRANSPARENT
+	 * 							'type'			=> \framework\orm\types\Type::STRING
 	 * 						),
 	 * 		'content'	=> array(
 	 * 							'storageField'	=> 'post_content',
-	 * 							'type'			=> \framework\orm\types\Type::TYPE_TRANSPARENT
+	 * 							'type'			=> \framework\orm\types\Type::MEDIUM_TEXT
 	 * 						),
 	 * 		'user'		=> array(
 	 * 							'storageField'	=> 'post_user_id',
@@ -103,29 +103,12 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	{
 		$this->datasource = $datasource;
 
-		if (!isset($this->modelName) || $this->modelName === '')
-		{
-			throw new \framework\orm\mappers\MapperException('No model name specified.');
-		}
-
 		if (!isset($this->fields) || $this->fields === array() || $this->fields === NULL)
 		{
 			throw new \framework\orm\mappers\MapperException('No fields specified.');
 		}
 		
-		
 		$this->fields = new \framework\orm\utils\Map($this->fields);
-		$this->fields->removeProperty('value');
-		/*
-
-		foreach ($this->fields as $name => $spec)
-		{
-			if (!\array_key_exists('type', $spec))
-			{
-				$this->fields[$name]['type'] = \framework\orm\types\Type::UNKNOWN;
-			}
-		}
-		*/
 		
 		$this->init();
 	}
@@ -186,19 +169,27 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	{
 		$data = $this->datasource->find($id, $this->getEntityIdentifier());
 
-		if ($data == array())
+		if (\count($data) == 0)
 		{
 			return null;
 		}
 		else
 		{
+			$result = NULL;
+			
 			if (\count($data) == 1)
 			{
-				return $this->mapToModel($data[0]);
+				$result = $this->mapToModel($data[0]);
+				
+				if($attach)
+				{
+					$this->attach($result);
+				}
 			}
 			else
 			{
-				$results = array();
+				$result = new \framework\orm\utils\Collection();
+				
 				foreach ($data as $map)
 				{
 					$newModel = $this->mapToModel($map);
@@ -208,11 +199,11 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 						$this->attach($newModel);
 					}
 
-					$results[] = $newModel;
+					$result[] = $newModel;
 				}
-
-				return $results;
 			}
+			
+			return $result;
 		}
 	}
 
@@ -331,14 +322,29 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 			if (\method_exists($model, $setter))
 			{
 				// if a particular type if specified, convert it to a PHP format
-				if ($spec['type'] !== \framework\orm\types\Type::UNKNOWN)
+				if ($spec['type'] !== \framework\orm\types\Type::UNKNOWN
+						&& !\in_array($spec['type'], $this->getComponent('orm.transparentTypes')))
 				{
-					$model->$setter($this->getComponent($spec['type'])->convertToPHP($map[$name]['value']));
+					if($spec['storageField']!== NULL)
+					{
+						$model->$setter($this->getComponent($spec['type'])->convertToPHP($map[$spec['storageField']]['value']));
+					}
+					else
+					{
+						$model->$setter($this->getComponent($spec['type'])->convertToPHP($map[$name]['value']));
+					}
 				}
 				// else, use the value as provided
 				else
 				{
-					$model->$setter($map[$name]['value']);
+					if($spec['storageField']!== NULL)
+					{
+						$model->$setter($map[$spec['storageField']]['value']);	
+					}
+					else
+					{
+						$model->$setter($map[$name]['value']);
+					}
 				}
 			}
 			else
@@ -368,7 +374,8 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 			if (\method_exists($model, $getter))
 			{
 				// if a particular type is specified, convert the value to a datasource-friendly format
-				if ($spec['type'] !== \framework\orm\types\Type::UNKNOWN)
+				if ($spec['type'] !== \framework\orm\types\Type::UNKNOWN 
+						&& !\in_array($spec['type'], $this->getComponent('orm.transparentTypes')))
 				{
 					$map[$name]['value'] = $this->getComponent($spec['type'])->convertToStorage($model->$getter());
 				}
@@ -450,11 +457,11 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	 * (i.e. table name, cluster ID, collection name, ect...)
 	 * @return string|int
 	 */
-	public abstract function getEntityIdentifier ();
+	//public abstract function getEntityIdentifier ();
 
 	/**
 	 * Get the key used to retrieve the model from the components container.
 	 * @return string
 	 */
-	public abstract function getModelName ();
+	//public abstract function getModelName ();
 }

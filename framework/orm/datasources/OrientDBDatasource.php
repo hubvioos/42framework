@@ -30,56 +30,56 @@ class OrientDBDatasourceException extends \Exception
 	
 }
 
-class OrientDBDatasource implements \framework\orm\datasources\interfaces\IConnectionDatasource, \framework\orm\datasources\interfaces\IDbDatasource, \framework\orm\datasources\interfaces\IDatasource
+class OrientDBDatasource extends \framework\core\FrameworkObject implements \framework\orm\datasources\interfaces\IConnectionDatasource, \framework\orm\datasources\interfaces\IDbDatasource, \framework\orm\datasources\interfaces\IDatasource
 {
 
 	/**
 	 * The connection to the database
 	 * @var OrientDB 
 	 */
-	private $_link = null;
+	private $link = null;
 
 	/**
 	 * The host
 	 * @var string 
 	 */
-	private $_host = 'localhost';
+	private $host = 'localhost';
 
 	/**
 	 * The connection's port
 	 * @var int
 	 */
-	private $_port = 2424;
+	private $port = 2424;
 
 	/**
 	 * The user name used for the connection to the host
 	 * @var string 
 	 */
-	private $_user = '';
+	private $user = '';
 
 	/**
 	 * The password used for the connection to the host
 	 * @var string
 	 */
-	private $_password = '';
+	private $password = '';
 
 	/**
 	 * The name of the active database
 	 * @var string 
 	 */
-	private $_active = '';
+	private $active = '';
 
 	/**
-	 * The configuration
+	 * The configuration of the datasource. Named "configuration" to prevent confusing with $this->getConfig().
 	 * @var array 
 	 */
-	private $_config = array();
+	private $configuration = array();
 
 	/**
 	 * Regex pattern the IDs must match
 	 * @var string
 	 */
-	private $_pattern = '/^[^ \t\n\r]*$/';
+	private $pattern = '/^[^ \t\n\r]*$/';
 
 	/**
 	 * Constructor
@@ -91,20 +91,20 @@ class OrientDBDatasource implements \framework\orm\datasources\interfaces\IConne
 	 */
 	public function __construct ($host, $port, $user = '', $password= '')
 	{
-		$this->_host = $host;
-		$this->_port = $port;
-		$this->_user = $user;
-		$this->_password = $password;
+		$this->host = $host;
+		$this->port = $port;
+		$this->user = $user;
+		$this->password = $password;
 
 		try
 		{
-			$this->_link = new \OrientDB($this->_host, $this->_port);
-			$this->_link->connect($this->_user, $this->_password);
+			$this->link = new \OrientDB($this->host, $this->port);
+			$this->link->connect($this->user, $this->password);
 		}
 		catch (\Exception $e)
 		{
 			$message = 'Unable to connect to ' . $this->_getFullHost()
-					. ' with user ' . $this->_user . ' and the password you specified';
+					. ' with user ' . $this->user . ' and the password you specified';
 
 			throw new \framework\orm\datasources\OrientDBDatasourceException($message, null, $e);
 		}
@@ -119,18 +119,18 @@ class OrientDBDatasource implements \framework\orm\datasources\interfaces\IConne
 	 */
 	public function connect ($database, $user = '', $password = '')
 	{
-		if (!$this->_link->isConnected())
+		if (!$this->link->isConnected())
 		{
 			$message = 'No connection established, unable to select a database.';
 			throw new \framework\orm\datasources\OrientDBDatasourceException($message);
 		}
 
-		if ($this->_link->DBExists($database))
+		if ($this->link->DBExists($database))
 		{
-			$this->_link->DBOpen($database, $user, $password);
-			$this->_active = $database;
+			$this->link->DBOpen($database, $user, $password);
+			$this->active = $database;
 
-			$this->_config = $this->_link->configList();
+			$this->configuration = $this->link->configList();
 		}
 		else
 		{
@@ -146,8 +146,8 @@ class OrientDBDatasource implements \framework\orm\datasources\interfaces\IConne
 	{
 		try
 		{
-			$this->_link->DBClose();
-			$this->_active = '';
+			$this->link->DBClose();
+			$this->active = '';
 		}
 		catch (\Exception $e)
 		{
@@ -164,7 +164,7 @@ class OrientDBDatasource implements \framework\orm\datasources\interfaces\IConne
 	 */
 	public function databaseExists ($database)
 	{
-		return $this->_link->DBExists($database);
+		return $this->link->DBExists($database);
 	}
 
 	/**
@@ -181,7 +181,7 @@ class OrientDBDatasource implements \framework\orm\datasources\interfaces\IConne
 			throw new \framework\orm\datasources\OrientDBDatasourceException('Bad database type ' . $type);
 		}
 
-		return $this->_link->DBCreate($name, $type);
+		return $this->link->DBCreate($name, $type);
 	}
 
 	/**
@@ -193,12 +193,12 @@ class OrientDBDatasource implements \framework\orm\datasources\interfaces\IConne
 	{
 		if ($this->databaseExists($database))
 		{
-			if ($this->_active == $database)
+			if ($this->active == $database)
 			{
 				$this->close();
 			}
 
-			return $this->_link->DBDelete($database);
+			return $this->link->DBDelete($database);
 		}
 
 		return true;
@@ -210,14 +210,14 @@ class OrientDBDatasource implements \framework\orm\datasources\interfaces\IConne
 	 * @param string $key The option
 	 * @return mixed An empty string if the $key doesn't exist
 	 */
-	public function getConfig ($key = '')
+	public function getConfiguration ($key = '')
 	{
 		if ($key == '')
 		{
-			return $this->_config;
+			return $this->configuration;
 		}
 
-		return isset($this->_config[$key]) ? $this->_config[$key] : '';
+		return isset($this->configuration[$key]) ? $this->configuration[$key] : '';
 	}
 
 	/**
@@ -226,12 +226,12 @@ class OrientDBDatasource implements \framework\orm\datasources\interfaces\IConne
 	 * @param string $value The new value
 	 * @return bool
 	 */
-	public function setConfig ($key, $value)
+	public function setConfiguration ($key, $value)
 	{
-		if ($this->_link->configSet($key, $value))
+		if ($this->link->configSet($key, $value))
 		{
 			// update the cache
-			$this->_config[$key] = $value;
+			$this->configuration[$key] = $value;
 			return true;
 		}
 
@@ -249,7 +249,7 @@ class OrientDBDatasource implements \framework\orm\datasources\interfaces\IConne
 	 */
 	public function createCluster ($cluster, $type = \OrientDB::DATACLUSTER_TYPE_PHYSICAL)
 	{
-		if ($this->_link->isConnected())
+		if ($this->link->isConnected())
 		{
 			if ($type != \OrientDB::DATACLUSTER_TYPE_LOGICAL && $type != \OrientDB::DATACLUSTER_TYPE_MEMORY
 					&& $type != \OrientDB::DATACLUSTER_TYPE_PHYSICAL)
@@ -258,7 +258,7 @@ class OrientDBDatasource implements \framework\orm\datasources\interfaces\IConne
 			}
 			else
 			{
-				return $this->_link->dataclusterAdd($cluster, $type);
+				return $this->link->dataclusterAdd($cluster, $type);
 			}
 		}
 		else
@@ -275,9 +275,9 @@ class OrientDBDatasource implements \framework\orm\datasources\interfaces\IConne
 	 */
 	public function deleteCluster ($clusterID)
 	{
-		if ($this->_link->isConnected())
+		if ($this->link->isConnected())
 		{
-			return $this->_link->dataclusterRemove($clusterID);
+			return $this->link->dataclusterRemove($clusterID);
 		}
 		else
 		{
@@ -304,13 +304,13 @@ class OrientDBDatasource implements \framework\orm\datasources\interfaces\IConne
 
 		$clusterID = \filter_var($cluster, \FILTER_VALIDATE_INT);
 
-		if (\preg_match($this->_pattern, $class) !== false)
+		if (\preg_match($this->pattern, $class) !== false)
 		{
 			$query = 'CREATE CLASS ' . $class;
 
 			if ($parent != '')
 			{
-				if (\preg_match($this->_pattern, $parent) !== false)
+				if (\preg_match($this->pattern, $parent) !== false)
 				{
 					$query .= ' EXTENDS ' . $parent;
 				}
@@ -326,7 +326,7 @@ class OrientDBDatasource implements \framework\orm\datasources\interfaces\IConne
 				$query .= ' CLUSTER ' . $clusterID;
 			}
 
-			return $this->_link->query($query);
+			return $this->link->query($query);
 		}
 		else
 		{
@@ -342,7 +342,7 @@ class OrientDBDatasource implements \framework\orm\datasources\interfaces\IConne
 	 */
 	public function getConnection ()
 	{
-		return $this->_link;
+		return $this->link;
 	}
 
 	/**
@@ -355,7 +355,7 @@ class OrientDBDatasource implements \framework\orm\datasources\interfaces\IConne
 	{
 		try
 		{
-			return $this->_link->query($query);
+			return $this->link->query($query);
 		}
 		catch (\Exception $e)
 		{
@@ -371,7 +371,7 @@ class OrientDBDatasource implements \framework\orm\datasources\interfaces\IConne
 	 */
 	public function query ($query)
 	{
-		return $this->_link->select($query);
+		return $this->link->select($query);
 	}
 
 	/**
@@ -431,12 +431,12 @@ class OrientDBDatasource implements \framework\orm\datasources\interfaces\IConne
 						break;
 						
 					default:
-						if(\in_array($dataType, \framework\orm\types\Type::NUMERIC_TYPES))
+						if(\in_array($dataType, $this->getComponent('orm.numericTypes')))
 						{
 							break;
 						}
 						
-						if(\in_array($dataType, \framework\orm\types\Type::TEXTUAL_TYPES))
+						if(\in_array($dataType, $this->getComponent('orm.textualTypes')))
 						{
 							$dataValue = $this->_quote($dataValue);
 							break;
@@ -449,13 +449,14 @@ class OrientDBDatasource implements \framework\orm\datasources\interfaces\IConne
 				$values .= $dataValue . ', ';
 			}
 
-			$values = \rtrim($values, ', ');
-			$fields = \rtrim($fields, ', ');
-
+			// get rid of the extra ", " at the end of each string
+			$values = \substr($value, 0, \strlen($values)-2);
+			$fields = \substr($fields, 0, \strlen($fields)-2);
+			
 			$req = 'INSERT INTO ' . $entity . '(' . $fields . ')' . ' VALUES (' . $values . ')';
 
 
-			$response = $this->_link->query($req);
+			$response = $this->link->query($req);
 
 			if ($response instanceof \OrientDBRecord)
 			{
@@ -474,7 +475,7 @@ class OrientDBDatasource implements \framework\orm\datasources\interfaces\IConne
 	 */
 	public function delete ($id, \framework\orm\Criteria $where = null)
 	{
-		return $this->_link->recordDelete($id);
+		return $this->link->recordDelete($id);
 	}
 
 	/**
@@ -499,7 +500,7 @@ class OrientDBDatasource implements \framework\orm\datasources\interfaces\IConne
 
 		foreach ($primary as $id)
 		{
-			$record = $this->_link->recordLoad($id);
+			$record = $this->link->recordLoad($id);
 			
 			if($record !== false)
 			{
@@ -528,7 +529,7 @@ class OrientDBDatasource implements \framework\orm\datasources\interfaces\IConne
 			}
 			elseif ($value instanceof \OrientDBTypeDate)
 			{
-				$map[$index]['value'] = \substr($value->getTime(), 0, 9);
+				$map[$index]['value'] = \substr($value->getTime(), 0, 10);
 			}
 			else
 			{
@@ -540,7 +541,7 @@ class OrientDBDatasource implements \framework\orm\datasources\interfaces\IConne
 		return $map;
 	}
 
-	private function _mapToRecord (array $map)
+	private function _mapToRecord ($map)
 	{
 		$record = new \OrientDBRecord();
 
@@ -548,7 +549,7 @@ class OrientDBDatasource implements \framework\orm\datasources\interfaces\IConne
 		{
 			if ($spec['storageField'] !== NULL)
 			{
-				$record->data->$property = $spec['value'];
+				$record->data->$spec['storageField'] = $spec['value'];
 			}
 		}
 
@@ -581,7 +582,7 @@ class OrientDBDatasource implements \framework\orm\datasources\interfaces\IConne
 		$record = $this->_mapToRecord($data);
 
 		// return true on success
-		return ($this->_link->recordUpdate($id, $record) !== -1);
+		return ($this->link->recordUpdate($id, $record) !== -1);
 	}
 
 	/**
@@ -590,7 +591,7 @@ class OrientDBDatasource implements \framework\orm\datasources\interfaces\IConne
 	 */
 	protected function _getFullHost ()
 	{
-		return $this->_host . ':' . $this->_port;
+		return $this->host . ':' . $this->port;
 	}
 	
 	/**
@@ -617,7 +618,7 @@ class OrientDBDatasource implements \framework\orm\datasources\interfaces\IConne
 	 */
 	public function getLink ()
 	{
-		return $this->_link;
+		return $this->link;
 	}
 
 }

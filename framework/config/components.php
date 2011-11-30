@@ -171,6 +171,70 @@ $fcomponents = array(
 	 * ORM			
 	 */
 				
+	'orm.numericTypes' => array(
+		'callable' => function($c, $args)
+		{
+			return array(
+				\framework\orm\types\Type::INTEGER,
+				\framework\orm\types\Type::INT,
+				\framework\orm\types\Type::TINYINT,
+				\framework\orm\types\Type::SMALLINT,
+				\framework\orm\types\Type::MEDIUMINT,
+				\framework\orm\types\Type::BIGINT,
+				\framework\orm\types\Type::FLOAT,
+				\framework\orm\types\Type::DOUBLE,
+				\framework\orm\types\Type::LONG,
+				\framework\orm\types\Type::SHORT,
+				\framework\orm\types\Type::DECIMAL,
+				\framework\orm\types\Type::REAL
+			);
+		},
+		'isUnique' => true
+	),
+	
+			
+	'orm.textualTypes' => array(
+		'callable' => function($c, $args)
+		{
+			return array(
+				\framework\orm\types\Type::STRING,
+				\framework\orm\types\Type::TEXT,
+				\framework\orm\types\Type::MEDIUMTEXT,
+				\framework\orm\types\Type::TINYTEXT,
+				\framework\orm\types\Type::CHAR,
+				\framework\orm\types\Type::VARCHAR,
+				\framework\orm\types\Type::VARCHAR2,
+				\framework\orm\types\Type::ENUM
+			);
+		},
+		'isUnique' => true
+	),
+			
+			
+	'orm.booleanTypes' => array(
+		'callable' => function($c, $args)
+		{
+			return array(
+				\framework\orm\types\Type::BOOL,
+				\framework\orm\types\Type::BOOLEAN
+			);
+		},
+		'isUnique' => true
+	),
+
+	'orm.transparentTypes' => array(
+		'callable' => function($c, $args)
+		{
+			return \array_merge(
+					$c->getComponent('orm.numericTypes'),
+					$c->getComponent('orm.textualTypes'),
+					$c->getComponent('orm.booleanTypes')
+				);
+		},
+		'isUnique' => true
+	),
+
+
 	/* ADAPTERS */
 	'OrientDBDateTimeAdapter' => array(
 		'callable' => function($c, $args)

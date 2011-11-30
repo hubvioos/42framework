@@ -102,6 +102,10 @@ class Map extends \ArrayObject
 				$this[$name]['storageField'] = $storageField;
 			}
 		}
+		else
+		{
+			$this[$name]['storageField'] = NULL;
+		}
 		
 		if($primary)
 		{
@@ -118,21 +122,6 @@ class Map extends \ArrayObject
 		if($this->offsetExists($name))
 		{
 			$this->offsetUnset($name);
-		}
-	}
-	
-	/**
-	 * Remove a specification from all the properties.
-	 * @param string $specification 
-	 */
-	public function removeSpecification($specification)
-	{
-		foreach($this as $property => $specs)
-		{
-			if(\array_key_exists($specification, $specs))
-			{
-				unset($this[$property][$specification]);
-			}
 		}
 	}
 
