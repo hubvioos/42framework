@@ -16,6 +16,12 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
-namespace framework\modules\cli;
+namespace modules\cli\controllers;
 
-class ClassFinder extends \TheSeer\Tools\ClassFinder { }
+class ShowDoc extends \modules\cli\controllers\CliCommand
+{
+	public function processAction ()
+	{
+		
+	}
+}

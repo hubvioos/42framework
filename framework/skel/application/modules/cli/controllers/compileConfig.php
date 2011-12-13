@@ -17,9 +17,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-namespace framework\modules\cli\controllers;
+namespace modules\cli\controllers;
 
-class CompileConfig extends \framework\modules\cli\controllers\CliCommand
+class CompileConfig extends \modules\cli\controllers\CliCommand
 {
 	public function processAction ()
 	{
@@ -41,7 +41,7 @@ class CompileConfig extends \framework\modules\cli\controllers\CliCommand
 		
 		$config = $this->getConfig()->toArray();
 		
-		$ab = new \framework\modules\cli\ConfigBuilder($config);
+		$ab = new \modules\cli\ConfigBuilder($config);
 		$ab->setTemplateFile(\FRAMEWORK_DIR.\DIRECTORY_SEPARATOR.'modules' . \DIRECTORY_SEPARATOR . 'cli' . \DIRECTORY_SEPARATOR . 'views' . \DIRECTORY_SEPARATOR . 'configTemplate.php');
 		$ab->save(\APP_DIR . \DIRECTORY_SEPARATOR . 'build' . \DIRECTORY_SEPARATOR . 'config.php');
 		

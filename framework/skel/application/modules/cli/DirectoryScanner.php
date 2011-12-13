@@ -16,13 +16,6 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
-namespace framework\modules\errors\controllers;
+namespace modules\cli;
 
-class error404 extends \framework\modules\errors\generic
-{
-	public function processAction ($request = null)
-	{
-		$this->getComponent('httpResponse')->setStatus(404)->setContent(
-				$this->createView('errors', 'error404', array('requestedUrl' => $this->getComponent('httpRequest')->getUrl(true)), $request->getFormat()));
-	}
-}
+class DirectoryScanner extends \TheSeer\Tools\DirectoryScanner { }

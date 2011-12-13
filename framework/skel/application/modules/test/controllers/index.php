@@ -1,6 +1,6 @@
 <?php
 
-namespace application\modules\test\controllers;
+namespace modules\test\controllers;
 
 class Index extends \framework\core\Controller
 {

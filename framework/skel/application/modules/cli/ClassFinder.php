@@ -1,5 +1,4 @@
 <?php 
-
 /**
  * Copyright (C) 2011 - K√©vin O'NEILL, Fran√ßois KLINGLER - <contact@42framework.com>
  * 
@@ -17,19 +16,6 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
-namespace framework\modules\errors;
+namespace modules\cli;
 
-abstract class generic extends \framework\core\Controller
-{
-	protected $_response = null;
-	
-	public function _before()
-	{
-		$this->getComponent('httpResponse')->reset();
-	}
-	
-	public function _after ()
-	{
-		$this->getComponent('httpResponse')->stopProcess();
-	}
-}
+class ClassFinder extends \TheSeer\Tools\ClassFinder { }

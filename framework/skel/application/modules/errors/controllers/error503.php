@@ -16,38 +16,13 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
-namespace framework\modules\cli;
+namespace modules\errors\controllers;
 
-class CliUtils
+class error503 extends \modules\errors\generic
 {
-	/**
-	 * Extract request params from the cli
-	 * 
-	 * @return array
-	 */
-	public static function extractParams ()
+	public function processAction ($request = null)
 	{
-		if ($_SERVER['argc'] === 1)
-		{
-			return array('action' => 'showDoc', 'params' => array('all'));
-		}
-		if ($_SERVER['argc'] === 2)
-		{
-			return array('action' => $_SERVER['argv'][1], 'params' => array());
-		}
-		
-		$params = array('action' => '', 'params' => array());
-		for ($i = 1; $i < $_SERVER['argc']; $i++)
-		{
-			if ($i === 1)
-			{
-				$params['action'] = $_SERVER['argv'][$i];
-			}
-			else 
-			{
-				$params['params'][] = $_SERVER['argv'][$i];
-			}
-		}
-		return $params;
+		$this->getComponent('httpResponse')->setStatus(503)->setContent(
+				$this->createView('errors', 'error503', array(), $request->getFormat()));
 	}
 }

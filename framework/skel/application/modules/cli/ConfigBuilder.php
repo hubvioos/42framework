@@ -16,10 +16,10 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
-namespace framework\modules\cli;
+namespace modules\cli;
 use TheSeer\Tools;
 
-class ConfigBuilder extends \framework\modules\cli\AutoloadBuilder
+class ConfigBuilder extends \modules\cli\AutoloadBuilder
 {
 	public function render ()
 	{

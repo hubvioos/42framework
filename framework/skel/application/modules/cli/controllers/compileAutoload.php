@@ -16,23 +16,23 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
-namespace framework\modules\cli\controllers;
+namespace modules\cli\controllers;
 
-class CompileAutoload extends \framework\modules\cli\controllers\CliCommand
+class CompileAutoload extends \modules\cli\controllers\CliCommand
 {
 	public function processAction ()
 	{
-		$scanner = new \framework\modules\cli\DirectoryScanner;
+		$scanner = new \modules\cli\DirectoryScanner;
 		$scanner->addInclude('*.php');
 		
-		$finder = new \framework\modules\cli\ClassFinder;
+		$finder = new \modules\cli\ClassFinder;
 		
 		$found = array_merge($finder->parseMulti($scanner(\VENDORS_DIR)), 
 							 $finder->parseMulti($scanner(\FRAMEWORK_DIR)), 
 							 $finder->parseMulti($scanner(\MODULES_DIR)),
 							 $finder->parseMulti($scanner(\APP_DIR)));
 		
-		$ab = new \framework\modules\cli\AutoloadBuilder($found);
+		$ab = new \modules\cli\AutoloadBuilder($found);
 		$ab->setTemplateFile(\FRAMEWORK_DIR.\DIRECTORY_SEPARATOR.'modules'.\DIRECTORY_SEPARATOR.'cli'.\DIRECTORY_SEPARATOR.'views'.\DIRECTORY_SEPARATOR.'autoloadTemplate.php');
 		$ab->save(\APP_DIR.\DIRECTORY_SEPARATOR.'build'.\DIRECTORY_SEPARATOR.'autoload.php');
 		

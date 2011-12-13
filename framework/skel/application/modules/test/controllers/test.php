@@ -1,6 +1,6 @@
 <?php
 
-namespace application\modules\test\controllers;
+namespace modules\test\controllers;
 
 class Test extends \framework\core\Controller
 {

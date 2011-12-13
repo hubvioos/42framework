@@ -16,6 +16,13 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
-namespace framework\modules\cli;
+namespace modules\errors\controllers;
 
-class AutoloadBuilder extends \TheSeer\Tools\AutoloadBuilder { }
+class error403 extends \modules\errors\generic
+{
+	public function processAction ($request = null)
+	{
+		$this->getComponent('httpResponse')->setStatus(403)->setContent(
+				$this->createView('errors', 'error403', array(), $request->getFormat()));
+	}
+}
