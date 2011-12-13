@@ -18,7 +18,7 @@
  */
 
 $config = array(
-	'environment' => \framework\core\Core::DEV,
+	'environment' => 'dev',
 	'errorReporting' => E_ALL|E_STRICT,
 	'displayErrors' => 1,
 	'defaultModule' => 'website',
@@ -37,6 +37,9 @@ $config = array(
 	'dbConnectionParams' => array(
 		'driver' => 'pdo_sqlite',
 		'path' => APP_DIR.DS.'database'.DS.'db.sqlite'
+	),
+	'logs' => array(
+		'file' => \AREA_DIR . \DIRECTORY_SEPARATOR . 'log'
 	),
 	'defaultCacheSysteml' => 'Apc',
 	'cache' => array(
