@@ -186,6 +186,13 @@ abstract class Controller extends \framework\core\FrameworkObject
 
 		return $this->_response;
 	}
+	
+	public function forward ($module, $action)
+	{
+		$this->_request->set('module', $module);
+		$this->_request->set('action', $action);
+		$this->setResponse($this->_request->execute());
+	}
 
 	/**
 	 * Sets the view of the current action
