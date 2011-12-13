@@ -35,7 +35,6 @@ class ConfigBuilder
 	 */
 	protected $_config = array(
 		'modules' => array(),
-		'modulesLocation' => array(),
 		'routes' => array(),
 		'events' => array(),
 		'components' => array()
@@ -51,18 +50,17 @@ class ConfigBuilder
 	 * @var array
 	 */
 	protected $_appConfig = array();
+	
+	/** The area's config (to be merged with the framework's config)
+	 * @var array
+	 */
+	protected $_areaConfig = array();
 
 	/**
 	 * The modules config
 	 * @var array 
 	 */
 	protected $_modulesConfig = array();
-
-	/**
-	 * The modules' locations
-	 * @var array
-	 */
-	protected $_modulesLocation = array();
 
 	/**
 	 * The routes' config
@@ -86,22 +84,7 @@ class ConfigBuilder
 	 * The modules list
 	 * @var array
 	 */
-	protected $_modulesList = array(
-		'framework' => array(),
-		'modules' => array(),
-		'application' => array()
-	);
-
-	/**
-	 * An array containing the paths to the directories where the modules are stored.
-	 * The array must contain absolute paths
-	 * @var array
-	 */
-	protected $_modulesDirectories = array(
-		'framework' => '',
-		'modules' => '',
-		'application' => ''
-	);
+	protected $_modulesList = array();
 
 	/**
 	 * A string-indexed array containing the names of the config variable at each level
@@ -114,14 +97,15 @@ class ConfigBuilder
 	protected $_variablesNames = array(
 		'framework' => array('config' => 'config', 'routes' => 'routes', 'events' => 'events', 'components' => 'components'),
 		'modules' => array('config' => 'config', 'events' => 'events', 'components' => 'components'),
-		'application' => array('config' => 'config', 'routes' => 'routes', 'events' => 'events', 'components' => 'components')
+		'application' => array('config' => 'config', 'routes' => 'routes', 'events' => 'events', 'components' => 'components'),
+		'area' => array('config' => 'config', 'routes' => 'routes', 'events' => 'events', 'components' => 'components')
 	);
 
 	/**
 	 * The only keys that will be used in the arrays passed as parameters
 	 * @var array
 	 */
-	protected static $_allowedKeys = array('framework', 'modules', 'application');
+	protected static $_allowedKeys = array('framework', 'modules', 'application', 'area');
 
 	// </editor-fold>
 
@@ -134,11 +118,10 @@ class ConfigBuilder
 	 * @param array $configFileName The name of config file WHITHOUT .php extension
 	 * @param array $variablesNames A string indexed array containing the names of the config variables at each level
 	 */
-	public function __construct (array $variablesNames = array(), array $modulesDirectories = array())
+	public function __construct (array $variablesNames = array())
 	{
 		// Use parameters
 		$this->setVariablesNames($variablesNames);
-		$this->setModulesDirectories($modulesDirectories);
 	}
 
 	// <editor-fold defaultstate="collapsed" desc="getters">
@@ -169,6 +152,15 @@ class ConfigBuilder
 	{
 		return $this->_appConfig;
 	}
+	
+	/**
+	 * Get the area's config
+	 * @return array $this->_areaConfig
+	 */
+	public function getAreaConfig ()
+	{
+		return $this->_areaConfig;
+	}
 
 	/**
 	 * Get the modules' config
@@ -177,15 +169,6 @@ class ConfigBuilder
 	public function getModulesConfig ()
 	{
 		return $this->_modulesConfig;
-	}
-
-	/**
-	 * Get the modules location
-	 * @return array 
-	 */
-	public function getModulesLocation ()
-	{
-		return $this->_modulesLocation;
 	}
 
 	/**
@@ -251,26 +234,17 @@ class ConfigBuilder
 
 		return $this->_mergeInternalConfigs();
 	}
-
+	
 	/**
-	 * Set the paths to directories to scan for the modules
-	 * The keys of the array can ONLY be chosen among 'framework, 'application' or 'modules'.
-	 * Any other key will be IGNORED.
-	 * The directories should not end with a trailing slash or back-slash
-	 * @param array $_modulesDirectory A string-indexed array where the keys represent the level of the module
+	 * Set the area's config
+	 * @param array $areaConfig The new area's config
 	 * @return framework\libs\ConfigBuilder $this
 	 */
-	public function setModulesDirectories (array $modulesDirectories)
+	public function setAreaConfig (array $areaConfig)
 	{
-		array_map(
-				function($directoryPath)
-				{
-					return rtrim($directoryPath, '/\\ \t');
-				}, $modulesDirectories);
+		$this->_areaConfig = $areaConfig;
 
-		$this->_selectiveMerge($this->_modulesDirectories, $modulesDirectories);
-
-		return $this;
+		return $this->_mergeInternalConfigs();
 	}
 
 	/**
@@ -301,6 +275,9 @@ class ConfigBuilder
 
 		// app config
 		$this->_findAndGetConfig(\APP_DIR . \DIRECTORY_SEPARATOR . 'config', 'config.php', $this->_variablesNames['application']['config'], $this->_appConfig);
+		
+		// area config
+		$this->_findAndGetConfig(\AREA_DIR . \DIRECTORY_SEPARATOR . 'config', 'config.php', $this->_variablesNames['area']['config'], $this->_areaConfig);
 
 		return $this->_mergeInternalConfigs();
 	}
@@ -312,15 +289,11 @@ class ConfigBuilder
 	public function buildMinimalModulesConfig ()
 	{
 		// the order IS important
-		$this->_findAllModulesFromLevel('framework')
-				->_findAllModulesFromLevel('modules')
-				->_findAllModulesFromLevel('application');
+		$this->_findAllModules('modules');
 
-		$this->_mergeInternalConfigs();
+		//$this->_mergeInternalConfigs();
 
-		$this->_getAllModulesConfigFromLevel('framework')
-				->_getAllModulesConfigFromLevel('modules')
-				->_getAllModulesConfigFromLevel('application');
+		$this->_getAllModulesConfig('config');
 
 		return $this->_mergeInternalConfigs();
 	}
@@ -351,7 +324,13 @@ class ConfigBuilder
 
 		// app routes
 		$this->_findAndGetConfig(\APP_DIR . \DIRECTORY_SEPARATOR . 'config', 'routes.php', $this->_variablesNames['application']['routes'], $this->_routesConfig);
-
+		
+		// area routes
+		$this->_findAndGetConfig(\AREA_DIR . \DIRECTORY_SEPARATOR . 'config', 'routes.php', $this->_variablesNames['area']['routes'], $this->_routesConfig);
+		
+		// modules routes
+		$this->_getAllModulesConfig('routes');
+		
 		return $this->_mergeInternalConfigs();
 	}
 
@@ -364,8 +343,12 @@ class ConfigBuilder
 		$this->_findAndGetConfig(\FRAMEWORK_DIR . \DIRECTORY_SEPARATOR . 'config', 'events.php', $this->_variablesNames['framework']['events'], $this->_eventsConfig);
 
 		$this->_findAndGetConfig(\APP_DIR . \DIRECTORY_SEPARATOR . 'config', 'events.php', $this->_variablesNames['application']['events'], $this->_eventsConfig);
+		
+		$this->_findAndGetConfig(\AREA_DIR . \DIRECTORY_SEPARATOR . 'config', 'events.php', $this->_variablesNames['area']['events'], $this->_eventsConfig);
 
-		$this->_mergeInternalConfigs();
+		$this->_getAllModulesConfig('events');
+		
+		//$this->_mergeInternalConfigs();
 		
 		foreach($this->_eventsConfig as $key => $event)
 		{
@@ -405,10 +388,10 @@ class ConfigBuilder
 
 		$modulesComponents = array();
 		
-		foreach ($this->_modulesLocation as $moduleName => $level)
+		foreach ($this->_modulesList as $moduleName)
 		{
 			$this->_findAndGetConfig(
-					$this->_modulesDirectories[$level] . \DIRECTORY_SEPARATOR . $moduleName . \DIRECTORY_SEPARATOR . 'config', 'components.php', $this->_variablesNames['modules']['components'], $modulesComponents, true, $moduleName);
+					\MODULES_DIR . \DIRECTORY_SEPARATOR . $moduleName . \DIRECTORY_SEPARATOR . 'config', 'components.php', $this->_variablesNames['modules']['components'], $modulesComponents, true, $moduleName);
 		}
 
 		foreach ($modulesComponents as $module => $components)
@@ -417,43 +400,7 @@ class ConfigBuilder
 				$this->_componentsConfig[$module . '.' . $componentName] = $componentData;
 		}
 		
-		$this->_mergeInternalConfigs();
-		
-				
-		//Get all unique component container
-		foreach ($this->_componentsConfig as $key => $component)
-		{
-			if( $component['isUnique']  == true)
-			{
-				$this->_componentsConfig[$key] = $this->asUniqueInstance($component['callable']);
-			}
-			else
-			{
-				$this->_componentsConfig[$key] = $component['callable'];
-			}
-		}
-		
 		return $this->_mergeInternalConfigs();
-	}
-	
-	/**
-	 * Get the unique instance of the specified comonent
-	 * @param collable $callable - The collable component container
-	 * @return collable - The unique instance of the component
-	 */
-	private function asUniqueInstance ($callable)
-	{
-		return function ($c, $arguments) use ($callable)
-		{
-			static $object = null;
-
-			if ($object === null)
-			{
-				$object = $callable($c, $arguments);
-			}
-
-			return $object;
-		};
 	}
 	
 
@@ -485,8 +432,7 @@ class ConfigBuilder
 		// merge framework and application's configs for generic options
 		// in case of duplicate options, application's config overrides framework's config
 		$this->_config = \array_merge($this->_frameworkConfig, 
-								$this->_appConfig, array('modules' => $this->_modulesConfig),
-								array('modulesLocation' => $this->_modulesLocation), 
+								$this->_appConfig, $this->_areaConfig, array('modules' => $this->_modulesConfig), 
 								array('events' => $this->_eventsConfig), 
 								array('components' => $this->_componentsConfig), 
 								array('routes' => $this->_routesConfig));
@@ -562,14 +508,12 @@ class ConfigBuilder
 	}
 
 	/**
-	 * Find all the modules at a specified level and build 
-	 * $this->_modulesList and $this->_modulesLocation
-	 * @param string $level
+	 * Find all the modules and build $this->_modulesList
 	 * @return framework\libs\ConfigBuilder $this
 	 */
-	private function _findAllModulesFromLevel ($level)
+	private function _findAllModules ()
 	{
-		$directoryIterator = new \DirectoryIterator($this->_modulesDirectories[$level]);
+		$directoryIterator = new \DirectoryIterator(\MODULES_DIR);
 
 		// scan the directory and add every module it contains to the modules list
 		// except ./ and ../
@@ -579,8 +523,7 @@ class ConfigBuilder
 			if ($file->isDir() and !$file->isDot())
 			{
 				$this->_modulesConfig[$moduleName] = array();
-				$this->_modulesList[$level][] = $moduleName;
-				$this->_modulesLocation[$moduleName] = $level;
+				$this->_modulesList[] = $moduleName;
 			}
 		}
 
@@ -589,33 +532,32 @@ class ConfigBuilder
 
 	/**
 	 * Get the minimal modules' configs (i.e. without the dependency checking)
-	 * of each module of a given level
-	 * @param string $level
+	 * of each module
 	 */
-	private function _getAllModulesConfigFromLevel ($level = 'application')
+	private function _getAllModulesConfig ($configType = 'config')
 	{
-		$directory = $this->_modulesDirectories[$level] . \DIRECTORY_SEPARATOR;
-		$configFile = \DIRECTORY_SEPARATOR . 'config' . \DIRECTORY_SEPARATOR . 'config.php';
+		$directory = \MODULES_DIR . \DIRECTORY_SEPARATOR;
+		$configFile = \DIRECTORY_SEPARATOR . 'config' . \DIRECTORY_SEPARATOR . $configType . '.php';
 
-		foreach ($this->_modulesList[$level] as $moduleName)
+		foreach ($this->_modulesList as $moduleName)
 		{
 			$pathToConfigFile = $directory . $moduleName . $configFile;
 
 			// unset a variable that could have been included before
-			unset(${$this->_variablesNames['modules']['config']});
+			unset(${$this->_variablesNames['modules'][$configType]});
 
 			// get the config var in the config file for each module, if existant
 			if (file_exists($pathToConfigFile))
 			{
 				require_once($pathToConfigFile);
 
-				if (isset(${$this->_variablesNames['modules']['config']}))
+				if (isset(${$this->_variablesNames['modules'][$configType]}))
 				{
 					// if the module has already some config options from another level
 					// merge the new ones with them
 					if (isset($this->_modulesConfig[$moduleName]))
 					{
-						$this->_modulesConfig[$moduleName] = array_merge($this->_modulesConfig[$moduleName], ${$this->_variablesNames['modules']['config']});
+						$this->_modulesConfig[$moduleName] = array_merge($this->_modulesConfig[$moduleName], ${$this->_variablesNames['modules'][$configType]});
 					}
 					else
 					{

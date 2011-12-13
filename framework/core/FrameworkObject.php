@@ -33,20 +33,20 @@ abstract class FrameworkObject
 	{
 		if ($key === null)
 		{
-			return self::$_container->_config;
+			return self::$_container;
 		}
 		
-		return self::$_container->_config->get($key, $toArray);
+		return self::$_container->get($key, $toArray);
 	}
 	
 	public function setConfig($key, $value)
 	{
-		self::$_container->_config->set($key, $value);
+		self::$_container->set($key, $value);
 	}
 	
 	public function getComponent()
 	{
-		return call_user_func_array(array(self::$_container,'get'),func_get_args());
+		return call_user_func_array(array(self::$_container,'getComponent'),func_get_args());
 	}
 		
 	/**
@@ -122,15 +122,15 @@ abstract class FrameworkObject
 	
 	public function removePlugin ($name)
 	{
-		unset(self::$_container->_config['plugin'][$name]);
+		unset(self::$_container['plugin'][$name]);
 		return $this;
 	}
 	
 	public function __call ($method, $arguments)
 	{
-		if (isset(self::$_container->_config['plugin'][$method]))
+		if (isset(self::$_container['plugin'][$method]))
 		{
-			$plugin = self::$_container->_config['plugin'][$method];
+			$plugin = self::$_container['plugin'][$method];
 			return \call_user_func_array($plugin, $arguments);
 		}
 		
