@@ -32,6 +32,8 @@ class Criteria
 	const GREATER_THAN = 'greaterThan';
 	const LESS_THAN = 'lessThan';
 	const NOT_EQUALS = 'notEquals';
+	const GREATER_THAN_OR_EQUAL = 'greaterThanOrEqual';
+	const LESS_THAN_OR_EQUAL = 'lessThanOrEqual';
 	
 	const IN = 'in';
 	const NOT_IN = 'notIn';
@@ -51,46 +53,64 @@ class Criteria
 	
 	protected $constraints = array();
 	
-	
-	
 	public function __construct ()
 	{
 		$this->constraints[self::CRITERIA] = array();
 	}
 	
-	protected function _addCriterion($operator, $args)
+	protected function _addConstraint($operator, $params)
 	{
-		$this->constraints[$operator] = $args;
+		$this->constraints[$operator] = $params;
 
 		return $this;
 	}
 
 	
-	public function criteria($criteria, $association = self::ASSOCIATION_OR)
+	public function criteria(\framework\orm\utils\Criteria $criteria, $association = self::ASSOCIATION_OR)
 	{
 		$this->constraints[self::CRITERIA] = \array_merge($this->constraints[self::CRITERIA], array($criteria, $association));
 		return $this;
 	}
 	
-	
-	public function lessThan($field, $value)
+	public function andCriteria(\framework\orm\utils\Criteria $criteria)
 	{
-		return $this->_addCriterion(self::LESS_THAN, array($field, $value));
+		return $this->criteria($criteria, self::ASSOCIATION_AND);
 	}
+	
+	public function orCriteria(\framework\orm\utils\Criteria $criteria)
+	{
+		return $this->criteria($criteria, self::ASSOCIATION_OR);
+	}
+	
 	
 	public function equals($field, $value)
 	{
-		return $this->_addCriterion(self::EQUALS, array($field, $value));
+		return $this->_addConstraint(self::EQUALS, array($field, $value));
 	}
 	
 	public function greaterThan($field, $value)
 	{
-		return $this->_addCriterion(self::GREATER_THAN, array($field, $value));
+		return $this->_addConstraint(self::GREATER_THAN, array($field, $value));
+	}
+	
+	public function lessThan($field, $value)
+	{
+		return $this->_addConstraint(self::LESS_THAN, array($field, $value));
+	}
+	
+	public function greaterThanOrEqual($field, $value)
+	{
+		return $this->_addConstraint(self::GREATER_THAN_OR_EQUAL, array($field, $value));
+	}
+	
+	public function lessThanOrEqual($field, $value)
+	{
+		return $this->_addConstraint(self::LESS_THAN_OR_EQUAL, array($field, $value));
 	}
 
 	public function notEquals($field, $value)
 	{
-		return $this->_addCriterion(self::NOT_EQUALS, array($field, $value));
+		return $this->_addConstraint(self::NOT_EQUALS, array($field, $value));
 	}
 	
 	
@@ -98,12 +118,12 @@ class Criteria
 	
 	public function in($field, array $values)
 	{
-		return $this->_addCriterion(self::IN, array($field, $values));
+		return $this->_addConstraint(self::IN, array($field, $values));
 	}
 
 	public function notIn($field, array $values)
 	{
-		return $this->_addCriterion(self::NOT_IN, array($field, $values));
+		return $this->_addConstraint(self::NOT_IN, array($field, $values));
 	}
 	
 	
@@ -111,12 +131,12 @@ class Criteria
 	
 	public function isNull($field)
 	{
-		return $this->_addCriterion(self::IS_NULL, $field);
+		return $this->_addConstraint(self::IS_NULL, $field);
 	}
 
 	public function isNotNull($field)
 	{
-		return $this->_addCriterion(self::IS_NOT_NULL, $field);
+		return $this->_addConstraint(self::IS_NOT_NULL, $field);
 	}
 
 	
@@ -124,12 +144,12 @@ class Criteria
 	
 	public function like($field, $value)
 	{
-		return $this->_addCriterion(self::LIKE, array($field, $value));
+		return $this->_addConstraint(self::LIKE, array($field, $value));
 	}
 
 	public function notLike($field, $value)
 	{
-		return $this->_addCriterion(self::NOT_LIKE, array($field, $value));
+		return $this->_addConstraint(self::NOT_LIKE, array($field, $value));
 	}	
 	
 	
@@ -137,7 +157,7 @@ class Criteria
 	
 	public function limit($start, $count)
 	{
-		return $this->_addCriterion(self::LIMIT, array($start, $count));
+		return $this->_addConstraint(self::LIMIT, array($start, $count));
 	}
 	
 	
