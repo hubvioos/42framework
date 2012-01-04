@@ -24,10 +24,10 @@ interface IDatasource
 	/**
 	 * @abstract
 	 * @param string|int $id
-	 * @param \framework\orm\Criteria $where
+	 * @param \framework\orm\utils\Criteria $where
 	 * @return boolean
 	 */
-	public function delete($id, \framework\orm\Criteria $where);
+	public function delete($id, \framework\orm\utils\Criteria $where);
 
 	/**
 	 * @abstract
@@ -40,12 +40,12 @@ interface IDatasource
 
 	/**
 	 * @abstract
-	 * @param \framework\orm\Criteria $criteria
+	 * @param \framework\orm\utils\Criteria $criteria
 	 * @param array $inherits
 	 * @param array $dependents
 	 * @return array
 	 */
-	public function findAll(\framework\orm\Criteria $criteria = null, array $inherits = array(), array $dependents = array());
+	public function findAll(\framework\orm\utils\Criteria $criteria = null, array $inherits = array(), array $dependents = array());
 
 	/**
 	 * @abstract
@@ -62,10 +62,16 @@ interface IDatasource
 	 * @param array|string $id An ID (primary key or RecordID) or array of IDs
 	 * @param string $entity The entity name
 	 * @param mixed $data
-	 * @param \framework\orm\Criteria $where
+	 * @param \framework\orm\utils\Criteria $where
 	 * @return boolean
 	 */
-	public function update($id, $entity, $data, \framework\orm\Criteria $where);
+	public function update($id, $entity, $data, \framework\orm\utils\Criteria $where);
+	
+	/**
+	 * @abstract
+	 * @return \framework\orm\utils\Criteria
+	 */
+	public function getNativeCriteria();
 	
 	/*public function findAllByAssociation(\Gacela\DataSource\Resource $resource, array $relation, 
 	 * array $data, array $inherits, array $dependents);*/

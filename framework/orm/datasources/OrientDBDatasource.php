@@ -414,7 +414,7 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 				switch ($dataType)
 				{
 					case \framework\orm\types\OrientDBDateTime::TYPE_IDENTIFIER :
-						$dataValue = $this->_quote($dataValue);
+						$dataValue = $this->_quoteString($dataValue);
 						break;
 					
 					case \framework\orm\types\OrientDBBoolean::TYPE_IDENTIFIER :
@@ -423,7 +423,7 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 					case \framework\orm\types\Type::UNKNOWN :
 						if (\is_string($dataValue))
 						{
-							$dataValue = $this->_quote($dataValue);
+							$dataValue = $this->_quoteString($dataValue);
 							break;
 						}
 						
@@ -438,7 +438,7 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 						
 						if(\in_array($dataType, $this->getComponent('orm.textualTypes')))
 						{
-							$dataValue = $this->_quote($dataValue);
+							$dataValue = $this->_quoteString($dataValue);
 							break;
 						}
 						
@@ -450,7 +450,7 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 			}
 
 			// get rid of the extra ", " at the end of each string
-			$values = \substr($value, 0, \strlen($values)-2);
+			$values = \substr($values, 0, \strlen($values)-2);
 			$fields = \substr($fields, 0, \strlen($fields)-2);
 			
 			$req = 'INSERT INTO ' . $entity . '(' . $fields . ')' . ' VALUES (' . $values . ')';
@@ -473,7 +473,7 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 	 * @param string $id
 	 * @param \framework\orm\Criteria $where 
 	 */
-	public function delete ($id, \framework\orm\Criteria $where = null)
+	public function delete ($id, \framework\orm\utils\Criteria $where = null)
 	{
 		return $this->link->recordDelete($id);
 	}
@@ -511,7 +511,7 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 		return $found;
 	}
 
-	private function _recordToMap (\OrientDBRecord $record, $id)
+	protected function _recordToMap (\OrientDBRecord $record, $id)
 	{
 		// get the array representing the data (quite dirty ATM...)
 		$map = (array) $record->data;
@@ -540,7 +540,7 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 		return $map;
 	}
 
-	private function _mapToRecord ($map)
+	protected function _mapToRecord ($map)
 	{
 		$record = new \OrientDBRecord();
 
@@ -559,7 +559,7 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 
 	/**
 	 *
-	 * @param \framework\orm\Criteria $criteria
+	 * @param \framework\orm\utils\Criteria $criteria
 	 * @param array $inherits
 	 * @param array $dependents 
 	 */
@@ -572,16 +572,34 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 	 *
 	 * @param string $id
 	 * @param string|OrientDBRecord $data
-	 * @param \framework\orm\Criteria $where 
+	 * @param \framework\orm\utils\Criteria $where 
 	 * @return bool Update status
 	 */
-	public function update ($id, $entity, $data, \framework\orm\Criteria $where = null)
+	public function update ($id, $entity, $data, \framework\orm\utils\Criteria $where = null)
 	{
 		// convert the $data to a record
 		$record = $this->_mapToRecord($data);
 
 		// return true on success
 		return ($this->link->recordUpdate($id, $record) !== -1);
+	}
+
+	/**
+	 *
+	 * @return \framework\orm\utils\OrientDBCriteria 
+	 */
+	public function getNativeCriteria ()
+	{
+		return $this->getComponent('orm.OrientDBCriteria');
+	}
+
+	
+	/**
+	 * Not supported yet
+	 */
+	public function getQuery ()
+	{
+		return '';
 	}
 
 	/**
@@ -598,26 +616,108 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 	 * @param string $string The string to quote
 	 * @return string 
 	 */
-	protected function _quote($string)
+	protected function _quoteString($string)
 	{
 		return '"'.  \str_replace('"', '\\"', $string).'"';
-	}
-
-	/**
-	 * Not supported yet
-	 */
-	public function getQuery ()
+	}	
+	
+	protected function _quoteParameter($param)
 	{
-		return '';
+		return ((\is_string($param) && \is_numeric($param)) || \is_float($param) || \is_int($param)) 
+			? $param : $this->_quoteString($param);
 	}
-
+	
 	/**
-	 *
-	 * @return \OrientDB
+	 * Get the string representation of a criteria.
+	 * @param \framework\orm\utils\Criteria $criteria
+	 * @return string 
 	 */
-	public function getLink ()
+	public function _criteriaToString(\framework\orm\utils\Criteria $criteria)
 	{
-		return $this->link;
+		$string = '';
+		$constraints = $criteria->getConstraints();
+		
+		foreach($constraints as $params)
+		{
+			switch ($params[0])
+			{
+				case \framework\orm\utils\Criteria::CRITERIA :
+					if($params[1][0] == \framework\orm\utils\Criteria::ASSOCIATION_AND)
+					{
+						//$string = '('.$string.' AND '.$this->_criteriaToString($params[1][1]).')';
+						$string .= ' AND '.$this->_criteriaToString($params[1][1]);
+					}
+					else if($params[1][0] == \framework\orm\utils\Criteria::ASSOCIATION_OR)
+					{
+						//$string = '('.$string.' OR '.$this->_criteriaToString($params[1][1]).')';
+						$string .= ' OR '.$this->_criteriaToString($params[1][1]);
+					}
+					break;
+					
+				case \framework\orm\utils\Criteria::EQUALS :
+					$string .= $params[1][0].' = '.$this->_quoteParameter($params[1][1]);
+					break;
+				case \framework\orm\utils\Criteria::GREATER_THAN :
+					$string .= $params[1][0].' > '.$this->_quoteParameter($params[1][1]);
+					break;
+				case \framework\orm\utils\Criteria::LESS_THAN :
+					$string .= $params[1][0].' < '.$this->_quoteParameter($params[1][1]);
+					break;
+				case \framework\orm\utils\Criteria::GREATER_THAN_OR_EQUAL :
+					$string .= $params[1][0].' >= '.$this->_quoteParameter($params[1][1]);
+					break;
+				case \framework\orm\utils\Criteria::LESS_THAN_OR_EQUAL :
+					$string .= $params[1][0].' <= '.$this->_quoteParameter($params[1][1]);
+					break;
+				case \framework\orm\utils\Criteria::NOT_EQUALS : 
+					$string .= $params[1][0].' <> '.$this->_quoteParameter($params[1][1]);
+					break;
+
+				case \framework\orm\utils\Criteria::IS_NULL :
+					$string .= $params[1].' is null';
+					break;
+				case \framework\orm\utils\Criteria::LIKE :
+					$string .= $params[1][0].' like '.$this->_quoteParameter($params[1][1]);
+					break;
+				case \framework\orm\utils\Criteria::IN :
+					$values = '[';
+
+					foreach($params[1][1] as $value)
+					{
+						$values .= $this->_quoteParameter($value).', ';
+					}
+
+					$values = \rtrim($values, ', ').']';
+					$string .= $params[1][0].' in '.$values;
+					break;
+
+				case \framework\orm\utils\Criteria::LIMIT :
+					$string .= ' limit '.$params[1][0].', '.$params[1][1];
+					break;
+
+				case \framework\orm\utils\OrientDBCriteria::CONTAINS_TEXT :
+					$string .= $params[1][0].' containsText '.$this->_quoteString($params[1][1]);
+					break;
+				case \framework\orm\utils\OrientDBCriteria::MATCHES :
+					$string .= $params[1][0].' matches '.$this->_quoteString($params[1][1]);
+					break;
+				
+				default:
+					break;
+				
+			}
+			
+		}
+		
+		/*
+		if($criterias > 0 && (\substr($string, 0, 1) == '(' && \substr($string, \strlen($string)-1, 1) == ')'))
+		{
+			$string = \trim($string, '()');
+		}
+		 * 
+		 */
+		
+		return $string;
 	}
 
 }
