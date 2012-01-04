@@ -632,7 +632,7 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 	 * @param \framework\orm\utils\Criteria $criteria
 	 * @return string 
 	 */
-	public function _criteriaToString(\framework\orm\utils\Criteria $criteria)
+	protected function _criteriaToString(\framework\orm\utils\Criteria $criteria)
 	{
 		$string = '';
 		$constraints = $criteria->getConstraints();
