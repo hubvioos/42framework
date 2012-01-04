@@ -155,7 +155,7 @@ class Criteria
 	
 	
 	
-	public function limit($start, $count)
+	public function limit($count, $start = 0)
 	{
 		return $this->_addConstraint(self::LIMIT, array($start, $count));
 	}
