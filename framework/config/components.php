@@ -234,6 +234,39 @@ $fcomponents = array(
 		'isUnique' => true
 	),
 
+	'orm.Criteria' => array(
+		'callable' => function($c, $args)
+		{
+			if(\count($args) == 1)
+			{
+				return new \framework\orm\utils\Criteria($args[0]);
+			}
+			if(\count($args) == 2)
+			{
+				return new \framework\orm\utils\Criteria($args[0]);
+			}
+			
+			return new \framework\orm\utils\Criteria();
+		},
+		'isUnique' => false
+	),
+				
+	'orm.OrientDBCriteria' => array(
+		'callable' => function($c, $args)
+		{
+			if(\count($args) == 1)
+			{
+				return new \framework\orm\utils\OrientDBCriteria($args[0]);
+			}
+			if(\count($args) == 2)
+			{
+				return new \framework\orm\utils\OrientDBCriteria($args[0]);
+			}
+			
+			return new \framework\orm\utils\OrientDBCriteria();
+		},
+		'isUnique' => false
+	),
 
 	/* ADAPTERS */
 	'OrientDBDateTimeAdapter' => array(
