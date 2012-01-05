@@ -172,6 +172,7 @@ abstract class OrientDBCommandAbstract
 
     /**
      * Execute command by sending data to server, receive initial reply
+     * @return mixed
      */
     public function execute()
     {
@@ -185,7 +186,7 @@ abstract class OrientDBCommandAbstract
         }
         if ($this->opType == self::DB_CLOSE) {
             // No incoming bytes
-            return;
+            return null;
         }
 
         $this->debugCommand('request_status');
@@ -411,7 +412,7 @@ abstract class OrientDBCommandAbstract
     }
 
     /**
-     * Add string to outgoing data. Length is calulated automatically
+     * Add string to outgoing data. Length is calculated automatically
      * @param string $string
      */
     protected function addString($string)
@@ -426,12 +427,15 @@ abstract class OrientDBCommandAbstract
      */
     protected function addBytes($string)
     {
+        if ($string instanceof OrientDBRecord) {
+            $string = (string) $string;
+        }
         $this->addInt(strlen($string));
         $this->requestBytes .= $string;
     }
 
     /**
-     * If debug is enabled, output $commandName to stdout
+     * If debug is enabled, output $commandName to STDOUT
      * @param string $commandName
      */
     protected function debugCommand($commandName)
@@ -508,7 +512,7 @@ abstract class OrientDBCommandAbstract
             }
         }
 
-        //x32 string with bc_match
+        // x32 string with bc_match
         // Check if module is available
         if (!extension_loaded('bcmath')) {
             throw new OrientDBException('Required bcmath module to continue');

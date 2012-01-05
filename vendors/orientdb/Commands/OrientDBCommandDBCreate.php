@@ -37,7 +37,7 @@ class OrientDBCommandDBCreate extends OrientDBCommandAbstract
             OrientDB::DB_TYPE_MEMORY,
             OrientDB::DB_TYPE_LOCAL);
         if (!in_array($this->attribs[1], $db_types)) {
-            throw new OrientDBWrongParamsException('Not supported DB type. Supported types are: ' . implode(', ', $db_types));
+            throw new OrientDBWrongParamsException('Not supported DB type. Supported types is: ' . implode(', ', $db_types));
         }
         $this->addString($this->attribs[1]);
     }

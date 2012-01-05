@@ -85,6 +85,7 @@ class OrientDBRecord
     public function __construct()
     {
         $this->data = new OrientDBData($this);
+        $this->isParsed = true;
     }
 
     /**
@@ -117,6 +118,36 @@ class OrientDBRecord
     public function setParsed()
     {
         $this->isParsed = true;
+    }
+
+    /**
+     * Fully resets class, equals to new()
+     * @return void
+     */
+    public function reset()
+    {
+        $this->data = new OrientDBData($this);
+        $this->className = null;
+        $this->content = null;
+        $this->isParsed = true;
+        $this->clusterID = null;
+        $this->recordPos = null;
+        $this->recordID = null;
+        $this->version = null;
+    }
+
+    /**
+     * Resets Record data, keeping className and clusterID intact
+     * @return void
+     */
+    public function resetData()
+    {
+        $this->data = new OrientDBData($this);
+        $this->content = null;
+        $this->isParsed = true;
+        $this->recordPos = null;
+        $this->recordID = null;
+        $this->version = null;
     }
 
     /**
