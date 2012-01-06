@@ -8,4 +8,5 @@ doc/*
 .settings/*
 .DS_STORE
 nbproject/*
-/nbproject/private/
+nbproject/private/
+.idea/*
