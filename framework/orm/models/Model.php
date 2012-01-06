@@ -1,6 +1,5 @@
 <?php
-
-/**
+/** 
  * Copyright (C) 2011 - Kévin O'NEILL, François KLINGLER - <contact@42framework.com>
  * 
  * 42framework is free software; you can redistribute it and/or
@@ -18,31 +17,19 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-namespace framework\orm\models;
-
 /**
- * Interface IAttachableModel
- * 
- * This interface must be implemented by every 
- * model that will be attached to a Mapper.
+ * Class Model.
+ * Base class that every model can extend. It extends the \framework\core\FrameworkObject class 
+ * to provide access to convenient mthods like $this->getComponent(), $this->getConfig(), ... ; 
+ * and also implements the \framework\orm\models\IAttachableModel interface so it can be
+ * managed by a \framework\orm\mappers\Mapper.
+ *
+ * @author mickael
  */
-interface IAttachableModel
+
+namespace framework\libs;
+
+abstract class Model extends \framework\core\FrameworkObject implements \framework\orm\models\IAttachableModel
 {
-
-	const REALTION_ONE_TO_ONE = 1;
-	const REALTION_MANY_TO_ONE = 2;
-	const REALTION_ONE_TO_MANY = 3;
-	const REALTION_MANY_TO_MANY = 4;
-
-	/**
-	 * Get the key used to retrieve the mapper from the components container.
-	 * @return string
-	 */
-	public function getMapperName ();
-
-	/**
-	 * Get the unique identifier of the instance.
-	 * @return int|string|NULL MUST return NULL if no ID exists yet (i.e. if it's never been stored in the datasource)
-	 */
-	public function getId ();
+	
 }
