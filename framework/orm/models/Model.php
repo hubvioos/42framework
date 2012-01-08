@@ -27,7 +27,7 @@
  * @author mickael
  */
 
-namespace framework\libs;
+namespace framework\orm\models;
 
 abstract class Model extends \framework\core\FrameworkObject implements \framework\orm\models\IAttachableModel
 {

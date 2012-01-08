@@ -29,10 +29,8 @@ namespace framework\orm\models;
 interface IAttachableModel
 {
 
-	const REALTION_ONE_TO_ONE = 1;
-	const REALTION_MANY_TO_ONE = 2;
-	const REALTION_ONE_TO_MANY = 3;
-	const REALTION_MANY_TO_MANY = 4;
+	const RELATION_HAS_ONE = 1;
+	const RELATION_HAS_MANY = 2;
 
 	/**
 	 * Get the key used to retrieve the mapper from the components container.
