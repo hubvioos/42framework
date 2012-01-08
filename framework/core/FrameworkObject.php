@@ -48,7 +48,27 @@ abstract class FrameworkObject
 	{
 		return call_user_func_array(array(self::$_container,'get'),func_get_args());
 	}
-		
+	
+	/**
+	 * Get a mapper
+	 * @param string $model The model for which we want to get the mapper
+	 * @return \framework\orm\mappers\Mapper
+	 */
+	public function getMapper($model)
+	{
+		return self::$_container->get('mapper.'.$model);
+	}
+	
+	/**
+	 * Get a model
+	 * @param string $model The model's name
+	 * @return \framework\orm\models\IAttachableModel
+	 */
+	public function getModel($model)
+	{
+		return self::$_container->get('model.'.$model);
+	}
+	
 	/**
 	 * @param \framework\libs\ComponentsContainer $container
 	 */
