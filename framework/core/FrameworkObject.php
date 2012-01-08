@@ -56,7 +56,14 @@ abstract class FrameworkObject
 	 */
 	public function getMapper($model)
 	{
-		return self::$_container->get('mapper.'.$model);
+		try
+		{
+			return self::$_container->get('mapper.'.$model);
+		}
+		catch (\InvalidArgumentException $e)
+		{
+			throw new \InvalidArgumentException('Mapper for model <strong>'.$model.'</strong> couldn\'t be found.');
+		}
 	}
 	
 	/**
@@ -66,7 +73,14 @@ abstract class FrameworkObject
 	 */
 	public function getModel($model)
 	{
-		return self::$_container->get('model.'.$model);
+		try
+		{
+			return self::$_container->get('model.'.$model);
+		}
+		catch (\InvalidArgumentException $e)
+		{
+			throw new \InvalidArgumentException('Model <strong>'.$model.'</strong> couldn\'t be found.');
+		}
 	}
 	
 	/**
