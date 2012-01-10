@@ -52,7 +52,7 @@ class Map extends \ArrayObject
 	
 	
 	/**
-	 *
+	 * Add a property to the Map
 	 * @param string $name The property name
 	 * @param array $array An array representing the property. Accepted fields are storageField, type, value, relation and primary. Other fields will be ignored.
 	 */

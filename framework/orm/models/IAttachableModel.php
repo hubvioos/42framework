@@ -33,12 +33,6 @@ interface IAttachableModel
 	const RELATION_HAS_MANY = 2;
 
 	/**
-	 * Get the key used to retrieve the mapper from the components container.
-	 * @return string
-	 */
-	public function getMapperName ();
-
-	/**
 	 * Get the unique identifier of the instance.
 	 * @return int|string|NULL MUST return NULL if no ID exists yet (i.e. if it's never been stored in the datasource)
 	 */
