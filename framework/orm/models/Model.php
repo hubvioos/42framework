@@ -31,5 +31,29 @@ namespace framework\orm\models;
 
 abstract class Model extends \framework\core\FrameworkObject implements \framework\orm\models\IAttachableModel
 {
+	protected $id;
 	
+	public function __construct ()
+	{
+		
+	}
+
+	/**
+	 * Get the model's id.
+	 * @return mixed
+	 */
+	public function getId ()
+	{
+		return $this->id;
+	}
+
+	/**
+	 * Set the model's id.
+	 * @param string|int $id 
+	 */
+	public function setId ($id)
+	{
+		$this->id = $id;
+	}
+
 }

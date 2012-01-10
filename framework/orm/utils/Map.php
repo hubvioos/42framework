@@ -54,25 +54,35 @@ class Map extends \ArrayObject
 	/**
 	 *
 	 * @param string $name The property name
-	 * @param array $spec An array representing the property. Accepted fields are storageField, type, value, relation and primary. Other fields will be ignored.
+	 * @param array $array An array representing the property. Accepted fields are storageField, type, value, relation and primary. Other fields will be ignored.
 	 */
-	public function addPropertyFromArray($name, array $spec)
+	public function addPropertyFromArray($name, array $array)
 	{
 		if(!\is_string($name) || \is_null($name))
 		{
 			throw new \framework\orm\utils\MapException('A property name cannot be empty and must be a string.');
 		}
-		
+
 		$specs = array();
 		
 		// gonna give that bitch some ternary operators, bitches love ternary operators.
-		$specs['storageField'] = (\array_key_exists('storageField', $spec)) ? $spec['storageField'] : $name ;
-		$specs['type'] = (\array_key_exists('type', $spec)) ? $spec['type'] : \framework\orm\types\Type::UNKNOWN ;
-		$specs['value'] = (\array_key_exists('value', $spec)) ? $spec['value'] : NULL ;
-		$specs['relation'] = (\array_key_exists('relation', $spec)) ? $spec['relation'] : NULL ;
-		$specs['primary'] = (\array_key_exists('primary', $spec)) ? $spec['primary'] : NULL ;
+		$specs['storageField'] = (\array_key_exists('storageField', $array)) ? $array['storageField'] : $name ;
+		$specs['type'] = (\array_key_exists('type', $array)) ? $array['type'] : \framework\orm\types\Type::UNKNOWN ;
+		$specs['value'] = (\array_key_exists('value', $array)) ? $array['value'] : NULL ;
 		
-		$this->addProperty($name, $specs['type'], $specs['value'], $specs['storageField'], $specs['primary'], $specs['relation']);
+		if(\array_key_exists('relation', $array))
+		{
+			$specs['relation'] = $array['relation'];
+			$specs['internal'] = (\array_key_exists('internal', $array)) ? $array['internal'] : false;
+		}
+		else
+		{
+			$specs['relation'] = NULL;
+			$specs['internal'] = false;
+		}
+		
+		$this->addProperty($name, $specs['type'], $specs['value'], $specs['storageField'], 
+				$specs['primary'], $specs['relation'], $specs['internal']);
 	}
 	
 	/**
@@ -84,12 +94,17 @@ class Map extends \ArrayObject
 	 * @param bool $primary Whether or not the property is the primary key. 'false' is used by default.
 	 * @param string $relation The type of the relation for this property.
 	 */
-	public function addProperty($name, $type, $value, $storageField = '', $primary = false, $relation = NULL)
+	public function addProperty($name, $type, $value, $storageField = '', $primary = false, $relation = NULL, $internal = false)
 	{
 		$this[$name] = array();
 		$this[$name]['type'] = $type;
 		$this[$name]['value'] = $value;
 		$this[$name]['relation'] = $relation;
+
+		if($relation !== NULL)
+		{
+			$this[$name]['internal'] = $internal;
+		}
 		
 		if($storageField !== NULL)
 		{
