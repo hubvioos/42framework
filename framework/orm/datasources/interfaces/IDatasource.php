@@ -31,12 +31,12 @@ interface IDatasource
 
 	/**
 	 * @abstract
-	 * @param array|string $primary ID (primary key or RecordID) or array of IDs
+	 * @param array $primary An array of IDs
 	 * @param array $inherits
 	 * @param array $dependends
 	 * @return array
 	 */
-	public function find($primary, $entity, array $inherits = array(), array $dependents = array());
+	public function find(array $primary, $entity, array $inherits = array(), array $dependents = array());
 
 	/**
 	 * @abstract
@@ -72,7 +72,4 @@ interface IDatasource
 	 * @return \framework\orm\utils\Criteria
 	 */
 	public function getNativeCriteria();
-	
-	/*public function findAllByAssociation(\Gacela\DataSource\Resource $resource, array $relation, 
-	 * array $data, array $inherits, array $dependents);*/
 }

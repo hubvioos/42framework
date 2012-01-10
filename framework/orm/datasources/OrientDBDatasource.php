@@ -481,21 +481,16 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 	/**
 	 * Find elements from their IDs.
 	 * @throws \framework\orm\datasources\OrientDBDatasourceException
-	 * @param string|array $primary An ID or an array of IDs
+	 * @param array $primary An array of IDs
 	 * @param string|int The identifier of the entity where to look for (table name, cluster ID, ...)
 	 * @param array $inherits
 	 * @param array $dependents 
 	 * @return \framework\orm\utils\Collection The Collection of elements
 	 */
-	public function find ($primary, $entity, array $inherits = array(), array $dependents = array())
+	public function find (array $primary, $entity, array $inherits = array(), array $dependents = array())
 	{
-		$found = new \framework\orm\utils\Collection();
+		$found = $this->getComponent('orm.utils.Collection');
 		$record = null;
-
-		if (!\is_array($primary))
-		{
-			$primary = array($primary);
-		}
 
 		foreach ($primary as $id)
 		{

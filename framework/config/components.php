@@ -235,7 +235,7 @@ $fcomponents = array(
 	),
 
 	'orm.utils.Map' => array(
-		'callable' => function()
+		'callable' => function($c, $args)
 		{
 			return new \framework\orm\utils\Map();
 		},
@@ -243,7 +243,7 @@ $fcomponents = array(
 	),
 				
 	'orm.utils.Collection' => array(
-		'callable' => function()
+		'callable' => function($c, $args)
 		{
 			return new \framework\orm\utils\Collection();
 		},

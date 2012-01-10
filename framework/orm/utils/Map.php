@@ -82,7 +82,7 @@ class Map extends \ArrayObject
 		}
 		
 		$this->addProperty($name, $specs['type'], $specs['value'], $specs['storageField'], 
-				$specs['primary'], $specs['relation'], $specs['internal']);
+				$specs['relation'], $specs['internal']);
 	}
 	
 	/**
@@ -94,7 +94,7 @@ class Map extends \ArrayObject
 	 * @param bool $primary Whether or not the property is the primary key. 'false' is used by default.
 	 * @param string $relation The type of the relation for this property.
 	 */
-	public function addProperty($name, $type, $value, $storageField = '', $primary = false, $relation = NULL, $internal = false)
+	public function addProperty($name, $type, $value, $storageField = '', $relation = NULL, $internal = false)
 	{
 		$this[$name] = array();
 		$this[$name]['type'] = $type;
@@ -120,11 +120,6 @@ class Map extends \ArrayObject
 		else
 		{
 			$this[$name]['storageField'] = NULL;
-		}
-		
-		if($primary)
-		{
-			$this[$name]['primary'] = true;
 		}
 	}
 	

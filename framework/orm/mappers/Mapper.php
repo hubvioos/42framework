@@ -26,7 +26,7 @@ class MapperException extends \Exception
 }
 
 /**
- * Class NewMapper
+ * Class Mapper
  * 
  * This class is the base class every mapper has to inherit in order to work properly.
  * It extends \framework\core\FrameworkObject so the common $this->getComponent() 
@@ -72,21 +72,21 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	 * 						),
 	 * 		'user'		=> array(
 	 * 							'storageField'	=> 'post_user_id',
-	 * 							'type'			=> 'model.user',
-	 * 							'relation'		=> 'hasOne',
-	 * 							'relationField'	=> 'user_id'
+	 * 							'type'			=> 'User',
+	 * 							'relation'		=> '\framework\orm\models\IAttachableModel::RELATION_HAS_ONE',
+	 * 							'internal'	=> true
 	 * 						),
 	 * 		'category'	=> array(
 	 * 							'storageField'	=> 'post_category_id',
-	 * 							'type'			=> 'model.category',
-	 * 							'relation'		=> 'hasOne',
-	 * 							'relationField'	=> 'category_id'
+	 * 							'type'			=> 'Category',
+	 * 							'relation'		=> '\framework\orm\models\IAttachableModel::RELATION_HAS_ONE',
+	 * 							'internal'		=> true
 	 * 						),
 	 * 		'comments'	=> array(
-	 * 							'storageField'	=> null,
-	 * 							'type'			=> 'model.comment',
-	 * 							'relation'		=> 'hasMany',
-	 * 							'relationField'	=> 'post_id'
+	 * 							'storageField'	=> user_id,
+	 * 							'type'			=> 'Comment',
+	 * 							'relation'		=> '\framework\orm\models\IAttachableModel::RELATION_HAS_MANY',
+	 * 							'internal'	=> false
 	 * 						)
 	 * );</pre>
 	 * 
@@ -173,6 +173,11 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	 */
 	public function find ($id, $attach = true)
 	{
+		if(\is_scalar($id))
+		{
+			$id = array($id);
+		}
+		
 		$data = $this->datasource->find($id, $this->getEntityIdentifier());
 
 		if (\count($data) == 0)
@@ -194,7 +199,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 			}
 			else
 			{
-				$result = new \framework\orm\utils\Collection();
+				$result = $this->getComponent('orm.utils.Collection');
 
 				foreach ($data as $map)
 				{
@@ -221,22 +226,17 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	public function findAll (\framework\orm\utils\Criteria $criteria = null)
 	{
 		$data = $this->datasource->findAll($this->getEntityIdentifier(), $criteria);
+		$results = $this->getComponent('orm.utils.Collection');
 
-		if (\count($data) == 0)
+		if (\count($data) != 0)
 		{
-			return $data;
-		}
-		else
-		{
-			$results = new \framework\orm\utils\Collection();
-
 			foreach ($data as $map)
 			{
 				$results[] = $this->_mapToModel($map);
 			}
-
-			return $results;
 		}
+		
+		return $results;
 	}
 
 	/**
@@ -294,6 +294,63 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 			return $this->_deleteModel($criteria);
 		}
 	}
+	
+	/**
+	 * Check if a model is attached to the mapper
+	 * @param \framework\orm\models\IAttachableModel $model
+	 * @return bool 
+	 */
+	public final function isAttached (\framework\orm\models\IAttachableModel $model)
+	{
+		return \in_array($model, $this->attachedModels, true);
+	}
+
+	/**
+	 * Get the fields mapping configuration
+	 * @return array 
+	 */
+	public final function getFields ()
+	{
+		return $this->fields;
+	}
+
+	public final function getAttachedModel ($id)
+	{
+		if (\array_key_exists((string) $id, $this->attachedModels))
+		{
+			return $this->attachedModels[(string) $id];
+		}
+
+		return NULL;
+	}
+
+	/**
+	 * Get all the attached models.
+	 * @return array
+	 */
+	public final function getAttachedModels ()
+	{
+		return $this->attachedModels;
+	}
+
+	/**
+	 * Get the datasource used by the mapper.
+	 * @return \framework\orm\datasources\IDatasource
+	 */
+	public final function getDatasource ()
+	{
+		return $this->datasource;
+	}
+
+	/**
+	 * Method that can be overriden by children classes and which is called at the end of the constructor.
+	 */
+	public function init ()
+	{
+		
+	}
+	
+	
 
 	protected function _deleteModel ($model)
 	{
@@ -434,7 +491,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 		$map = new \framework\orm\utils\Map();
 		$getter = '';
 
-		foreach ($this->fields as $name => $spec)
+		foreach ($this->nonRelations as $name => $spec)
 		{
 			$getter = 'get' . \ucfirst($name);
 
@@ -463,61 +520,6 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 		}
 
 		return $map;
-	}
-
-	/**
-	 * Check if a model is attached to the mapper
-	 * @param \framework\orm\models\IAttachableModel $model
-	 * @return bool 
-	 */
-	public final function isAttached (\framework\orm\models\IAttachableModel $model)
-	{
-		return \in_array($model, $this->attachedModels, true);
-	}
-
-	/**
-	 * Get the fields mapping configuration
-	 * @return array 
-	 */
-	public final function getFields ()
-	{
-		return $this->fields;
-	}
-
-	public final function getAttachedModel ($id)
-	{
-		if (\array_key_exists($id, $this->attachedModels))
-		{
-			return $this->attachedModels[$id];
-		}
-
-		return NULL;
-	}
-
-	/**
-	 * Get all the attached models.
-	 * @return array
-	 */
-	public final function getAttachedModels ()
-	{
-		return $this->attachedModels;
-	}
-
-	/**
-	 * Get the datasource used by the mapper.
-	 * @return \framework\orm\datasources\IDatasource
-	 */
-	public final function getDatasource ()
-	{
-		return $this->datasource;
-	}
-
-	/**
-	 * Method that can be overriden by children classes and which is called at the end of the constructor.
-	 */
-	public function init ()
-	{
-		
 	}
 
 }
