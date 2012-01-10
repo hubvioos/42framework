@@ -170,7 +170,7 @@ $fcomponents = array(
 	/**
 	 * ORM			
 	 */
-				
+								
 	'orm.numericTypes' => array(
 		'callable' => function($c, $args)
 		{
@@ -234,7 +234,23 @@ $fcomponents = array(
 		'isUnique' => true
 	),
 
-	'orm.Criteria' => array(
+	'orm.utils.Map' => array(
+		'callable' => function()
+		{
+			return new \framework\orm\utils\Map();
+		},
+		'isUnique' => false
+	),
+				
+	'orm.utils.Collection' => array(
+		'callable' => function()
+		{
+			return new \framework\orm\utils\Collection();
+		},
+		'isUnique' => false
+	),
+				
+	'orm.utils.Criteria' => array(
 		'callable' => function($c, $args)
 		{
 			if(\count($args) == 1)
@@ -251,7 +267,7 @@ $fcomponents = array(
 		'isUnique' => false
 	),
 				
-	'orm.OrientDBCriteria' => array(
+	'orm.utils.OrientDBCriteria' => array(
 		'callable' => function($c, $args)
 		{
 			if(\count($args) == 1)

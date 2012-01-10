@@ -45,7 +45,7 @@ interface IDatasource
 	 * @param array $dependents
 	 * @return array
 	 */
-	public function findAll(\framework\orm\utils\Criteria $criteria = null, array $inherits = array(), array $dependents = array());
+	public function findAll($entity, \framework\orm\utils\Criteria $criteria = null, array $inherits = array(), array $dependents = array());
 
 	/**
 	 * @abstract
