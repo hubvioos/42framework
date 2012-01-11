@@ -28,7 +28,7 @@ namespace framework\orm\types;
 abstract class Type extends \framework\core\FrameworkObject
 {
 	// Unknown type
-	const UNKNOWN = 0;
+	const UNKNOWN = 'unknown';
 	
 	/** 
 	 * NUMERIC TYPES 
