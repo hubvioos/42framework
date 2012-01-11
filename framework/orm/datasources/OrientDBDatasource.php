@@ -146,7 +146,11 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 	{
 		try
 		{
-			$this->link->DBClose();
+			if($this->link->isDBOpen())
+			{
+				$this->link->DBClose();
+			}
+			
 			$this->active = '';
 		}
 		catch (\Exception $e)
@@ -745,6 +749,14 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 		 */
 
 		return $string;
+	}
+	
+	/**
+	 * Close the connection on object destruction 
+	 */
+	public function __destruct()
+	{
+		$this->close();
 	}
 
 }

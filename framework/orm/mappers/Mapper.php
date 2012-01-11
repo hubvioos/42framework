@@ -521,5 +521,16 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 
 		return $map;
 	}
+	
+	/**
+	 * Close the connection on destruction if one is opened 
+	 */
+	public function __destruct()
+	{
+		if($this->datasource instanceof \framework\orm\datasources\interfaces\IConnectionDatasource)
+		{
+			$this->datasource->close();
+		}
+	}
 
 }
