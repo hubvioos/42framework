@@ -146,11 +146,11 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 	{
 		try
 		{
-			if($this->link->isDBOpen())
+			if ($this->link->isDBOpen())
 			{
 				$this->link->DBClose();
 			}
-			
+
 			$this->active = '';
 		}
 		catch (\Exception $e)
@@ -408,10 +408,15 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 		}
 		else
 		{
+			echo '<h2>Datasource: </h2>';
 			$values = '';
 
 			foreach ($toPersist as $property)
 			{
+				echo '<pre>';
+				var_dump($data[$property]);
+				echo '</pre>';
+				
 				$dataType = $data[$property]['type'];
 				$dataValue = $data[$property]['value'];
 
@@ -431,7 +436,8 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 							break;
 						}
 
-						throw new \framework\orm\datasources\OrientDBDatasourceException('Bad type for value "' . $dataValue . '"');
+						throw new \framework\orm\datasources\OrientDBDatasourceException('Bad type for value "'
+								. $dataValue . '"');
 						break;
 
 					default:
@@ -443,6 +449,34 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 						if (\in_array($dataType, $this->getComponent('orm.textualTypes')))
 						{
 							$dataValue = $this->_quoteString($dataValue);
+							break;
+						}
+
+						if (\in_array($dataType, $this->getComponent('orm.booleanTypes')))
+						{
+							$dataValue = ($dataValue == true) ? 'true' : 'false';
+							break;
+						}
+						
+						if(\array_key_exists('internal', $data[$property]))
+						{
+							if($data[$property]['internal'] == true)
+							{
+								// build a string of IDs surrounded by square-barces [#3:21, #3:17, 3:56]
+								$dataValue = '[';
+								
+								foreach($data[$property]['value'] as $relation)
+								{
+									$dataValue .= '#'.$relation['id']['value'].', ';
+								}
+								
+								$dataValue = \rtrim($dataValue, ', ').']';
+							}
+							else
+							{
+								$dataValue = '';
+							}
+							
 							break;
 						}
 
@@ -458,7 +492,6 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 			$fields = \substr($fields, 0, \strlen($fields) - 2);
 
 			$req = 'INSERT INTO ' . $entity . '(' . $fields . ')' . ' VALUES (' . $values . ')';
-
 
 			$response = $this->link->query($req);
 
@@ -523,7 +556,7 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 
 			if ($value instanceof \OrientDBTypeLink)
 			{
-				$map[$index]['value'] = $value->clusterID.':'.$value->recordPos;
+				$map[$index]['value'] = $value->clusterID . ':' . $value->recordPos;
 			}
 			elseif ($value instanceof \OrientDBTypeDate)
 			{
@@ -532,12 +565,12 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 			elseif (\is_array($value))
 			{
 				$map[$index]['value'] = array();
-				
-				foreach($value as $link)
+
+				foreach ($value as $link)
 				{
-					if($link instanceof \OrientDBTypeLink)
+					if ($link instanceof \OrientDBTypeLink)
 					{
-						$map[$index]['value'][] = $link->clusterID.':'.$link->recordPos;
+						$map[$index]['value'][] = $link->clusterID . ':' . $link->recordPos;
 					}
 				}
 			}
@@ -550,16 +583,30 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 		$map['id']['value'] = $id;
 		return $map;
 	}
-	
+
 	protected function _mapToRecord ($map)
 	{
 		$record = new \OrientDBRecord();
-
+		
 		foreach ($map as $property => $spec)
 		{
 			if ($spec['storageField'] !== NULL)
 			{
-				$record->data->$spec['storageField'] = $spec['value'];
+				if(\is_array($spec['value']) || $spec['value'] instanceof \ArrayAccess)
+				{
+					$data = array();
+					
+					foreach($spec['value'] as $value)
+					{
+						$data[] = new \OrientDBTypeLink($value['id']['value']);
+					}
+					
+					$record->data->$spec['storageField'] = $data;
+				}
+				else
+				{
+					$record->data->$spec['storageField'] = $spec['value'];
+				}
 			}
 		}
 
@@ -750,11 +797,11 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 
 		return $string;
 	}
-	
+
 	/**
 	 * Close the connection on object destruction 
 	 */
-	public function __destruct()
+	public function __destruct ()
 	{
 		$this->close();
 	}
