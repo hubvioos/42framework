@@ -59,4 +59,9 @@ class Collection extends \ArrayObject
 	{
 		// nope !
 	}
+	
+	public function asArray()
+	{
+		return $this->getArrayCopy();
+	}
 }

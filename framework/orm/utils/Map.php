@@ -135,6 +135,10 @@ class Map extends \ArrayObject
 		}
 	}
 
+	public function asArray()
+	{
+		return $this->getArrayCopy();
+	}
 	
 }
 
