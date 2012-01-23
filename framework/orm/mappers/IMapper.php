@@ -58,7 +58,7 @@ interface IMapper
 	 * Save a model in the datasource. 
 	 * @param \framework\orm\models\IAttachableModel The model to save.
 	 */
-	public function save (\framework\orm\models\IAttachableModel $model);
+	public function save (\framework\orm\models\IAttachableModel &$model);
 
 	/**
 	 * Delete a model from the datasource.

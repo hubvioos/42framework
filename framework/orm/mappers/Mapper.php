@@ -243,35 +243,83 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	 * Save a model in the datasource. 
 	 * @param \framework\orm\models\IAttachableModel The model to save.
 	 */
-	public function save (\framework\orm\models\IAttachableModel $model)
+	public function save (\framework\orm\models\IAttachableModel &$model)
 	{
 		$response = NULL;
 
 		if ($model->getId() === NULL)
 		{
-			$response = $this->datasource->create($this->getEntityIdentifier(), $this->_modelToMap($model));
+			$response = $this->_create($model);
 
 			if ($response !== false)
 			{
-				return $this->find($response);
+				$model = $this->find($response);				
+				return $model;
 			}
 
 			throw new \framework\orm\mappers\MapperException('Unable to save new model (' . $this->getModelName() . ')');
 		}
 		else
 		{
-			$response = $this->datasource->update($model->getId(), $this->getEntityIdentifier(), $this->_modelToMap($model));
-
+			$response = $this->_update($model);
+			
 			if ($response === true)
 			{
 				return $model;
 			}
-
+			
 			throw new \framework\orm\mappers\MapperException('Unable to save model ' . $this->getModelName()
 					. ' with id ' . $model->getId());
 		}
-
+		
 		return $response;
+	}
+	
+	/**
+	 *
+	 * @param \framework\orm\models\IAttachableModel $model
+	 * @return type 
+	 */
+	protected function _create(\framework\orm\models\IAttachableModel &$model)
+	{
+		if($this->relations !== NULL)
+		{
+			$this->_saveRelations($model);
+		}
+		
+		return $this->datasource->create($this->getEntityIdentifier(), $this->_modelToMap($model));
+	}
+	
+	/**
+	 *
+	 * @param \framework\orm\models\IAttachableModel $model
+	 * @return type 
+	 */
+	protected function _update(\framework\orm\models\IAttachableModel &$model)
+	{
+		if($this->relations !== NULL)
+		{
+			$this->_saveRelations($model);
+		}
+		
+		return $this->datasource->update($model->getId(), $this->getEntityIdentifier(), $this->_modelToMap($model));
+	}
+	
+	protected function _saveRelations(&$model)
+	{
+		foreach($this->relations as $name => $spec)
+		{
+			$mapper = $this->getMapper($spec['type']);
+			$toSave = $model->{'get'.\ucfirst($name)}();
+			$saved = $this->getComponent('orm.utils.Collection');
+			
+			foreach($toSave as $relation)
+			{
+				$saved->add($mapper->save($relation));
+			}
+			
+			$model->{'set'.\ucfirst($name)}($saved);
+		}
 	}
 
 	/**
@@ -371,14 +419,13 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	{
 		// get a new model's instance
 		$model = $this->getModel($this->getModelName());
-		
+
 		// set all of its properties
-		//foreach ($this->fields as $name => $spec)
 		foreach ($this->nonRelations as $name => $spec)
 		{
 			$setter = 'set' . \ucfirst($name);
 
-			if (\array_key_exists($name, $map) /*&& \array_key_exists($spec['storageField'], $this->nonRelations)*/)
+			if (\array_key_exists($spec['storageField'], $map) || \array_key_exists($name, $map))
 			{
 				if(\method_exists($model, $setter))
 				{
@@ -386,31 +433,12 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 					if ($spec['type'] !== \framework\orm\types\Type::UNKNOWN
 							&& !\in_array($spec['type'], $this->getComponent('orm.transparentTypes')))
 					{
-						$model->$setter($this->getComponent($spec['type'])->convertToPHP($map[$name]['value']));
-						
-						if ($spec['storageField'] !== NULL)
-						{
-							$model->$setter($this->getComponent($spec['type'])
-											->convertToPHP($map[$spec['storageField']]['value']));
-						}
-						else
-						{
-							$model->$setter($this->getComponent($spec['type'])->convertToPHP($map[$name]['value']));
-						}
+						$model->$setter($this->getComponent($spec['type'])->convertToPHP($map[$spec['storageField']]['value']));
 					}
 					// else, use the value as provided
 					else
 					{
 						$model->$setter($map[$name]['value']);
-						
-						if ($spec['storageField'] !== NULL)
-						{
-							$model->$setter($map[$name]['value']);
-						}
-						else
-						{
-							$model->$setter($map[$name]['value']);
-						}
 					}
 				}
 				else
@@ -433,7 +461,6 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 					if (\method_exists($model, $setter))
 					{
 						$relationMapper = $this->getMapper($spec['type']);
-						$criteria = $this->getComponent('orm.utils.Criteria');
 						$entities = NULL;
 
 						if ($spec['relation'] == \framework\orm\models\IAttachableModel::RELATION_HAS_ONE)
@@ -445,6 +472,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 							}
 							else//if(!$spec['internal'])
 							{
+								$criteria = $this->getComponent('orm.utils.Criteria');
 								$criteria->equals($spec['storageField'], $model->getId())->limit(1);
 								$entities = $relationMapper->findAll($criteria);
 							}
@@ -462,6 +490,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 							}
 							else//if(!$spec['internal'])
 							{
+								$criteria = $this->getComponent('orm.utils.Criteria');
 								$criteria->equals($spec['storageField'], $model->getId());
 								$entities = $relationMapper->findAll($criteria);
 							}
@@ -518,10 +547,51 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 				throw new \framework\orm\mappers\MapperException('Unable to retrieve ' . $name . ' property.');
 			}
 		}
+		
+		if($this->relations !== NULL)
+		{	
+			foreach ($this->relations as $name => $spec)
+			{
+				$getter = 'get' . \ucfirst($name);
 
+				if (\method_exists($model, $getter))
+				{
+					$relationMapper = $this->getMapper($spec['type']);
+					$relations = $model->$getter();
+					
+					$map[$name]['storageField'] = $spec['storageField'];
+					$map[$name]['internal'] = $spec['internal'];
+					$map[$name]['type'] = $relationMapper->getEntityIdentifier();
+					$map[$name]['value'] = array();
+
+
+					if($relations === NULL)
+					{
+						$map[$name]['value'] = NULL;
+					}
+					elseif(\is_array($relations) || $relations instanceof \ArrayAccess)
+					{
+						foreach($relations as $relation)
+						{
+							$map[$name]['value'][] = $relationMapper->_modelToMap($relation);
+						}
+					}
+					else
+					{
+						$map[$name]['value'] = $relationMapper->_modelToMap($relations);					
+					}
+				}
+				else
+				{
+					throw new \framework\orm\mappers\MapperException('Missing method ' . $getter
+							. ' in model ' . \get_class($model));
+				}
+			}
+		}
+		
 		return $map;
 	}
-	
+		
 	/**
 	 * Close the connection on destruction if one is opened 
 	 */
@@ -533,4 +603,18 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 		}
 	}
 
+	
+	
+	public function maps()
+	{
+		$maps = array();
+		
+		foreach ($this->attachedModels as $model)
+		{
+			$maps[] = $this->_modelToMap($model);
+		}
+		
+		return $maps;
+	}
+	
 }
