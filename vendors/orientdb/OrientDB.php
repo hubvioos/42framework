@@ -71,7 +71,7 @@ class OrientDB
      * Client protocol version
      * @var int
      */
-    public $clientVersion = 6;
+    public $clientVersion = 7;
 
     /**
      * Server's protocol version.
@@ -108,6 +108,11 @@ class OrientDB
      * @var int
      */
     private $sessionIDDB;
+
+
+    const DRIVER_NAME = 'OrientDB-PHP';
+
+    const DRIVER_VERSION = 'beta-0.4.4';
 
     /**
      * Record type Bytes
@@ -365,6 +370,15 @@ class OrientDB
     }
 
     /**
+     * Return this driver supported protocol version
+     * @return int
+     */
+    public function getProtocolVersionClient()
+    {
+        return $this->clientVersion;
+    }
+
+    /**
      * Returns list of commands require to previously run connect()
      * @return array
      */
@@ -471,7 +485,7 @@ class OrientDBDeSerializeException extends OrientDBException
 
 /*
 if (!function_exists('OrientDB_autoload')) {
-*/
+ */
     /**
      *
      * Default autoload function for OrientDB-PHP
