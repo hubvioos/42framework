@@ -30,6 +30,8 @@ abstract class Type extends \framework\core\FrameworkObject
 	// Unknown type
 	const UNKNOWN = 'unknown';
 	
+	const RELATION_KEY = 'key';
+	
 	/** 
 	 * NUMERIC TYPES 
 	 */
