@@ -1,4 +1,5 @@
-<?php 
+<?php
+
 /**
  * Copyright (C) 2011 - K√©vin O'NEILL, Fran√ßois KLINGLER - <contact@42framework.com>
  * 
@@ -24,102 +25,130 @@ namespace framework\libs;
 
 class ClassLoader
 {
-	protected $_namespace = null;
-	
-	protected $_folder = null;
-	
-	protected $_extension = '.php';
-	
-	protected $_separator = '\\';
-	
-	public function __construct($namespace, $folder, $separator = null, $extension = null)
+	protected $_namespaces = array();
+	protected $_extensions = array();
+	protected $_separators = array();
+	protected $_defaultPath = null;
+
+	public function __construct ($defaultPath = './')
 	{
-		$this->_namespace = $namespace;
-		$this->_folder = $folder;
-		
-		if ($separator !== null)
-		{
-			$this->_separator = $separator;
-		}
-		if ($extension !== null)
-		{
-			$this->_extension = $extension;
-		}
+		$this->setDefaultPath($defaultPath);
 	}
-	
-	public function setSeparator($separator)
-	{
-		$this->_separator = $separator;
-	}
-	
-	public function getSeparator()
-	{
-		return $this->_separator;
-	}
-	
-	public function setNamespace($namespace)
-	{
-		$this->_namespace = $namespace;
-	}
-	
-	public function getNamespace()
-	{
-		return $this->_namespace;
-	}
-	
-	public function setFolder($folder)
-	{
-		$this->_folder = $folder;
-	}
-	
-	public function getFolder()
-	{
-		return $this->_folder;
-	}
-	
-	public function setExtension($extension)
-	{
-		$this->_extension = $extension;
-	}
-	
-	public function getExtension()
-	{
-		return $this->_extension;
-	}
-	
-	public function register()
+
+	public function register ()
 	{
 		spl_autoload_register(array($this, 'loadClass'));
 	}
-	
-	public function unregister()
+
+	public function unregister ()
 	{
 		spl_autoload_unregister(array($this, 'loadClass'));
 	}
-	
-	public function loadClass($className)
+
+	/**
+	 * Registers a new top-level namespace to match.
+	 *
+	 * @param string $namespace The namespace name to add.
+	 * @param string $path The path to the namespace (without the namespace name itself).
+	 * @param string $extension The namespace file extension.
+	 */
+	public function addNamespace ($namespace, $path = null, $extension = '.php', $separator = '\\')
 	{
-		if (!$this->canLoadClass($className))
+		if (isset($this->_namespaces[(string) $namespace]))
 		{
-			return false;
+			throw new \DomainException('The namespace ' . $namespace . ' is already added.');
 		}
-		require $this->getClassPath($className);
-		return true;
-	}
-	
-	public function canLoadClass($className)
-	{
-		if ($this->_namespace !== null && strpos ($className, $this->_namespace.$this->_separator) !== 0)
+
+		if ($path !== null)
 		{
-			return false;
+			$length = \strlen($path);
+			if ($length == 0 || $path[$length - 1] != \DIRECTORY_SEPARATOR)
+			{
+				$path .= \DIRECTORY_SEPARATOR;
+			}
+			$this->_namespaces[(string) $namespace] = $path;
 		}
-		return file_exists($this->getClassPath($className));
+		else
+		{
+			$this->_namespaces[(string) $namespace] = $this->_defaultPath;
+		}
+
+		$this->_extensions[(string) $namespace] = $extension;
+		$this->_separators[(string) $namespace] = $separator;
 	}
-	
-	public function getClassPath($className)
+
+	/**
+	 * Checks if the specified top-level namespace is available.
+	 *
+	 * @param string $namespace The namespace name to check.
+	 */
+	public function hasNamespace ($namespace)
 	{
-		$length = strlen($this->_namespace.$this->_separator);
-		$classFile = str_replace($this->_separator, DIRECTORY_SEPARATOR, substr($className, $length)).$this->_extension;
-		return $this->_folder.DIRECTORY_SEPARATOR.$classFile;
+		return isset($this->_namespaces[(string) $namespace]);
 	}
+
+	/**
+	 * Removes a registered top-level namespace.
+	 *
+	 * @param string $namespace The namespace name to remove.
+	 */
+	public function removeNamespace ($namespace)
+	{
+		if (!isset($this->_namespaces[(string) $namespace]))
+		{
+			throw new \DomainException('The namespace ' . $namespace . ' is not available.');
+		}
+		unset($this->_namespaces[(string) $namespace]);
+		unset($this->_extensions[(string) $namespace]);
+		unset($this->_separators[(string) $namespace]);
+	}
+
+	/**
+	 * Sets the default path used by the namespaces. Note that it does not affect
+	 * the already added namespaces.
+	 *
+	 * @param string $defaultPath The new default path.
+	 */
+	public function setDefaultPath ($defaultPath)
+	{
+		if ($defaultPath[\strlen($defaultPath) - 1] != \DIRECTORY_SEPARATOR)
+		{
+			$defaultPath .= \DIRECTORY_SEPARATOR;
+		}
+		$this->_defaultPath = $defaultPath;
+	}
+
+	/**
+	 * Returns the default path used by the namespaces.
+	 *
+	 * @return string The current default path.
+	 */
+	public function getDefaultPath ()
+	{
+		return $this->_defaultPath;
+	}
+
+	/**
+	 * Loads the given class or interface.
+	 *
+	 * @param string $className The name of the class to load.
+	 * @return void
+	 */
+	public function loadClass ($className)
+	{
+		foreach ($this->_namespaces as $namespace => $path)
+		{
+			if (\strpos($className, $namespace) === 0)
+			{
+				$length = \strlen($namespace.$this->_separators[$namespace]);
+				$classFile = \str_replace($this->_separators[$namespace], \DIRECTORY_SEPARATOR, \substr($className, $length));
+				
+				require $path . $classFile . $this->_extensions[$namespace];
+				
+				return true;
+			}
+		}
+		return false;
+	}
+
 }

@@ -24,16 +24,16 @@
 
 namespace framework\libs;
 
-class ComponentsContainer
+class ComponentsContainer extends \framework\libs\Registry
 {
 
 	/**
 	 * Array of all components
 	 * Structure of array
-	 * 		'Component Name' => array ( 'collable' ,'isUnique' )
-	 * @var \framework\libs\Registry
+	 * 		'Component Name' => array ( 'callable' ,'isUnique' )
+	 * @var array
 	 */
-	protected $_config = null;
+	//protected $_config = null;
 
 	/**
 	 * Contains all number of each instance of each component
@@ -41,9 +41,23 @@ class ComponentsContainer
 	 */
 	protected $_accessCounter = array();
 
-	public function __construct (\framework\libs\Registry $config)
+	public function __construct (array $config)
 	{
-		$this->_config = $config;
+		parent::__construct($config);
+		
+		//$this->_config = $config;
+		
+		foreach ($this['components'] as $key => $component)
+		{
+			if( $component['isUnique']  == true)
+			{
+				$this['components'][$key] = $this->asUniqueInstance($component['callable']);
+			}
+			else
+			{
+				$this['components'][$key] = $component['callable'];
+			}
+		}
 	}
 
 	/**
@@ -51,57 +65,7 @@ class ComponentsContainer
 	 * @param string $key - If it is a module component the syntax is MODULE_NAME.COMPONENT_NAME
 	 * @return <type>
 	 */
-	public function getComponent ($key)
-	{
-		return $this->get($key);
-	}
-
-	public function __set ($key, $value)
-	{
-		$this->_config['components'][$key] = $value;
-	}
-
-	public function __get ($key)
-	{
-		if ($key === '_config')
-		{
-			return $this->_config;
-		}
-
-		return $this->get($key);
-	}
-
-	public function __call ($method, $arguments)
-	{
-		$match = null;
-
-		if (!preg_match('/^get(.+)$/', $method, $match))
-		{
-			throw new \BadMethodCallException('Call to undefined method : ' . $method);
-		}
-
-		$key = \lcfirst($match[1]);
-
-		array_unshift($arguments, $key);
-
-		return call_user_func_array(array($this, 'get'), $arguments);
-	}
-
-	public function __isset ($key)
-	{
-		return isset($this->_config[$key]);
-	}
-
-	public function __unset ($key)
-	{
-		unset($this->_container[$key]);
-	}
-
-	/**
-	 * Get component specified
-	 * @return mix - The component specified if it exists
-	 */
-	public function get ()
+	public function getComponent ()
 	{
 		//Get params
 		$arguments = func_get_args();
@@ -114,10 +78,11 @@ class ComponentsContainer
 
 		//Extract the component name of the argument array
 		$key = array_shift($arguments);
-		$arrayKey = explode('.', $key);
+		
+		$component = $this->get('components.'.$key);
 
 		//Check if the component exists
-		if (!isset($this->_config['components'][$key]))
+		if ($component === null)
 		{
 			throw new \InvalidArgumentException('Component ' . $key . ' is not defined.');
 		}
@@ -133,15 +98,46 @@ class ComponentsContainer
 		}
 
 		//If it's a callable component, we call it !
-		if (is_callable($this->_config['components'][$key]))
+		if (is_callable($component))
 		{
-			return $this->_config['components'][$key]($this, $arguments);
+			return $component($this, $arguments);
 		}
 		//If it's a non collable component, we return it !
 		else
 		{
-			return $this->_config['components'][$key];
+			return $component;
 		}
+	}
+
+	public function __call ($method, $arguments)
+	{
+		$match = null;
+
+		if (!preg_match('/^get(.+)$/', $method, $match))
+		{
+			throw new \BadMethodCallException('Call to undefined method : ' . $method);
+		}
+
+		$key = \lcfirst($match[1]);
+
+		array_unshift($arguments, $key);
+
+		return call_user_func_array(array($this, 'getComponent'), $arguments);
+	}
+	
+	public function asUniqueInstance ($callable)
+	{
+		return function ($c, $arguments) use ($callable)
+		{
+			static $object = null;
+			
+			if ($object === null)
+			{
+				$object = $callable($c, $arguments);
+			}
+			
+			return $object;
+		};
 	}
 
 	/**

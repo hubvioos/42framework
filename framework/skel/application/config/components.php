@@ -1,0 +1,3 @@
+<?php
+
+$components = array();

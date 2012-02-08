@@ -17,8 +17,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-$frameworkConfig = array(
-	'environment' => \framework\core\Core::DEV,
+$config = array(
+	'environment' => 'dev',
 	'errorReporting' => E_ALL|E_STRICT,
 	'displayErrors' => 1,
 	'defaultModule' => 'website',
@@ -32,12 +32,14 @@ $frameworkConfig = array(
 	'routes' => array(),
 	'historySize' => 2,
 	'errorHandlerListeners' => array('framework\\errorHandler\\listeners\\Html'),
-	'viewExtension' => '.php',
 	'applicationFilters' => array(),
 	'viewFilters' => array(), 
 	'dbConnectionParams' => array(
 		'driver' => 'pdo_sqlite',
 		'path' => APP_DIR.DS.'database'.DS.'db.sqlite'
+	),
+	'logs' => array(
+		'file' => \AREA_DIR . \DIRECTORY_SEPARATOR . 'log'
 	),
 	'defaultCacheSysteml' => 'Apc',
 	'cache' => array(
