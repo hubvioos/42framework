@@ -1,5 +1,7 @@
 *~
 framework/skel/application/build/*
+application/*
+application/
 */*.orig
 doc/*
 .project
