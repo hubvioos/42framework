@@ -140,7 +140,7 @@ class Registry extends \ArrayObject
 					\array_shift($params);
 					$newKey = \implode('.', $params);
 					
-					$value = $this->get($newKey);
+					$value = $value->get($newKey);
 				}
 			}
 		}
