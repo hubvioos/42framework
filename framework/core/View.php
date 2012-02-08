@@ -25,16 +25,42 @@ class View extends \framework\core\FrameworkObject
 
 	protected $_file;
 	protected $_extension = '.php';
-	protected $_format = null;
+	protected $_format = 'html';
 	protected $_vars = array();
 	protected $_renderedView = null;
 	protected static $_globalsVars = array();
 
-	public function __construct ($module, $file, $vars = false, $format = null)
+	public function __construct ($vars = false)
+	{
+		if ($vars !== false)
+		{
+			$this->_vars = $vars;
+		}
+	}
+	
+	public function getExtension ()
+	{
+		return $this->_extension;
+	}
+
+	public function setExtension ($extension)
+	{
+		$this->_extension = $extension;
+	}
+
+	public function getFormat ()
+	{
+		return $this->_format;
+	}
+
+	public function setFormat ($format)
+	{
+		$this->_format = $format;
+	}
+	
+	public function setFile ($module, $file)
 	{
 		$this->_extension = $this->getConfig('viewExtension');
-		
-		$this->_format = $format;
 
 		$this->_file = $this->getComponent('dispatcher')->getViewPath($module, $file, $this->_extension, $this->_format);
 
@@ -57,11 +83,6 @@ class View extends \framework\core\FrameworkObject
 			{
 				throw new \RuntimeException('View not found : ' . $this->_file);
 			}
-		}
-
-		if ($vars !== false)
-		{
-			$this->_vars = $vars;
 		}
 	}
 
@@ -136,11 +157,9 @@ class View extends \framework\core\FrameworkObject
 		return $this->getConfig('siteUrl') . \urldecode($this->getComponent('router')->url($params, $routeName));
 	}
 
-	public function getBlock ($block, $params = array(), $format = null)
+	public function getBlock (Array $file, $params = array(), $format = null)
 	{
-		list($module, $action) = \explode('/', $block);
-
-		return $this->createView($module, $action, $params, $format);
+		return $this->createView($file, $params, $format);
 	}
 
 	public function setTitle ($title)

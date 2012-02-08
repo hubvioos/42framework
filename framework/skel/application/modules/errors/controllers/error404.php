@@ -23,6 +23,6 @@ class error404 extends \modules\errors\generic
 	public function processAction ($request = null)
 	{
 		$this->getComponent('httpResponse')->setStatus(404)->setContent(
-				$this->createView('errors', 'error404', array('requestedUrl' => $this->getComponent('httpRequest')->getUrl(true)), $request->getFormat()));
+				$this->createView(array('module' => 'errors', 'action' => 'error404'), array('requestedUrl' => $this->getComponent('httpRequest')->getUrl(true)), $request->getFormat()));
 	}
 }

@@ -70,9 +70,16 @@ abstract class FrameworkObject
 		return $this->getComponent('request', $params, $state);
 	}
 	
-	public function createView($module, $action, $vars = false, $format = null)
+	public function createView(Array $file, $vars = false, $format = null)
 	{
-		return $this->getComponent('view', $module, $action, $vars, $format);
+		if (isset($file["class"]))
+		{
+			return $this->getComponent($file["class"], $file["module"], $file["action"], $vars, $format);
+		}
+		else
+		{
+			return $this->getComponent('view', $file["module"], $file["action"], $vars, $format);
+		}
 	}
 	
 		

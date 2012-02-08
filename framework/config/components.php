@@ -72,7 +72,10 @@ $components = array(
 			$vars = isset($args[2]) ? $args[2] : false;
 			$format = isset($args[3]) ? $args[3] : null;
 
-			return new \framework\core\View($module, $action, $vars, $format);
+			$view = new \framework\core\View($vars);
+			$view->setFormat($format);
+			$view->setFile($module, $action);
+			return $view;
 		},
 		'isUnique' => false),
 	'eventManager' => array(
