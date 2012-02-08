@@ -137,10 +137,10 @@ class Registry extends \ArrayObject
 				// deep into the array if dotted notation was used
 				if ($size > 1)
 				{
-					for ($i = 1; $i < $size; $i++)
-					{
-						$value = $value[$params[$i]];
-					}
+					\array_shift($params);
+					$newKey = \implode('.', $params);
+					
+					$value = $this->get($newKey);
 				}
 			}
 		}
