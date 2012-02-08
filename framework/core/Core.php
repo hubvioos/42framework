@@ -44,7 +44,7 @@ class Core extends \framework\core\FrameworkObject
 		$this->getComponent('session')->init();
 
 		$this->getComponent('router')->init($this->getConfig('routes', true));
-
+		
 		// Timezone
 		\date_default_timezone_set($this->getConfig('defaultTimezone'));
 
@@ -113,14 +113,14 @@ class Core extends \framework\core\FrameworkObject
 		$executeResponse = $execute->execute();
 		
 		$this->raiseEvent('framework.afterExecute', $executeResponse);
-
+		
 		if ($executeResponse->getStatus() == \framework\core\Response::SUCCESS)
 		{
 			$response->setContent($executeResponse->getContent());
 		}
 		else
 		{
-			$this->createRequest(array('module' => 'errors', 'action' => 'error404'))->execute();
+			throw new \framework\core\http\exception\NotFoundException();
 		}
 
 		$this->render();
@@ -143,7 +143,7 @@ class Core extends \framework\core\FrameworkObject
 			$this->viewSetGlobal('contentForLayout', $response->getContent());
 			$response->resetContent();
 
-			$response->setContent($this->createView($this->getConfig('defaultModule'), $this->viewGetGlobal('layout')));
+			$response->setContent($this->createView(array('module' => $this->getConfig('defaultModule'), 'action' => $this->viewGetGlobal('layout'))));
 		}
 
 		$content = $response->getContent();
@@ -164,11 +164,14 @@ class Core extends \framework\core\FrameworkObject
 
 		$this->raiseEvent('framework.afterRender', $content);
 
-		$response->send();
-
-		if ($response->getStatus() == 200)
+		if (!$request->isCli())
 		{
-			$request->updateHistory();
+			$response->send();
+
+			if ($response->getStatus() == 200)
+			{
+				$request->updateHistory();
+			}
 		}
 		
 		$this->raiseEvent('framework.afterApp');

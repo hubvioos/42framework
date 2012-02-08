@@ -1,6 +1,6 @@
 <?php
 
-$fcomponents = array(
+$components = array(
 	/**
 	 * Core
 	 * 
@@ -72,14 +72,17 @@ $fcomponents = array(
 			$vars = isset($args[2]) ? $args[2] : false;
 			$format = isset($args[3]) ? $args[3] : null;
 
-			return new \framework\core\View($module, $action, $vars, $format);
+			$view = new \framework\core\View($vars);
+			$view->setFormat($format);
+			$view->setFile($module, $action);
+			return $view;
 		},
 		'isUnique' => false),
 	'eventManager' => array(
 		'callable' => function ($c, $args)
 		{
 			/* @var $c ApplicationContainer */
-			return new \framework\core\EventManager($c->_config['events']);
+			return new \framework\core\EventManager($c['events']);
 		},
 		'isUnique' => true),
 	/*
@@ -90,11 +93,11 @@ $fcomponents = array(
 		'callable' => function ($c, $args)
 		{
 			$errorHandler = new \framework\errorHandler\ErrorHandler();
-			foreach ($c->_config['errorHandlerListeners'] as $lis)
+			foreach ($c['errorHandlerListeners'] as $lis)
 			{
 				$errorHandler->attach(new $lis());
 			}
-			$errorHandler->init($c->_config['errorReporting'], $c->_config['displayErrors']);
+			$errorHandler->init($c['errorReporting'], $c['displayErrors']);
 			return $errorHandler;
 		},
 		'isUnique' => true),
@@ -102,7 +105,7 @@ $fcomponents = array(
 		'callable' => function ($c, $args)
 		{
 			/* @var $c ApplicationContainer */
-			return new \framework\core\http\History('_history', $c->_config['historySize']);
+			return new \framework\core\http\History('_history', $c['historySize']);
 		},
 		'isUnique' => true),
 	'route' => array(
@@ -110,7 +113,7 @@ $fcomponents = array(
 		{
 			/* @var $c ApplicationContainer */
 			// return new \framework\libs\Route($c->_config['routes']->toArray());
-			return new \framework\libs\Route($c->_config);
+			return new \framework\libs\Route($c);
 		},
 		'isUnique' => true),
 	'router' => array(
@@ -139,15 +142,29 @@ $fcomponents = array(
 			return new \framework\libs\Event($args[0], $args[1]);
 		},
 		'isUnique' => false),
+	'logger' => array(
+		'callable' => function ($c, $args)
+		{
+			$logger = new \Monolog\Logger('log');
+			$logger->pushHandler($c->getComponent('log.streamHandler'));
+			return $logger;
+		},
+		'isUnique' => false),
+	'log.streamHandler' => array(
+		'callable' => function ($c, $args)
+		{
+			return new \Monolog\Handler\StreamHandler($c['logs.file'], Logger::WARNING);
+		},
+		'isUnique' => false),
 	'cache' => array(
 		'callable' => function ($c, $args)
 		{
-			if (!\array_key_exists($args[0], $c->_config['cache']))
+			if (!\array_key_exists($args[0], $c['cache']))
 			{
 				throw new \InvalidArgumentException('The cache configuration  ' . $args[0] . ' doesn\'t exist');
 			}
 
-			return new \framework\libs\Cache($args[0], $c->_config['cache'][$args[0]]);
+			return new \framework\libs\Cache($args[0], $c['cache'][$args[0]]);
 		},
 		'isUnique' => false),
 	/**

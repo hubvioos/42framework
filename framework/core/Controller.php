@@ -87,6 +87,7 @@ abstract class Controller extends \framework\core\FrameworkObject
 	 * @var mixed (null, string or false)
 	 */
 	protected $_view = null;
+	protected $_customClassView = null;
 
 	/**
 	 * Contains vars for the view
@@ -168,7 +169,15 @@ abstract class Controller extends \framework\core\FrameworkObject
 						{
 							$this->setView($this->_request->getAction());
 						}
-						$this->_response->setContent($this->createView($this->_request->getModule(), $this->_view, $this->_vars, $this->_response->getFormat()));
+						$file = array(
+							'module' => $this->_request->getModule(),
+							'action' => $this->_view
+						);
+						if ($this->_customClassView !== null)
+						{
+							$file["class"] = $this->_customClassView;
+						}
+						$this->_response->setContent($this->createView($file, $this->_vars, $this->_response->getFormat()));
 					}
 
 					$this->_response->setStatus(\framework\core\Response::SUCCESS);
@@ -185,6 +194,13 @@ abstract class Controller extends \framework\core\FrameworkObject
 		}
 
 		return $this->_response;
+	}
+	
+	public function forward ($module, $action)
+	{
+		$this->_request->set('module', $module);
+		$this->_request->set('action', $action);
+		$this->setResponse($this->_request->execute());
 	}
 
 	/**
@@ -203,6 +219,12 @@ abstract class Controller extends \framework\core\FrameworkObject
 			$this->_view = $view;
 		}
 
+		return $this;
+	}
+	
+	public function setCustomClassView ($class)
+	{
+		$this->_customClassView = $class;
 		return $this;
 	}
 

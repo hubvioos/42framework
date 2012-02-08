@@ -19,13 +19,13 @@
 
 
 $vendorsAutoload = array(
-         'theseer\\tools\\autoloadbuilder' => VENDORS_DIR.DS.'theseer'.DS.'autoload'.DS.'autoloadbuilder.php',
-         'theseer\\tools\\autoloadbuilderexception' => VENDORS_DIR.DS.'theseer'.DS.'autoload'.DS.'autoloadbuilder.php',
-         'theseer\\tools\\autoloadbuildercli' => VENDORS_DIR.DS.'theseer'.DS.'autoload'.DS.'autoloadbuildercli.php',
-         'theseer\\tools\\classfinder' => VENDORS_DIR.DS.'theseer'.DS.'autoload'.DS.'classfinder.php',
-         'theseer\\tools\\phpfilteriterator' => VENDORS_DIR.DS.'theseer'.DS.'autoload'.DS.'phpfilter.php',
-         'theseer\\tools\\directoryscanner' => VENDORS_DIR.DS.'theseer'.DS.'scanner'.DS.'directoryscanner.php',
-         'theseer\\tools\\directoryscannerexception' => VENDORS_DIR.DS.'theseer'.DS.'scanner'.DS.'directoryscanner.php',
-         'theseer\\tools\\filesonlyfilteriterator' => VENDORS_DIR.DS.'theseer'.DS.'scanner'.DS.'filesonlyfilter.php',
-         'theseer\\tools\\includeexcludefilteriterator' => VENDORS_DIR.DS.'theseer'.DS.'scanner'.DS.'includeexcludefilter.php',
+         'theseer\\tools\\autoloadbuilder' => \FRAMEWORK_DIR.\DIRECTORY_SEPARATOR.'vendors'.\DIRECTORY_SEPARATOR.'theseer'.\DIRECTORY_SEPARATOR.'autoload'.\DIRECTORY_SEPARATOR.'autoloadbuilder.php',
+         'theseer\\tools\\autoloadbuilderexception' => \FRAMEWORK_DIR.\DIRECTORY_SEPARATOR.'vendors'.\DIRECTORY_SEPARATOR.'theseer'.\DIRECTORY_SEPARATOR.'autoload'.\DIRECTORY_SEPARATOR.'autoloadbuilder.php',
+         'theseer\\tools\\autoloadbuildercli' => \FRAMEWORK_DIR.\DIRECTORY_SEPARATOR.'vendors'.\DIRECTORY_SEPARATOR.'theseer'.\DIRECTORY_SEPARATOR.'autoload'.\DIRECTORY_SEPARATOR.'autoloadbuildercli.php',
+         'theseer\\tools\\classfinder' => \FRAMEWORK_DIR.\DIRECTORY_SEPARATOR.'vendors'.\DIRECTORY_SEPARATOR.'theseer'.\DIRECTORY_SEPARATOR.'autoload'.\DIRECTORY_SEPARATOR.'classfinder.php',
+         'theseer\\tools\\phpfilteriterator' => \FRAMEWORK_DIR.\DIRECTORY_SEPARATOR.'vendors'.\DIRECTORY_SEPARATOR.'theseer'.\DIRECTORY_SEPARATOR.'autoload'.\DIRECTORY_SEPARATOR.'phpfilter.php',
+         'theseer\\tools\\directoryscanner' => \FRAMEWORK_DIR.\DIRECTORY_SEPARATOR.'vendors'.\DIRECTORY_SEPARATOR.'theseer'.\DIRECTORY_SEPARATOR.'scanner'.\DIRECTORY_SEPARATOR.'directoryscanner.php',
+         'theseer\\tools\\directoryscannerexception' => \FRAMEWORK_DIR.\DIRECTORY_SEPARATOR.'vendors'.\DIRECTORY_SEPARATOR.'theseer'.\DIRECTORY_SEPARATOR.'scanner'.\DIRECTORY_SEPARATOR.'directoryscanner.php',
+         'theseer\\tools\\filesonlyfilteriterator' => \FRAMEWORK_DIR.\DIRECTORY_SEPARATOR.'vendors'.\DIRECTORY_SEPARATOR.'theseer'.\DIRECTORY_SEPARATOR.'scanner'.\DIRECTORY_SEPARATOR.'filesonlyfilter.php',
+         'theseer\\tools\\includeexcludefilteriterator' => \FRAMEWORK_DIR.\DIRECTORY_SEPARATOR.'vendors'.\DIRECTORY_SEPARATOR.'theseer'.\DIRECTORY_SEPARATOR.'scanner'.\DIRECTORY_SEPARATOR.'includeexcludefilter.php',
          );

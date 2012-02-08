@@ -26,72 +26,34 @@ class Dispatcher extends \framework\core\FrameworkObject
 	public function dispatch (\framework\core\Request $request)
 	{
 		$this->raiseEvent('framework.beforeDispatch', $request);
-		
-		$classname = $this->getAction($request->getModule(), $request->getAction(), $request);
+
+		$classname = $this->getAction($request->getModule(), $request->getAction());
 		
 		if (!$classname)
 		{
-			return $this->createRequest(array('module' => 'errors', 'action' => 'error404'), $request->getState())->execute();
+			throw new \framework\core\http\exception\NotFoundException();
 		}
 
 		$module = $this->getComponent('action', $classname);
 		$response = $this->getComponent('response');
 		$response->setFormat($request->getFormat());
-		
+
 		return $module->execute($request, $response);
 	}
 
 	public function getModulePath ($module)
 	{
-		$config = $this->getConfig('modulesLocation');
-
-		$viewsPath = null;
-
-		switch ($config[$module])
-		{
-			case 'framework':
-				$viewsPath = \FRAMEWORK_DIR . \DIRECTORY_SEPARATOR . 'modules' . \DIRECTORY_SEPARATOR . $module;
-				break;
-
-			case 'modules':
-				$viewsPath = \MODULES_DIR . \DIRECTORY_SEPARATOR . $module;
-				break;
-
-			case 'application':
-				$viewsPath = \APP_DIR . \DIRECTORY_SEPARATOR . 'modules' . \DIRECTORY_SEPARATOR . $module;
-				break;
-		}
-
-		return $viewsPath;
+		return \MODULES_DIR . \DIRECTORY_SEPARATOR . $module;
 	}
 
 	public function getModuleNamespace ($module)
 	{
-		$config = $this->getConfig('modulesLocation');
-
-		$namespace = null;
-
-		switch ($config[$module])
-		{
-			case 'framework':
-				$namespace = '\\framework\\modules\\' . $module;
-				break;
-
-			case 'modules':
-				$namespace = '\\modules\\' . $module;
-				break;
-
-			case 'application':
-				$namespace = '\\application\\modules\\' . $module;
-				break;
-		}
-
-		return $namespace;
+		return '\\modules\\' . $module;
 	}
 
-	protected function getAction ($module, $action, \framework\core\Request $request)
+	protected function getAction ($module, $action)
 	{
-		$modulesLocation = $this->getConfig('modulesLocation');
+		$modulesLocation = $this->getConfig('modules');
 
 		$classname = false;
 
@@ -105,17 +67,47 @@ class Dispatcher extends \framework\core\FrameworkObject
 
 				if (isset($moduleConfig['extends']))
 				{
-					$classname = $this->getAction($moduleConfig['extends'], $action, $request);
-					
-					if ($classname)
-					{
-						$request->set('module', $moduleConfig['extends']);
-					}
+					$classname = $this->getAction($moduleConfig['extends'], $action);
 				}
 			}
 		}
 
 		return $classname;
+	}
+
+	public function getViewPath ($module, $file, $extension, $format = null)
+	{
+		$modulesLocation = $this->getConfig('modules');
+
+		$filepath = false;
+		
+		if (isset($modulesLocation[$module]))
+		{
+			$filepath = $this->getModulePath($module) . \DIRECTORY_SEPARATOR . 'views' . \DIRECTORY_SEPARATOR;
+			
+			if ($format !== null)
+			{
+				$filepath .= $format . \DIRECTORY_SEPARATOR . $file . $extension;
+			}
+			else
+			{
+				$filepath .= $file . $extension;
+			}
+
+			if (!\file_exists($filepath))
+			{
+				$filepath = false;
+				
+				$moduleConfig = $this->getConfig('modules.' . $module);
+
+				if (isset($moduleConfig['extends']))
+				{
+					$filepath = $this->getView($moduleConfig['extends'], $file, $extension);
+				}
+			}
+		}
+
+		return $filepath;
 	}
 
 }
