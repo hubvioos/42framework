@@ -43,13 +43,13 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 	 * The host
 	 * @var string 
 	 */
-	private $host = 'localhost';
+	private $host;
 
 	/**
 	 * The connection's port
 	 * @var int
 	 */
-	private $port = 2424;
+	private $port;
 
 	/**
 	 * The user name used for the connection to the host
@@ -89,7 +89,7 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 	 * @param string $user The username used to connect to the host
 	 * @param string $password The password used to connect to the host
 	 */
-	public function __construct ($host, $port, $user = '', $password = '')
+	public function __construct ($user, $password, $host = 'localhost', $port = 2424)
 	{
 		$this->host = $host;
 		$this->port = $port;
@@ -408,15 +408,10 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 		}
 		else
 		{
-			echo '<h2>Datasource: </h2>';
 			$values = '';
 
 			foreach ($toPersist as $property)
 			{
-				echo '<pre>';
-				var_dump($data[$property]);
-				echo '</pre>';
-				
 				$dataType = $data[$property]['type'];
 				$dataValue = $data[$property]['value'];
 
@@ -428,7 +423,11 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 
 					case \framework\orm\types\OrientDBBoolean::TYPE_IDENTIFIER :
 						break;
-
+					
+					case \framework\orm\types\Type::RELATION_KEY :
+						$dataValue = $this->_quoteString($dataValue);
+						break;
+					
 					case \framework\orm\types\Type::UNKNOWN :
 						if (\is_string($dataValue))
 						{
@@ -543,6 +542,74 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 		return $found;
 	}
 
+	/**
+	 *
+	 * @param \framework\orm\utils\Criteria $criteria
+	 * @param array $inherits
+	 * @param array $dependents 
+	 */
+	public function findAll ($entity, \framework\orm\utils\Criteria $criteria = null, array $inherits = null, array $dependents = null)
+	{
+		if (\strpos(' ', $entity) !== false)
+		{
+			throw new \framework\orm\datasources\OrientDBDatasourceException('Bad entity name ' . $entity);
+		}
+
+		$entities = array();
+
+		try
+		{
+			$data = $this->query('SELECT FROM ' . $entity . ' WHERE ' . $this->_criteriaToString($criteria));
+
+			foreach ($data as $record)
+			{
+				$record->parse();
+				$entities[] = $this->_recordToMap($record, $record->recordID);
+			}
+		}
+		catch (\Exception $e)
+		{
+			throw new \framework\orm\datasources\OrientDBDatasourceException('Unable to find all entities '
+					. $entity);
+		}
+
+		return $entities;
+	}
+
+	/**
+	 *
+	 * @param string $id
+	 * @param string|OrientDBRecord $data
+	 * @param \framework\orm\utils\Criteria $where 
+	 * @return bool Update status
+	 */
+	public function update ($id, $entity, $data, \framework\orm\utils\Criteria $where = null)
+	{
+		// convert the $data to a record
+		$record = $this->_mapToRecord($data);
+
+		// return true on success
+		return ($this->link->recordUpdate($id, $record) !== -1);
+	}
+
+	/**
+	 *
+	 * @return \framework\orm\utils\OrientDBCriteria 
+	 */
+	public function getNativeCriteria ()
+	{
+		return $this->getComponent('orm.utils.OrientDBCriteria');
+	}
+
+	/**
+	 * Not supported yet
+	 */
+	public function getQuery ()
+	{
+		return '';
+	}
+
+	
 	protected function _recordToMap (\OrientDBRecord $record, $id)
 	{
 		// get the array representing the data (quite dirty ATM...)
@@ -613,75 +680,8 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 		$record->parse();
 
 		return $record;
-	}
-
-	/**
-	 *
-	 * @param \framework\orm\utils\Criteria $criteria
-	 * @param array $inherits
-	 * @param array $dependents 
-	 */
-	public function findAll ($entity, \framework\orm\utils\Criteria $criteria = null, array $inherits = null, array $dependents = null)
-	{
-		if (\strpos(' ', $entity) !== false)
-		{
-			throw new \framework\orm\datasources\OrientDBDatasourceException('Bad entity name ' . $entity);
-		}
-
-		$entities = array();
-
-		try
-		{
-			$data = $this->query('SELECT FROM ' . $entity . ' WHERE ' . $this->_criteriaToString($criteria));
-
-			foreach ($data as $record)
-			{
-				$record->parse();
-				$entities[] = $this->_recordToMap($record, $record->recordID);
-			}
-		}
-		catch (\Exception $e)
-		{
-			throw new \framework\orm\datasources\OrientDBDatasourceException('Unable to find all entities '
-					. $entity);
-		}
-
-		return $entities;
-	}
-
-	/**
-	 *
-	 * @param string $id
-	 * @param string|OrientDBRecord $data
-	 * @param \framework\orm\utils\Criteria $where 
-	 * @return bool Update status
-	 */
-	public function update ($id, $entity, $data, \framework\orm\utils\Criteria $where = null)
-	{
-		// convert the $data to a record
-		$record = $this->_mapToRecord($data);
-
-		// return true on success
-		return ($this->link->recordUpdate($id, $record) !== -1);
-	}
-
-	/**
-	 *
-	 * @return \framework\orm\utils\OrientDBCriteria 
-	 */
-	public function getNativeCriteria ()
-	{
-		return $this->getComponent('orm.utils.OrientDBCriteria');
-	}
-
-	/**
-	 * Not supported yet
-	 */
-	public function getQuery ()
-	{
-		return '';
-	}
-
+	}	
+	
 	/**
 	 * Get the full host, i.e. host:port
 	 * @return string
