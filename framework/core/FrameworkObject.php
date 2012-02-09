@@ -58,7 +58,7 @@ abstract class FrameworkObject
 	{
 		try
 		{
-			return self::$_container->get('mapper.'.$model);
+			return self::$_container->getComponent('mapper.'.$model);
 		}
 		catch (\InvalidArgumentException $e)
 		{
@@ -75,7 +75,7 @@ abstract class FrameworkObject
 	{
 		try
 		{
-			return self::$_container->get('model.'.$model);
+			return self::$_container->getComponent('model.'.$model);
 		}
 		catch (\InvalidArgumentException $e)
 		{
