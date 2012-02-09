@@ -1,4 +1,4 @@
-<?php 
+<?php
 /**
  * Copyright (C) 2011 - K√©vin O'NEILL, Fran√ßois KLINGLER - <contact@42framework.com>
  * 
@@ -17,74 +17,51 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 namespace modules\cli;
-use TheSeer\Tools;
 
 class ConfigBuilder extends \modules\cli\AutoloadBuilder
 {
 	public function render ()
 	{
-		//$entries = $this->formatEntries($this->classes);
-		$entries = \var_export($this->classes, true);
-		
-		$replace = array_merge($this->variables, 
-			array(
-				'___CREATED___' => date($this->dateformat, $this->timestamp ? $this->timestamp : time()), 
-				'___CLASSLIST___' => $entries,//\implode(',' . $this->linebreak . $this->indent, $entries), 
-				'___BASEDIR___' => $this->baseDir ? '__DIR__ . ' : '', 
-				'___AUTOLOAD___' => uniqid('autoload')));
-		return str_replace(array_keys($replace), array_values($replace), $this->template);
+		$entries = $this->formatEntries($this->classes);
+
+		$replace = \array_merge($this->variables, array(
+			'___CREATED___' => \date($this->dateformat, $this->timestamp ? $this->timestamp : \time()),
+			'___CLASSLIST___' => $entries, //\implode(',' . $this->linebreak . $this->indent, $entries), 
+			'___BASEDIR___' => $this->baseDir ? '__DIR__ . ' : '',
+			'___AUTOLOAD___' => \uniqid('autoload')));
+		return \str_replace(\array_keys($replace), \array_values($replace), $this->template);
 	}
-	
-	protected function formatEntries($config)
+
+	protected function formatEntries ($config)
 	{
-		$entries = array();
-		
-		foreach ($config as $key => $value)
+		$funcClosure = function(&$item, $key)
 		{
-			if (is_array($value))
+			if ($item instanceof \Closure)
 			{
-				if (!empty($value))
-				{
-					$v = 'array('.join(',', $this->formatEntries($value)).')';
-				}
-				else 
-				{
-					$v = array();
-				}
+				$item = new \SuperClosure($item);
+				$item = $item->getCode();
 			}
-			else
-			{
-				$v = $value;
-			}
-			
-			if (!is_array($v))
-			{
-				if (strpos($v, 'array(') !== false)
-				{
-					$entries[] = "'$key' => $v";
-				}
-				else 
-				{
-					if ($v === true)
-					{
-						$entries[] = "'$key' => true";
-					}
-					else if ($v === false)
-					{
-						$entries[] = "'$key' => false";
-					}
-					else
-					{
-						$entries[] = "'$key' => '$v'";
-					}
-				}
-			}
-			else
-			{
-				$entries[] = "'$key' => array()";
-			}
-		}
+		};
 		
-		return $entries;
+		$funcString = function(&$item, $key)
+		{
+			$arr = \explode("}'", $item);
+			
+			if (\count($arr) == 2)
+			{
+				$arr[0] = \stripslashes($arr[0]);
+				$item = \implode("}", $arr);
+			}
+		};
+		
+		\array_walk_recursive($config, $funcClosure);
+		
+		$config = \var_export($config, true);
+		
+		$arr = \explode("'function", $config);
+		\array_walk($arr, $funcString);
+		$config = \implode("function", $arr);
+		
+		return $config;
 	}
 }

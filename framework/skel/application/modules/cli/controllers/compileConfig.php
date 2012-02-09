@@ -1,4 +1,4 @@
-<?php 
+<?php
 /**
  * Copyright (C) 2011 - K√©vin O'NEILL, Fran√ßois KLINGLER - <contact@42framework.com>
  * 
@@ -23,28 +23,41 @@ class CompileConfig extends \modules\cli\controllers\CliCommand
 {
 	public function processAction ()
 	{
-		/*$config = array();
-		require \FRAMEWORK_DIR.DS.'config'.DS.'config.php';
-		$frameworkConfig = $config;
-		
-		require APP_DIR.DS.'config'.DS.'config.php';
-		$appConfig = $config;
-		
-		$config = array_merge($frameworkConfig, $appConfig);
-		
-		
-		// HERE WE GOOOOOOOO
-		$configBuilder->setModulesDirectories($modulesDirectories)
+		$variablesNames = array(
+			'framework' => array(
+				'config' => 'config',
+				'routes' => 'routes',
+				'events' => 'events',
+				'components' => 'components'),
+			'modules' => array(
+				'config' => 'config',
+				'routes' => 'routes',
+				'events' => 'events',
+				'components' => 'components'),
+			'application' => array(
+				'config' => 'config',
+				'routes' => 'routes',
+				'events' => 'events',
+				'components' => 'components'),
+			'area' => array(
+				'config' => 'config',
+				'routes' => 'routes',
+				'events' => 'events',
+				'components' => 'components')
+		);
+
+		// get the full config, i.e. framework + app + modules
+		$configBuilder = new \framework\libs\ConfigBuilder();
+		$configBuilder->setVariablesNames($variablesNames)
 				->buildConfig();
+
 		$config = $configBuilder->getConfig();
-		 */
-		
-		$config = $this->getConfig()->toArray();
-		
+
 		$ab = new \modules\cli\ConfigBuilder($config);
-		$ab->setTemplateFile(\FRAMEWORK_DIR.\DIRECTORY_SEPARATOR.'modules' . \DIRECTORY_SEPARATOR . 'cli' . \DIRECTORY_SEPARATOR . 'views' . \DIRECTORY_SEPARATOR . 'configTemplate.php');
-		$ab->save(\APP_DIR . \DIRECTORY_SEPARATOR . 'build' . \DIRECTORY_SEPARATOR . 'config.php');
-		
+		$ab->setTemplateFile(\MODULES_DIR . \DIRECTORY_SEPARATOR . 'cli' . \DIRECTORY_SEPARATOR . 'views' . \DIRECTORY_SEPARATOR . 'configTemplate.php');
+		$ab->save(\BUILD_DIR . \DIRECTORY_SEPARATOR . 'config.php');
+
 		echo "Configuration générée !\n";
 	}
+
 }

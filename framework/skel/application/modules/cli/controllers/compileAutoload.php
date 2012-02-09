@@ -33,8 +33,8 @@ class CompileAutoload extends \modules\cli\controllers\CliCommand
 							 $finder->parseMulti($scanner(\APP_DIR)));
 		
 		$ab = new \modules\cli\AutoloadBuilder($found);
-		$ab->setTemplateFile(\FRAMEWORK_DIR.\DIRECTORY_SEPARATOR.'modules'.\DIRECTORY_SEPARATOR.'cli'.\DIRECTORY_SEPARATOR.'views'.\DIRECTORY_SEPARATOR.'autoloadTemplate.php');
-		$ab->save(\APP_DIR.\DIRECTORY_SEPARATOR.'build'.\DIRECTORY_SEPARATOR.'autoload.php');
+		$ab->setTemplateFile(\MODULES_DIR.\DIRECTORY_SEPARATOR.'cli'.\DIRECTORY_SEPARATOR.'views'.\DIRECTORY_SEPARATOR.'autoloadTemplate.php');
+		$ab->save(\BUILD_DIR.\DIRECTORY_SEPARATOR.'autoload.php');
 		
 		echo "Autoload généré !\n";
 	}

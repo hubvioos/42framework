@@ -45,7 +45,7 @@ class ComponentsContainer extends \framework\libs\Registry
 	{
 		parent::__construct($config);
 		
-		//$this->_config = $config;
+		$this->_originalConfig = $config;
 		
 		foreach ($this['components'] as $key => $component)
 		{
@@ -156,5 +156,5 @@ class ComponentsContainer extends \framework\libs\Registry
 			return 0;
 		}
 	}
-
+	
 }
