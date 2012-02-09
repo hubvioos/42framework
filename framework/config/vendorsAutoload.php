@@ -28,4 +28,5 @@ $vendorsAutoload = array(
          'theseer\\tools\\directoryscannerexception' => \FRAMEWORK_DIR.\DIRECTORY_SEPARATOR.'vendors'.\DIRECTORY_SEPARATOR.'theseer'.\DIRECTORY_SEPARATOR.'scanner'.\DIRECTORY_SEPARATOR.'directoryscanner.php',
          'theseer\\tools\\filesonlyfilteriterator' => \FRAMEWORK_DIR.\DIRECTORY_SEPARATOR.'vendors'.\DIRECTORY_SEPARATOR.'theseer'.\DIRECTORY_SEPARATOR.'scanner'.\DIRECTORY_SEPARATOR.'filesonlyfilter.php',
          'theseer\\tools\\includeexcludefilteriterator' => \FRAMEWORK_DIR.\DIRECTORY_SEPARATOR.'vendors'.\DIRECTORY_SEPARATOR.'theseer'.\DIRECTORY_SEPARATOR.'scanner'.\DIRECTORY_SEPARATOR.'includeexcludefilter.php',
+		 'superclosure' => \FRAMEWORK_DIR.\DIRECTORY_SEPARATOR.'vendors'.\DIRECTORY_SEPARATOR.'SuperClosure.php',
          );
