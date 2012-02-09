@@ -70,7 +70,7 @@ class Core extends \framework\core\FrameworkObject
 
 		if ($request->isCli())
 		{
-			$params = \framework\modules\cli\CliUtils::extractParams();
+			$params = \modules\cli\CliUtils::extractParams();
 			$params['module'] = 'cli';
 
 			$state = \framework\core\Request::CLI_STATE;

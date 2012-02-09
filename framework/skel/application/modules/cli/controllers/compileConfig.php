@@ -50,13 +50,13 @@ class CompileConfig extends \modules\cli\controllers\CliCommand
 		$configBuilder = new \framework\libs\ConfigBuilder();
 		$configBuilder->setVariablesNames($variablesNames)
 				->buildConfig();
-
+		
 		$config = $configBuilder->getConfig();
-
+		
 		$ab = new \modules\cli\ConfigBuilder($config);
 		$ab->setTemplateFile(\MODULES_DIR . \DIRECTORY_SEPARATOR . 'cli' . \DIRECTORY_SEPARATOR . 'views' . \DIRECTORY_SEPARATOR . 'configTemplate.php');
 		$ab->save(\BUILD_DIR . \DIRECTORY_SEPARATOR . 'config.php');
-
+		
 		echo "Configuration générée !\n";
 	}
 
