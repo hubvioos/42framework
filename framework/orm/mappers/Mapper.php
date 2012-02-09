@@ -303,7 +303,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	 * @param \framework\orm\models\IAttachableModel The model to save.
 	 * @return \framework\orm\models\IAttachableModel The saved model on succes, NULL on failure.
 	 */
-	public function save (\framework\orm\models\IAttachableModel &$model)
+	public function save (\framework\orm\models\IAttachableModel $model)
 	{
 		$r = NULL;
 		
@@ -325,7 +325,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	 */
 	public function saveAll()
 	{
-		foreach ($this->attachedModels as $id => &$model)
+		foreach ($this->attachedModels as $id => $model)
 		{
 			$this->save($model);
 		}
@@ -418,7 +418,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	 * Find the external relations of a model
 	 * @param \framework\orm\models\IAttachableModel $model 
 	 */
-	protected function _findExternalRelations(\framework\orm\models\IAttachableModel &$model)
+	protected function _findExternalRelations(\framework\orm\models\IAttachableModel $model)
 	{
 		foreach($this->externalRelations as $name => $spec)
 		{
@@ -462,7 +462,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	 * Save the internal relations of a model
 	 * @param \framework\orm\models\IAttachableModel $model 
 	 */
-	protected function _saveInternalRelations(&$model)
+	protected function _saveInternalRelations($model)
 	{
 		foreach ($this->internalRelations as $name => $spec)
 		{
@@ -489,7 +489,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	 * @param \framework\orm\models\IAttachableModel $model
 	 * @throws \framework\orm\mappers\MapperException 
 	 */
-	protected function _saveExternalRelations(&$model)
+	protected function _saveExternalRelations($model)
 	{
 		foreach ($this->externalRelations as $name => $spec)
 		{
@@ -546,7 +546,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	 * @return \framework\orm\models\IAttachableModel
 	 * @throws \framework\orm\mappers\MapperException 
 	 */
-	protected function _persist (&$model, $mode = self::CREATE)
+	protected function _persist ($model, $mode = self::CREATE)
 	{
 		if ($mode != self::CREATE && $mode != self::UPDATE)
 		{
