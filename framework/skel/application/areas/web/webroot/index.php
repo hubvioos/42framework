@@ -22,51 +22,11 @@
 \define('AREA_NAME', 'web');
 
 /**
- * Defines the execution mode (dev, stage, prod or custom)
- */
-\define('ENV', 'dev');
-
-/**
  * Defines the path to the server root folder
  */
 \define('WEBROOT', __DIR__);
 
-/**
- * Defines the path to the application folder
- */
-\define('APP_DIR', \dirname(\dirname(\WEBROOT)));
-
-/**
- * Defines the path to the framework folder
- */
-\define('FRAMEWORK_DIR', \dirname(\dirname(\APP_DIR)));
-
-/**
- * Defines the path to the modules folder
- */
-\define('MODULES_DIR', \APP_DIR . \DIRECTORY_SEPARATOR . 'modules');
-
-/**
- * Definess the path to the vendors folder
- */
-\define('VENDORS_DIR', \APP_DIR . \DIRECTORY_SEPARATOR . 'vendors');
-
-/**
- * Definess the path to the area folder
- */
-\define('AREA_DIR', \APP_DIR . \DIRECTORY_SEPARATOR . \AREA_NAME);
-
-/**
- * Defines the path to the folder containing build files
- */
-\define('BUILD_DIR', \AREA_DIR . \DIRECTORY_SEPARATOR . 'build');
-
-/**
- * Defines the path to the folder containing log files
- */
-\define('LOGS_DIR', \AREA_DIR . \DIRECTORY_SEPARATOR . 'log');
-
-\define('DS', \DIRECTORY_SEPARATOR);
+require \dirname(\dirname(\dirname(\WEBROOT))) . \DIRECTORY_SEPARATOR . 'common' . \DIRECTORY_SEPARATOR . 'constants.php';
 
 $autoload = array();
 $config = array();
@@ -89,9 +49,13 @@ if (\ENV == 'dev') // dynamic autoload and config
 
 	$vendorsAutoload = array();
 	
-	include \BUILD_DIR . \DIRECTORY_SEPARATOR . 'autoload.php';
+	if (\file_exists(\BUILD_DIR . \DIRECTORY_SEPARATOR . 'autoload.php'))
+	{
+		include \BUILD_DIR . \DIRECTORY_SEPARATOR . 'autoload.php';
+	}
+	
 	include \FRAMEWORK_DIR . \DIRECTORY_SEPARATOR . 'config' . \DIRECTORY_SEPARATOR . 'vendorsAutoload.php';
-
+	
 	$loader = new \framework\libs\StaticClassLoader();
 	$loader->addMap('build', $autoload);
 	$loader->addMap('vendors', $vendorsAutoload);
@@ -100,11 +64,6 @@ if (\ENV == 'dev') // dynamic autoload and config
 	/*
 	 * Config
 	 */
-	//$modulesDirectories = array();
-	//$modulesDirectories['framework'] = \FRAMEWORK_DIR . \DIRECTORY_SEPARATOR . 'modules';
-	//$modulesDirectories['modules'] = \MODULES_DIR;
-	//$modulesDirectories['application'] = \APP_DIR . \DIRECTORY_SEPARATOR . 'modules';
-
 	$variablesNames = array(
 		'framework' => array(
 			'config' => 'config', 
@@ -151,8 +110,6 @@ else // static autoload and config
 	 */
 	require \BUILD_DIR . \DIRECTORY_SEPARATOR . 'config.php';
 }
-
-//$registry = new \framework\libs\Registry($config);
 
 $container = new \framework\libs\ComponentsContainer($config);
 

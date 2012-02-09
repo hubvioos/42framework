@@ -1,3 +1,0 @@
-Options +FollowSymLinks
-RewriteEngine on
-RewriteRule    ^(.*)$  ./application/$1

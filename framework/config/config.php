@@ -39,7 +39,7 @@ $config = array(
 		'path' => APP_DIR.DS.'database'.DS.'db.sqlite'
 	),
 	'logs' => array(
-		'file' => \AREA_DIR . \DIRECTORY_SEPARATOR . 'log'
+		'file' => \APP_DIR . \DIRECTORY_SEPARATOR . 'log'
 	),
 	'defaultCacheSysteml' => 'Apc',
 	'cache' => array(

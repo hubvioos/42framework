@@ -1,5 +1,5 @@
 *~
-framework/skel/application/build/*
+*/build/*
 application/*
 application/
 */*.orig
