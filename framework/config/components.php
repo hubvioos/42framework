@@ -368,4 +368,18 @@ $components = array(
 		},
 		'isUnique' => true
 	),
+	'MySQLDate' => array(
+		'callable' => function($c, $args)
+		{
+			return new \framework\orm\types\MySQLDate($c->getComponent('MySQLDateTimeAdapter'));
+		},
+		'isUnique' => true
+	),
+	'MySQLTimestamp' => array(
+		'callable' => function($c, $args)
+		{
+			return new \framework\orm\types\MySQLTimestamp($c->getComponent('MySQLDateTimeAdapter'));
+		},
+		'isUnique' => true
+	)
 );

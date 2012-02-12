@@ -18,38 +18,16 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+namespace framework\orm\types;
+
 /**
- * Class MySQLCriteria
+ * Description of MySQLDate
  *
  * @author mickael
  */
-
-namespace framework\orm\utils;
-
-class MySQLCriteria extends \framework\orm\utils\Criteria
+class MySQLDate extends \framework\orm\types\Type
 {
-	const BETWEEN = 'between';
-	const COALESCE = 'coalesce';
-	const GREATEST = 'greatest';
-	const LEAST = 'least';
+	const TYPE_IDENTIFIER = 'MySQLDate';
 	
-	public function between ($field, array $boundaries)
-	{
-		return $this->_addConstraint(self::BETWEEN, array($field, $boundaries));
-	}
-	
-	public function coalesce($field, array $list)
-	{
-		return $this->_addConstraint(self::COALESCE, array($field, $list));
-	}
-
-	public function greatest($field, array $values)
-	{
-		return $this->_addConstraint(self::GREATEST, array($field, $values));
-	}
-	
-	public function least($field, array $values)
-	{
-		return $this->_addConstraint(self::LEAST, array($field, $values));
-	}
 }
+
