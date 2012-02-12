@@ -122,7 +122,6 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	 */
 	public function __construct (\framework\orm\datasources\interfaces\IDatasource $datasource)
 	{
-		echo '<h1>'.\get_class($this).' created</h1>';
 		$this->datasource = $datasource;
 
 		if (!isset($this->fields) || $this->fields === array() || $this->fields === NULL)
@@ -656,7 +655,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 						{
 							if ($spec['internal'])
 							{
-								$entities = $relationMapper->find($spec['value']);
+								$entities = $relationMapper->find($map[$spec['storageField']]['value']);
 							}
 							else
 							{
