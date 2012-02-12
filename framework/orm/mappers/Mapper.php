@@ -122,6 +122,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	 */
 	public function __construct (\framework\orm\datasources\interfaces\IDatasource $datasource)
 	{
+		echo '<h1>'.\get_class($this).' created</h1>';
 		$this->datasource = $datasource;
 
 		if (!isset($this->fields) || $this->fields === array() || $this->fields === NULL)
@@ -618,7 +619,15 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 					// else, use the value as provided
 					else
 					{
-						$model->$setter($map[$name]['value']);
+						$value = $map[$name]['value'];
+						
+						// convert numeric types into actual numeric values (int, float)
+						if(\in_array($spec['type'], $this->getComponent('orm.numericTypes')))
+						{
+							$value = $value + 0;
+						}
+						
+						$model->$setter($value);
 					}
 				}
 				else
