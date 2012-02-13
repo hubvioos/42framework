@@ -46,7 +46,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 
 	/**
 	 * The datasource used to store the data.
-	 * @var \framework\orm\datasources\IDatasource
+	 * @var \framework\orm\datasources\interfaces\IDatasource
 	 */
 	protected $datasource = null;
 
@@ -117,7 +117,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 
 	/**
 	 * Constructor
-	 * @param \framework\orm\datasources\IDatasource $datasource The datasource used to store the data.
+	 * @param \framework\orm\datasources\interfaces\IDatasource $datasource The datasource used to store the data.
 	 * @throws \framework\orm\mappers\MapperException 
 	 */
 	public function __construct (\framework\orm\datasources\interfaces\IDatasource $datasource)
@@ -209,60 +209,64 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 
 	/**
 	 * Retrieve a model from the datasource based on its id.
-	 * @param int|string $id The model's id.
+	 * @param mixed $toFind An array of IDs or a unique ID.
 	 * @param bool $attach Attach the retrieved model(s) if found.
 	 * @return \framework\orm\models\IAttachableModel
 	 */
-	public function find ($id, $attach = true)
+	public function find ($toFind, $attach = true)
 	{
-		$data = $this->datasource->find($this->_wrapInArray($id), $this->getEntityIdentifier());
-
-		if (\count($data) == 0)
+		$alreadyFound = array();
+		$attached = $this->getComponent('orm.utils.Collection');
+		$found = $this->getComponent('orm.utils.Collection');
+		$toFind = $this->_wrapInArray($toFind);
+		
+		$searchForUniqueModel = (\count($toFind) == 1);
+		
+		foreach($toFind as $index => $id)
 		{
-			return null;
-		}
-		else
-		{
-			$result = NULL;
-
-			if (\count($data) == 1)
+			if($this->isAttached($id))
 			{
-				$result = $this->_mapToModel($data[0]);
-				
+				$attached->add($this->attachedModels[(string) $id]);
+				$alreadyFound[] = $index;
+			}
+		}
+		
+		foreach($alreadyFound as $index)
+		{
+			unset($toFind[$index]);
+		}
+		
+		if(\count($toFind) != 0)
+		{
+			$data = $this->datasource->find($toFind, $this->getEntityIdentifier());
+			
+			foreach ($data as $map)
+			{
+				$newModel = $this->_mapToModel($map);
+
 				if($this->externalRelations != NULL)
 				{
-					$this->_findExternalRelations($result);
+					$this->_findExternalRelations($newModel);
 				}
-				
+
 				if ($attach)
 				{
-					$this->attach($result);
+					$this->attach($newModel);
 				}
-			}
-			else
-			{
-				$result = $this->getComponent('orm.utils.Collection');
 
-				foreach ($data as $map)
-				{
-					$newModel = $this->_mapToModel($map);
-					
-					if($this->externalRelations != NULL)
-					{
-						$this->_findExternalRelations($newModel);
-					}
-					
-					if ($attach)
-					{
-						$this->attach($newModel);
-					}
-
-					$result[] = $newModel;
-				}
+				$found[] = $newModel;
 			}
 
-			return $result;
 		}
+		
+		$found->merge($attached);
+
+		if($searchForUniqueModel)
+		{
+			return $found->isEmpty() ? NULL : $found[0];
+		}
+		
+		return $found->isEmpty() ? NULL : $found;
 	}
 
 	/**
@@ -275,7 +279,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 		$data = $this->datasource->findAll($this->getEntityIdentifier(), $criteria);
 		$results = $this->getComponent('orm.utils.Collection');
 
-		if (\count($data) != 0)
+		if (!$data->isEmpty())
 		{
 			foreach ($data as $map)
 			{
@@ -359,12 +363,21 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 
 	/**
 	 * Check if a model is attached to the mapper
-	 * @param \framework\orm\models\IAttachableModel $model
+	 * @param mixed $model
 	 * @return bool 
 	 */
-	public final function isAttached (\framework\orm\models\IAttachableModel $model)
+	public final function isAttached ($model)
 	{
-		return \in_array($model, $this->attachedModels, true);
+		if(\is_scalar($model))
+		{
+			return \array_key_exists((string) $model, $this->attachedModels); 
+		}
+		elseif($model instanceof \framework\orm\models\IAttachableModel)
+		{
+			return \in_array($model, $this->attachedModels, true);
+		}
+		
+		throw new \framework\orm\mappers\MapperException('Mapper::isAttached() can only take a model or an ID as parameter.');
 	}
 
 	/**
@@ -402,7 +415,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 
 	/**
 	 * Get the datasource used by the mapper.
-	 * @return \framework\orm\datasources\IDatasource
+	 * @return \framework\orm\datasources\interfaces\IDatasource
 	 */
 	public final function getDatasource ()
 	{

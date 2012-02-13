@@ -64,4 +64,34 @@ class Collection extends \ArrayObject
 	{
 		return $this->getArrayCopy();
 	}
+	
+	/**
+	 * Merge with an array or another Collection
+	 * @param array|\framework\orm\utils\Collection $collection
+	 * @return \framework\orm\utils\Collection $this
+	 * @throws \framework\orm\utils\CollectionException 
+	 */
+	public function merge($collection)
+	{
+		if(!\is_array($collection) && !($collection instanceof self))
+		{
+			throw new \framework\orm\utils\CollectionException('A Collection can only be merged with an array or another Collection');
+		}
+		
+		foreach ($collection as $index => $element)
+		{
+			$this[$index] = $element;
+		}
+		
+		return $this;
+	}
+	
+	/**
+	 * Find whether the Collection is empty or not.
+	 * @return bool
+	 */
+	public function isEmpty()
+	{
+		return \count($this) == 0;
+	}
 }
