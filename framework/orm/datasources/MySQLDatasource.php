@@ -177,7 +177,7 @@ class MySQLDatasource extends \framework\core\FrameworkObject implements \framew
 	 * @param array $primary An array of IDs
 	 * @param array $inherits
 	 * @param array $dependends
-	 * @return array
+	 * @return \framework\orm\utils\Collection
 	 */
 	public function find(array $primary, $entity, array $inherits = array(), array $dependents = array())
 	{

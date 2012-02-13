@@ -34,7 +34,7 @@ interface IDatasource
 	 * @param array $primary An array of IDs
 	 * @param array $inherits
 	 * @param array $dependends
-	 * @return array
+	 * @return \framework\orm\utils\Collection
 	 */
 	public function find(array $primary, $entity, array $inherits = array(), array $dependents = array());
 
@@ -43,7 +43,7 @@ interface IDatasource
 	 * @param \framework\orm\utils\Criteria $criteria
 	 * @param array $inherits
 	 * @param array $dependents
-	 * @return array
+	 * @return \framework\orm\utils\Collection
 	 */
 	public function findAll($entity, \framework\orm\utils\Criteria $criteria = null, array $inherits = array(), array $dependents = array());
 
@@ -66,4 +66,18 @@ interface IDatasource
 	 * @return boolean
 	 */
 	public function update($id, $entity, $data, \framework\orm\utils\Criteria $where);
+	
+		/**
+	 * @abstract
+	 * @return \framework\orm\utils\Criteria
+	 */
+	public function getNativeCriteria();
+	
+	/**
+	 * Get the string representation of a Criteria
+	 * @abstract
+	 * @param \framework\orm\utils\Criteria
+	 * @return string 
+	 */
+	public function criteriaToString(\framework\orm\utils\Criteria $criteria);
 }

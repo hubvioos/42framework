@@ -564,7 +564,7 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 			throw new \framework\orm\datasources\OrientDBDatasourceException('Bad entity name ' . $entity);
 		}
 
-		$entities = array();
+		$entities = $this->getComponent('orm.utils.Collection');
 
 		try
 		{

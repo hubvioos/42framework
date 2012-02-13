@@ -35,19 +35,4 @@ interface IDbDatasource
 	 */
 	public function query ($query);
 	
-		
-	/**
-	 * @abstract
-	 * @return \framework\orm\utils\Criteria
-	 */
-	public function getNativeCriteria();
-	
-	/**
-	 * Get the string representation of a Criteria
-	 * @abstract
-	 * @param \framework\orm\utils\Criteria
-	 * @return string 
-	 */
-	public function criteriaToString(\framework\orm\utils\Criteria $criteria);
-	
 }
