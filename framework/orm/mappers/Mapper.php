@@ -573,7 +573,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 		}
 		else
 		{
-			if ($this->datasource->update($model->getId(), $this->getEntityIdentifier(), $model, NULL) == true)
+			if ($this->datasource->update($model->getId(), $this->getEntityIdentifier(), $this->_modelToMap($model), NULL) == true)
 			{
 				$id = $model->getId();
 			}
