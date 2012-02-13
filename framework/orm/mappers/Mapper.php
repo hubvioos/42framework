@@ -290,7 +290,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 				{
 					$model = $this->getAttachedModel($id);
 				}
-				else
+				elseif($attach)
 				{
 					$this->attach($model);
 				}
