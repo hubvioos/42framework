@@ -69,13 +69,24 @@ class MySQLDatasource extends \framework\core\FrameworkObject implements \framew
 	 */
 	protected $active = '';
 	
+	/**
+	 *
+	 * @var type 
+	 */
 	protected $pattern = '#[0-9,a-z,A-Z$_]+#';
 
-	
+	/**
+	 *
+	 * @var type 
+	 */
 	protected $config = array();
+	
+	protected $tools = NULL;
 	
 	public function __construct ($host = 'localhost', $port = 3306)
 	{
+		$this->tools = $this->getComponent('orm.utils.DatasourceTools');
+		
 		$this->host = $host;
 		$this->port = $port;
 	}
@@ -136,17 +147,7 @@ class MySQLDatasource extends \framework\core\FrameworkObject implements \framew
 	public function query ($query)
 	{
 		return $this->link->query($statement);
-	}
-	
-	/**
-	 * Get a query object to build query in a OO-style
-	 * @return mixed
-	 */
-	public function getQuery()
-	{
-		return '';
-	}
-	
+	}	
 	
 	/**
 	 * 
@@ -154,9 +155,21 @@ class MySQLDatasource extends \framework\core\FrameworkObject implements \framew
 	 * @param \framework\orm\utils\Criteria $where
 	 * @return boolean
 	 */
-	public function delete($id, \framework\orm\utils\Criteria $where)
+	public function delete($id, $entity, \framework\orm\utils\Criteria $where = NULL)
 	{
+		$this->_validateIdentifier($entity);
 		
+		if($where == NULL)
+		{
+			$req = $this->link->prepare('DELETE FROM '.$entity.' WHERE id = :id LIMIT 1');
+			$req->bindValue(':id', $id);
+		}
+		else
+		{
+			$req = $this->link->prepare('DELETE FROM '.$entity.' WHERE '.$this->criteriaToString($where));
+		}
+		
+		return $req->execute();
 	}
 
 	/**
@@ -168,10 +181,7 @@ class MySQLDatasource extends \framework\core\FrameworkObject implements \framew
 	 */
 	public function find(array $primary, $entity, array $inherits = array(), array $dependents = array())
 	{
-		if(!$this->_validTableName($entity))
-		{
-			throw new \framework\orm\datasources\MySQLDatasourceException('Wrong entity name '.$entity);
-		}
+		$this->_validateIdentifier($entity);
 		
 		$this->_retrieveTableConfig($entity);
 		
@@ -208,15 +218,36 @@ class MySQLDatasource extends \framework\core\FrameworkObject implements \framew
 	 * @param array $dependents
 	 * @return array
 	 */
-	public function findAll($entity, \framework\orm\utils\Criteria $criteria = null, array $inherits = array(), array $dependents = array())
+	public function findAll($entity, \framework\orm\utils\Criteria $criteria = NULL, array $inherits = array(), array $dependents = array())
 	{
-		if(!$this->_validTableName($entity))
+		$this->_validateIdentifier($entity);
+		
+		if($criteria == NULL)
 		{
+			$req = $this->link->prepare('SELECT * FROM '.$entity.' WHERE '.$this->criteriaToString($criteria));
+		}
+		else
+		{
+			$req = $this->link->prepare('SELECT * FROM '.$entity);
+		}
+		
+		$found = $this->getComponent('orm.utils.Collection');
+		
+		$i = 0;
+		while($result = $req->fetch(\PDO::FETCH_ASSOC))
+		{
+			foreach($result as $name => $value)
+			{
+				$found[$i][$name] = array(
+					'value' => $value
+				);
+			}
 			
+			$i++;
 		}
 		
 		
-		
+		return $found;
 	}
 	
 	/**
@@ -224,7 +255,7 @@ class MySQLDatasource extends \framework\core\FrameworkObject implements \framew
 	 * @param \framework\orm\utils\Criteria $criteria
 	 * @return string 
 	 */
-	protected function _criteriaToString(\framework\orm\utils\Criteria $criteria)
+	public function criteriaToString(\framework\orm\utils\Criteria $criteria)
 	{
 		$string = '';
 
@@ -235,45 +266,45 @@ class MySQLDatasource extends \framework\core\FrameworkObject implements \framew
 				case \framework\orm\utils\Criteria::CRITERIA :
 					if ($params[1][0] == \framework\orm\utils\Criteria::ASSOCIATION_AND)
 					{
-						$string .= ' AND ' . $this->_criteriaToString($params[1][1]);
+						$string .= ' AND ' . $this->criteriaToString($params[1][1]);
 					}
 					else if ($params[1][0] == \framework\orm\utils\Criteria::ASSOCIATION_OR)
 					{
-						$string .= ' OR ' . $this->_criteriaToString($params[1][1]);
+						$string .= ' OR ' . $this->criteriaToString($params[1][1]);
 					}
 					break;
 
 				case \framework\orm\utils\Criteria::EQUALS :
-					$string .= $params[1][0] . ' = ' . $this->_quoteParameter($params[1][1]);
+					$string .= $params[1][0] . ' = ' . $this->tools->quoteParameter($params[1][1]);
 					break;
 				case \framework\orm\utils\Criteria::GREATER_THAN :
-					$string .= $params[1][0] . ' > ' . $this->_quoteParameter($params[1][1]);
+					$string .= $params[1][0] . ' > ' . $this->tools->quoteParameter($params[1][1]);
 					break;
 				case \framework\orm\utils\Criteria::LESS_THAN :
-					$string .= $params[1][0] . ' < ' . $this->_quoteParameter($params[1][1]);
+					$string .= $params[1][0] . ' < ' . $this->tools->quoteParameter($params[1][1]);
 					break;
 				case \framework\orm\utils\Criteria::GREATER_THAN_OR_EQUAL :
-					$string .= $params[1][0] . ' >= ' . $this->_quoteParameter($params[1][1]);
+					$string .= $params[1][0] . ' >= ' . $this->tools->quoteParameter($params[1][1]);
 					break;
 				case \framework\orm\utils\Criteria::LESS_THAN_OR_EQUAL :
-					$string .= $params[1][0] . ' <= ' . $this->_quoteParameter($params[1][1]);
+					$string .= $params[1][0] . ' <= ' . $this->tools->quoteParameter($params[1][1]);
 					break;
 				case \framework\orm\utils\Criteria::NOT_EQUALS :
-					$string .= $params[1][0] . ' <> ' . $this->_quoteParameter($params[1][1]);
+					$string .= $params[1][0] . ' <> ' . $this->tools->quoteParameter($params[1][1]);
 					break;
 
 				case \framework\orm\utils\Criteria::IS_NULL :
 					$string .= $params[1] . ' IS NULL';
 					break;
 				case \framework\orm\utils\Criteria::LIKE :
-					$string .= $params[1][0] . ' LIKE ' . $this->_quoteParameter($params[1][1]);
+					$string .= $params[1][0] . ' LIKE ' . $this->tools->quoteParameter($params[1][1]);
 					break;
 				case \framework\orm\utils\Criteria::IN :
 					/*$values = '[';
 
 					foreach ($params[1][1] as $value)
 					{
-						$values .= $this->_quoteParameter($value) . ', ';
+						$values .= $this->tools->quoteParameter($value) . ', ';
 					}
 
 					$values = \rtrim($values, ', ') . ']';
@@ -305,56 +336,80 @@ class MySQLDatasource extends \framework\core\FrameworkObject implements \framew
 	public function create($entity, $data, $type = null)
 	{
 		$fields = '';
-		$toPersist = array();
+		$params = '';
 
+		$this->_validateIdentifier($entity);
+		
 		foreach ($data as $property => $spec)
 		{
 			if ($spec['storageField'] !== NULL)
 			{
+				$this->_validateIdentifier($spec['storageField']);
 				$fields .= $spec['storageField'] . ', ';
-				$toPersist[] = $property;
+				$params .= ':'.$spec['storageField'] . ', ';
 			}
 		}
 
-		if (!\preg_match('#^([a-zA-Z0-9$_]+, )+$#', $fields))
-		{
-			throw new \framework\orm\datasources\MySQLDatasourceException('Incorrect field names list: ' . $fields);
-		}
-		else
-		{
-			$values = '';
+		// get rid of the extra ", " at the end of each string
+		$params = \substr($params, 0, \strlen($params) - 2);
+		$fields = \substr($fields, 0, \strlen($fields) - 2);
 
-			foreach ($toPersist as $property)
+		$query = $this->link->prepare('INSERT INTO ' . $entity . '(' . $fields . ')' . ' VALUES(' . $params . ')');
+		
+		foreach ($data as $property => $spec)
+		{
+			$dataType = $spec['type'];
+			$dataValue = $spec['value'];
+			$bindType = \PDO::PARAM_STR;
+
+			switch ($dataType)
 			{
-				$dataType = $data[$property]['type'];
-				$dataValue = $data[$property]['value'];
-
-				switch ($dataType)
-				{
-					default:
-						throw new \framework\orm\datasources\OrientDBDatasourceException('Unknown type ' . $dataType);
+				case \framework\orm\types\MySQLDate::TYPE_IDENTIFIER:
+				case \framework\orm\types\MySQLDateTime::TYPE_IDENTIFIER:
+				case \framework\orm\types\MySQLTimestamp::TYPE_IDENTIFIER:
+				case \framework\orm\types\Type::RELATION_KEY: 
+					break;
+				
+				default:
+					if(\in_array($dataType, $this->getComponent('orm.numericTypes')))
+					{
 						break;
-				}
-
-				$values .= $dataValue . ', ';
+					}
+					elseif(\in_array($dataType, $this->getComponent('orm.textualTypes')))
+					{
+						break;
+					}
+					elseif(\in_array($dataType, $this->getComponent('orm.booleanTypes')))
+					{
+						$dataValue = ($dataValue) ? '\'1\'' : '\'0\'';
+						$bindType = \PDO::PARAM_BOOL;
+						break;
+					}
+					elseif($dataValue === NULL)
+					{
+						$bindType = \PDO::PARAM_NULL;
+						break;
+					}
+					elseif(\array_key_exists('internal', $spec))
+					{
+						$dataValue = $dataValue['id']['value'];
+						break;
+					}
+					
+					
+					throw new \framework\orm\datasources\MySQLDatasourceException('Unknown type ' . $dataType);
+					break;
 			}
-
-			// get rid of the extra ", " at the end of each string
-			$values = \substr($values, 0, \strlen($values) - 2);
-			$fields = \substr($fields, 0, \strlen($fields) - 2);
-
-			$req = 'INSERT INTO ' . $entity . '(' . $fields . ')' . ' VALUES (' . $values . ')';
-
-			$response = $this->link->query($req);
-
-			if ($response instanceof \OrientDBRecord)
-			{
-				$response->parse();
-				return $response->recordID;
-			}
-
-			return false;
+			
+			$query->bindValue(':'.$spec['storageField'], $dataValue, $bindType);
 		}
+
+		if($query->execute())
+		{
+			return $this->link->lastInsertId();
+		}
+		
+		return false;
 	}
 
 	/**
@@ -426,10 +481,7 @@ class MySQLDatasource extends \framework\core\FrameworkObject implements \framew
 	 */
 	protected function _retrieveTableConfig($table)
 	{
-		if(!$this->_validTableName($table))
-		{
-			throw new \framework\orm\datasources\MySQLDatasourceException('Wrong table name');
-		}
+		$this->_validateIdentifier($table);
 		
 		if(!\array_key_exists($this->active.'.'.$table, $this->config))
 		{
@@ -448,12 +500,15 @@ class MySQLDatasource extends \framework\core\FrameworkObject implements \framew
 	
 	/**
 	 *
-	 * @param string $tableName
+	 * @param string $identifier
 	 * @return bool 
 	 */
-	protected function _validTableName($tableName)
+	protected function _validateIdentifier($identifier)
 	{
-		return (\strlen($tableName) <= 64 && \preg_match($this->pattern, $tableName));
+		if(\strlen($identifier) > 64 || !\preg_match($this->pattern, $identifier))
+		{
+			throw new \framework\orm\datasources\MySQLDatasourceException('Wrong identifier '.$identifier);
+		}
 	}
 
 

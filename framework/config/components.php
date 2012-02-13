@@ -381,5 +381,13 @@ $components = array(
 			return new \framework\orm\types\MySQLTimestamp($c->getComponent('MySQLDateTimeAdapter'));
 		},
 		'isUnique' => true
+	),
+				
+	'orm.utils.DatasourceTools' => array(
+		'callable' => function($c, $args)
+		{
+			return new \framework\orm\utils\DatasourceTools();
+		},
+		'isUnique' => true
 	)
 );

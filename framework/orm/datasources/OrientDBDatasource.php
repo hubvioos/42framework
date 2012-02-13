@@ -37,49 +37,55 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 	 * The connection to the database
 	 * @var OrientDB 
 	 */
-	private $link = null;
+	protected $link = null;
 
 	/**
 	 * The host
 	 * @var string 
 	 */
-	private $host;
+	protected $host;
 
 	/**
 	 * The connection's port
 	 * @var int
 	 */
-	private $port;
+	protected $port;
 
 	/**
 	 * The user name used for the connection to the host
 	 * @var string 
 	 */
-	private $user = '';
+	protected $user = '';
 
 	/**
 	 * The password used for the connection to the host
 	 * @var string
 	 */
-	private $password = '';
+	protected $password = '';
 
 	/**
 	 * The name of the active database
 	 * @var string 
 	 */
-	private $active = '';
+	protected $active = '';
 
 	/**
 	 * The configuration of the datasource. Named "configuration" to prevent confusing with $this->getConfig().
 	 * @var array 
 	 */
-	private $configuration = array();
+	protected $configuration = array();
 
 	/**
 	 * Regex pattern the IDs must match
 	 * @var string
 	 */
-	private $pattern = '/^[^ \t\n\r]*$/';
+	protected $pattern = '/^[^ \t\n\r]*$/';
+	
+	/**
+	 *
+	 * @var \framework\orm\utils\DatasourceTools
+	 */
+	protected $tools = NULL;
 
 	/**
 	 * Constructor
@@ -91,6 +97,8 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 	 */
 	public function __construct ($user, $password, $host = 'localhost', $port = 2424)
 	{
+		$this->tools = $this->getComponent('orm.utils.DatasourceTools');
+		
 		$this->host = $host;
 		$this->port = $port;
 		$this->user = $user;
@@ -418,20 +426,20 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 				switch ($dataType)
 				{
 					case \framework\orm\types\OrientDBDateTime::TYPE_IDENTIFIER :
-						$dataValue = $this->_quoteString($dataValue);
+						$dataValue = $this->tools->quoteString($dataValue);
 						break;
 
 					case \framework\orm\types\OrientDBBoolean::TYPE_IDENTIFIER :
 						break;
 					
 					case \framework\orm\types\Type::RELATION_KEY :
-						$dataValue = $this->_quoteString($dataValue);
+						$dataValue = $this->tools->quoteString($dataValue);
 						break;
 					
 					case \framework\orm\types\Type::UNKNOWN :
 						if (\is_string($dataValue))
 						{
-							$dataValue = $this->_quoteString($dataValue);
+							$dataValue = $this->tools->quoteString($dataValue);
 							break;
 						}
 
@@ -447,7 +455,7 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 
 						if (\in_array($dataType, $this->getComponent('orm.textualTypes')))
 						{
-							$dataValue = $this->_quoteString($dataValue);
+							$dataValue = $this->tools->quoteString($dataValue);
 							break;
 						}
 
@@ -507,9 +515,10 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 	/**
 	 *
 	 * @param string $id
+	 * @param string $entity
 	 * @param \framework\orm\Criteria $where 
 	 */
-	public function delete ($id, \framework\orm\utils\Criteria $where = null)
+	public function delete ($id, $entity, \framework\orm\utils\Criteria $where = null)
 	{
 		return $this->link->recordDelete($id);
 	}
@@ -559,8 +568,8 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 
 		try
 		{
-			$data = $this->query('SELECT FROM ' . $entity . ' WHERE ' . $this->_criteriaToString($criteria));
-
+			$data = $this->query('SELECT FROM ' . $entity . ' WHERE ' . $this->criteriaToString($criteria));
+			
 			foreach ($data as $record)
 			{
 				$record->parse();
@@ -599,14 +608,6 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 	public function getNativeCriteria ()
 	{
 		return $this->getComponent('orm.utils.OrientDBCriteria');
-	}
-
-	/**
-	 * Not supported yet
-	 */
-	public function getQuery ()
-	{
-		return '';
 	}
 
 	
@@ -692,27 +693,11 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 	}
 
 	/**
-	 * Properly quote a string (i.e. escape the '"' character since it's the one we use to enclose string in requests).
-	 * @param string $string The string to quote
-	 * @return string 
-	 */
-	protected function _quoteString ($string)
-	{
-		return '"' . \str_replace('"', '\\"', $string) . '"';
-	}
-
-	protected function _quoteParameter ($param)
-	{
-		return ((\is_string($param) && \is_numeric($param))
-				|| \is_float($param) || \is_int($param)) ? $param : $this->_quoteString($param);
-	}
-
-	/**
 	 * Get the string representation of a criteria.
 	 * @param \framework\orm\utils\Criteria $criteria
 	 * @return string 
 	 */
-	protected function _criteriaToString (\framework\orm\utils\Criteria $criteria)
+	public function criteriaToString (\framework\orm\utils\Criteria $criteria)
 	{
 		$string = '';
 		$constraints = $criteria->getConstraints();
@@ -725,46 +710,46 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 					if ($params[1][0] == \framework\orm\utils\Criteria::ASSOCIATION_AND)
 					{
 						//$string = '('.$string.' AND '.$this->_criteriaToString($params[1][1]).')';
-						$string .= ' AND ' . $this->_criteriaToString($params[1][1]);
+						$string .= ' AND ' . $this->criteriaToString($params[1][1]);
 					}
 					else if ($params[1][0] == \framework\orm\utils\Criteria::ASSOCIATION_OR)
 					{
 						//$string = '('.$string.' OR '.$this->_criteriaToString($params[1][1]).')';
-						$string .= ' OR ' . $this->_criteriaToString($params[1][1]);
+						$string .= ' OR ' . $this->criteriaToString($params[1][1]);
 					}
 					break;
 
 				case \framework\orm\utils\Criteria::EQUALS :
-					$string .= $params[1][0] . ' = ' . $this->_quoteParameter($params[1][1]);
+					$string .= $params[1][0] . ' = ' . $this->tools->quoteParameter($params[1][1]);
 					break;
 				case \framework\orm\utils\Criteria::GREATER_THAN :
-					$string .= $params[1][0] . ' > ' . $this->_quoteParameter($params[1][1]);
+					$string .= $params[1][0] . ' > ' . $this->tools->quoteParameter($params[1][1]);
 					break;
 				case \framework\orm\utils\Criteria::LESS_THAN :
-					$string .= $params[1][0] . ' < ' . $this->_quoteParameter($params[1][1]);
+					$string .= $params[1][0] . ' < ' . $this->tools->quoteParameter($params[1][1]);
 					break;
 				case \framework\orm\utils\Criteria::GREATER_THAN_OR_EQUAL :
-					$string .= $params[1][0] . ' >= ' . $this->_quoteParameter($params[1][1]);
+					$string .= $params[1][0] . ' >= ' . $this->tools->quoteParameter($params[1][1]);
 					break;
 				case \framework\orm\utils\Criteria::LESS_THAN_OR_EQUAL :
-					$string .= $params[1][0] . ' <= ' . $this->_quoteParameter($params[1][1]);
+					$string .= $params[1][0] . ' <= ' . $this->tools->quoteParameter($params[1][1]);
 					break;
 				case \framework\orm\utils\Criteria::NOT_EQUALS :
-					$string .= $params[1][0] . ' <> ' . $this->_quoteParameter($params[1][1]);
+					$string .= $params[1][0] . ' <> ' . $this->tools->quoteParameter($params[1][1]);
 					break;
 
 				case \framework\orm\utils\Criteria::IS_NULL :
 					$string .= $params[1] . ' is null';
 					break;
 				case \framework\orm\utils\Criteria::LIKE :
-					$string .= $params[1][0] . ' like ' . $this->_quoteParameter($params[1][1]);
+					$string .= $params[1][0] . ' like ' . $this->tools->quoteParameter($params[1][1]);
 					break;
 				case \framework\orm\utils\Criteria::IN :
 					$values = '[';
 
 					foreach ($params[1][1] as $value)
 					{
-						$values .= $this->_quoteParameter($value) . ', ';
+						$values .= $this->tools->quoteParameter($value) . ', ';
 					}
 
 					$values = \rtrim($values, ', ') . ']';
@@ -776,10 +761,10 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 					break;
 
 				case \framework\orm\utils\OrientDBCriteria::CONTAINS_TEXT :
-					$string .= $params[1][0] . ' containsText ' . $this->_quoteString($params[1][1]);
+					$string .= $params[1][0] . ' containsText ' . $this->tools->quoteString($params[1][1]);
 					break;
 				case \framework\orm\utils\OrientDBCriteria::MATCHES :
-					$string .= $params[1][0] . ' matches ' . $this->_quoteString($params[1][1]);
+					$string .= $params[1][0] . ' matches ' . $this->tools->quoteString($params[1][1]);
 					break;
 
 				default:

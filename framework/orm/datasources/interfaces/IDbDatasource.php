@@ -23,19 +23,31 @@ interface IDbDatasource
 {
 	/**
 	 * Execute a request.
+	 * @abstract
 	 * @return mixed
 	 */
 	public function exec ($query);
 	
 	/**
 	 * Execute a query to retrieve data.
-	 * @return array
+	 * @abstract
+	 * @return mixed
 	 */
 	public function query ($query);
 	
+		
 	/**
-	 * Get a query object to build query in a OO-style
-	 * @return mixed
+	 * @abstract
+	 * @return \framework\orm\utils\Criteria
 	 */
-	public function getQuery();
+	public function getNativeCriteria();
+	
+	/**
+	 * Get the string representation of a Criteria
+	 * @abstract
+	 * @param \framework\orm\utils\Criteria
+	 * @return string 
+	 */
+	public function criteriaToString(\framework\orm\utils\Criteria $criteria);
+	
 }

@@ -27,7 +27,7 @@ interface IDatasource
 	 * @param \framework\orm\utils\Criteria $where
 	 * @return boolean
 	 */
-	public function delete($id, \framework\orm\utils\Criteria $where);
+	public function delete($id, $entity, \framework\orm\utils\Criteria $where);
 
 	/**
 	 * @abstract
@@ -66,10 +66,4 @@ interface IDatasource
 	 * @return boolean
 	 */
 	public function update($id, $entity, $data, \framework\orm\utils\Criteria $where);
-	
-	/**
-	 * @abstract
-	 * @return \framework\orm\utils\Criteria
-	 */
-	public function getNativeCriteria();
 }

@@ -39,8 +39,8 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	const UPDATE = 2;
 
 	/**
-	 * Array containing the model attached to the mapper.
-	 * @var array 
+	 * Array containing the models attached to the mapper.
+	 * @var array
 	 */
 	protected $attachedModels = array();
 
@@ -124,6 +124,8 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	{
 		$this->datasource = $datasource;
 
+		//$this->attachedModels = $this->getComponent('orm.utils.Collection');
+		
 		if (!isset($this->fields) || $this->fields === array() || $this->fields === NULL)
 		{
 			throw new \framework\orm\mappers\MapperException('No fields specified.');
@@ -347,11 +349,12 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 		{
 			if ($models instanceof \framework\orm\models\IAttachableModel)
 			{
-				$models = $models->getId();
+				$this->detach($models);
+				return $this->_deleteModel($models->getId());
 			}
-			
-			return $this->_deleteModel($models);
 		}
+		
+		throw new \framework\orm\mappers\MapperException('Wrong parameter type');
 	}
 
 	/**
@@ -445,7 +448,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	 */
 	protected function _deleteModel ($model)
 	{
-		return $this->datasource->delete($model, NULL);
+		return $this->datasource->delete($model, $this->getEntityIdentifier(), NULL);
 	}
 
 	/**
@@ -455,7 +458,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	 */
 	protected function _deleteCriteria (\framework\orm\utils\Criteria $criteria)
 	{
-		return $this->datasource->delete(NULL, $criteria);
+		return $this->datasource->delete(NULL, $this->getEntityIdentifier(), $criteria);
 	}
 	
 	/**
@@ -625,7 +628,6 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 						{
 							$value = $value + 0;
 						}
-						
 						$model->$setter($value);
 					}
 				}
@@ -752,7 +754,6 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 					$map[$name]['internal'] = $spec['internal'];
 					$map[$name]['type'] = $relationMapper->getEntityIdentifier();
 					$map[$name]['value'] = array();
-
 
 					if ($relations === NULL)
 					{
