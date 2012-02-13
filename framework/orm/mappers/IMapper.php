@@ -52,7 +52,7 @@ interface IMapper
 	 * Retrieve several models from the datasource.
 	 * @param \framework\orm\Criteria A set of constraints the results must match. 
 	 */
-	public function findAll (\framework\orm\utils\Criteria $criteria = null);
+	public function findAll (\framework\orm\utils\Criteria $criteria = null, $attach = true);
 
 	/**
 	 * Save a model in the datasource. 

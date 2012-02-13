@@ -274,7 +274,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	 * @param \framework\orm\utils\Criteria A set of constraints the results must match. 
 	 * @return \framework\orm\utils\Collection
 	 */
-	public function findAll (\framework\orm\utils\Criteria $criteria = null)
+	public function findAll (\framework\orm\utils\Criteria $criteria = null, $attach = true)
 	{
 		$data = $this->datasource->findAll($this->getEntityIdentifier(), $criteria);
 		$results = $this->getComponent('orm.utils.Collection');
@@ -283,7 +283,19 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 		{
 			foreach ($data as $map)
 			{
-				$results[] = $this->_mapToModel($map);
+				$model = $this->_mapToModel($map);
+				$id = (string) $model->getId();
+				
+				if($this->isAttached($id))
+				{
+					$model = $this->getAttachedModel($id);
+				}
+				else
+				{
+					$this->attach($model);
+				}
+				
+				$results[] = $model;
 			}
 		}
 
