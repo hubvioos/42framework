@@ -71,7 +71,7 @@ class MySQLDatasource extends \framework\core\FrameworkObject implements \framew
 	
 	/**
 	 *
-	 * @var type 
+	 * @var string 
 	 */
 	protected $pattern = '#[0-9,a-z,A-Z$_]+#';
 
@@ -340,7 +340,7 @@ class MySQLDatasource extends \framework\core\FrameworkObject implements \framew
 
 		$this->_validateIdentifier($entity);
 		
-		foreach ($data as $property => $spec)
+		foreach ($data as $spec)
 		{
 			if ($spec['storageField'] !== NULL)
 			{
@@ -356,53 +356,7 @@ class MySQLDatasource extends \framework\core\FrameworkObject implements \framew
 
 		$query = $this->link->prepare('INSERT INTO ' . $entity . '(' . $fields . ')' . ' VALUES(' . $params . ')');
 		
-		foreach ($data as $property => $spec)
-		{
-			$dataType = $spec['type'];
-			$dataValue = $spec['value'];
-			$bindType = \PDO::PARAM_STR;
-
-			switch ($dataType)
-			{
-				case \framework\orm\types\MySQLDate::TYPE_IDENTIFIER:
-				case \framework\orm\types\MySQLDateTime::TYPE_IDENTIFIER:
-				case \framework\orm\types\MySQLTimestamp::TYPE_IDENTIFIER:
-				case \framework\orm\types\Type::RELATION_KEY: 
-					break;
-				
-				default:
-					if(\in_array($dataType, $this->getComponent('orm.numericTypes')))
-					{
-						break;
-					}
-					elseif(\in_array($dataType, $this->getComponent('orm.textualTypes')))
-					{
-						break;
-					}
-					elseif(\in_array($dataType, $this->getComponent('orm.booleanTypes')))
-					{
-						$dataValue = ($dataValue) ? '\'1\'' : '\'0\'';
-						$bindType = \PDO::PARAM_BOOL;
-						break;
-					}
-					elseif($dataValue === NULL)
-					{
-						$bindType = \PDO::PARAM_NULL;
-						break;
-					}
-					elseif(\array_key_exists('internal', $spec))
-					{
-						$dataValue = $dataValue['id']['value'];
-						break;
-					}
-					
-					
-					throw new \framework\orm\datasources\MySQLDatasourceException('Unknown type ' . $dataType);
-					break;
-			}
-			
-			$query->bindValue(':'.$spec['storageField'], $dataValue, $bindType);
-		}
+		$this->_bindQueryValuesFromMap($query, $data);
 
 		if($query->execute())
 		{
@@ -420,9 +374,32 @@ class MySQLDatasource extends \framework\core\FrameworkObject implements \framew
 	 * @param \framework\orm\utils\Criteria $where
 	 * @return boolean
 	 */
-	public function update($id, $entity, $data, \framework\orm\utils\Criteria $where)
+	public function update($id, $entity, $data, \framework\orm\utils\Criteria $where = NULL)
 	{
+		$fields = '';
+		$this->_validateIdentifier($entity);
+	
+		foreach ($data as $spec)
+		{
+			if ($spec['storageField'] !== NULL)
+			{
+				$this->_validateIdentifier($spec['storageField']);
+				$fields .= $spec['storageField'] . ' = :'.$spec['storageField'].', ';
+			}
+		}
 		
+		// get rid of the extra ", "
+		$fields = \substr($fields, 0, \strlen($fields) - 2);
+
+		$idParameter = ':'.time();
+		
+		$query = $this->link->prepare('UPDATE ' . $entity . ' SET ' . $fields . ' WHERE id = '.$idParameter);
+		
+		$query->bindValue($idParameter, $id);
+		
+		$this->_bindQueryValuesFromMap($query, $data);
+		
+		return $query->execute();
 	}
 	
 	/**
@@ -474,8 +451,65 @@ class MySQLDatasource extends \framework\core\FrameworkObject implements \framew
 		return isset($this->config[$key]) ? $this->config[$key] : '';
 	}	
 	
+	
+	
 	/**
-	 *
+	 * Bind all the params from a map to a query
+	 * @throws \framework\orm\datasources\MySQLDatasourceException 
+	 */
+	protected function _bindQueryValuesFromMap($query, $map)
+	{
+		foreach ($map as $spec)
+		{
+			$dataType = $spec['type'];
+			$dataValue = $spec['value'];
+			$bindType = \PDO::PARAM_STR;
+
+			switch ($dataType)
+			{
+				case \framework\orm\types\MySQLDate::TYPE_IDENTIFIER:
+				case \framework\orm\types\MySQLDateTime::TYPE_IDENTIFIER:
+				case \framework\orm\types\MySQLTimestamp::TYPE_IDENTIFIER:
+				case \framework\orm\types\Type::RELATION_KEY: 
+					break;
+				
+				default:
+					if(\in_array($dataType, $this->getComponent('orm.numericTypes')))
+					{
+						break;
+					}
+					elseif(\in_array($dataType, $this->getComponent('orm.textualTypes')))
+					{
+						break;
+					}
+					elseif(\in_array($dataType, $this->getComponent('orm.booleanTypes')))
+					{
+						$dataValue = ($dataValue) ? '\'1\'' : '\'0\'';
+						$bindType = \PDO::PARAM_BOOL;
+						break;
+					}
+					elseif($dataValue === NULL)
+					{
+						$bindType = \PDO::PARAM_NULL;
+						break;
+					}
+					elseif(\array_key_exists('internal', $spec))
+					{
+						$dataValue = $dataValue['id']['value'];
+						break;
+					}
+					
+					
+					throw new \framework\orm\datasources\MySQLDatasourceException('Unknown type ' . $dataType);
+					break;
+			}
+			
+			$query->bindValue(':'.$spec['storageField'], $dataValue, $bindType);
+		}
+	}
+	
+	/**
+	 * Get a table's config, i.e. each column's type
 	 * @param string $table
 	 * @throws \framework\orm\datasources\MySQLDatasourceException 
 	 */
