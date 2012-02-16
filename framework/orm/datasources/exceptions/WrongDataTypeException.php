@@ -1,30 +1,39 @@
-<?php 
+<?php
 /**
- * Copyright (C) 2011 - K√©vin O'NEILL, Fran√ßois KLINGLER - <contact@42framework.com>
- * 
+ * Copyright (C) 2011 - Kévin O'NEILL, François KLINGLER - <contact@42framework.com>
+ *
  * 42framework is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * 42framework is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-namespace framework\orm\datasources;
+namespace framework\orm\datasources\exceptions;
 
-class DatasourceException extends \Exception
+/**
+ * WrongDataTypeException
+ * Exception to throw when an unknown type is used.
+ * @author mickael
+ */
+class WrongDataTypeException extends \framework\orm\datasources\exceptions\DatasourceException
 {
+    /**
+     * @param string $dataType
+     * @param mixed $value
+     * @param \Exception $previous
+     */
+    public function __construct($dataType,  $value, $previous = NULL)
+    {
+        parent::__construct('Wrong data-type <strong>'.$dataType.'</strong> for value '.$value, $previous);
+    }
 
-}
-
-class DatasourceConnectionException extends \framework\orm\datasources\DatasourceException
-{
-		
 }

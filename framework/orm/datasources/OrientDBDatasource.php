@@ -17,11 +17,6 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
-/**
- * Library OrientDBDatasource
- *
- * @author mickael
- */
 
 namespace framework\orm\datasources;
 
@@ -30,14 +25,20 @@ class OrientDBDatasourceException extends \Exception
 	
 }
 
+/**
+ * Library OrientDBDatasource
+ *
+ * @author mickael
+ */
+
 class OrientDBDatasource extends \framework\core\FrameworkObject implements \framework\orm\datasources\interfaces\IConnectionDatasource, \framework\orm\datasources\interfaces\IDbDatasource, \framework\orm\datasources\interfaces\IDatasource
 {
 
 	/**
 	 * The connection to the database
-	 * @var OrientDB 
+	 * @var \OrientDB
 	 */
-	protected $link = null;
+	protected $link = NULL;
 
 	/**
 	 * The host
@@ -111,10 +112,7 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 		}
 		catch (\Exception $e)
 		{
-			$message = 'Unable to connect to ' . $this->_getFullHost()
-					. ' with user ' . $this->user . ' and the password you specified';
-
-			throw new \framework\orm\datasources\OrientDBDatasourceException($message, null, $e);
+			throw new \framework\orm\datasources\exceptions\ConnectionException($this->_getFullHost(), $e);
 		}
 	}
 
@@ -142,8 +140,8 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 		}
 		else
 		{
-			$message = 'Database ' . $database . ' doesn\'t exist on host ' . $this->_getFullHost();
-			throw new \framework\orm\datasources\OrientDBDatasourceException($message);
+			throw new \framework\orm\datasources\exceptions\ConnectionException($database, 
+					\framework\orm\datasources\exceptions\ConnectionException::DATABASE);
 		}
 	}
 
@@ -307,7 +305,7 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 	 * @param string $clusterType The type of the new cluster if one must be created. Will be ignored if $createCluster == false
 	 * @return bool 
 	 */
-	public function createClass ($class, $parent = '', $cluster = null, $createCluster = false, $clusterType = \OrientDB::DATACLUSTER_TYPE_PHYSICAL)
+	public function createClass ($class, $parent = '', $cluster = NULL, $createCluster = false, $clusterType = \OrientDB::DATACLUSTER_TYPE_PHYSICAL)
 	{
 		if ($createCluster === true && is_string($cluster))
 		{
@@ -328,8 +326,7 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 				}
 				else
 				{
-					throw new \framework\orm\datasources\OrientDBDatasourceException('Invalid parent class name '
-							. $parent);
+					throw new \framework\orm\datasources\exceptions\WrongEntityFormatException($parent);
 				}
 			}
 
@@ -342,7 +339,7 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 		}
 		else
 		{
-			throw new \framework\orm\datasources\OrientDBDatasourceException('Invalid class name ' . $class);
+			throw new \framework\orm\datasources\exceptions\WrongEntityFormatException($class);
 		}
 	}
 
@@ -350,7 +347,7 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 
 	/**
 	 * Get the connection (a.k.a the OrientDB instance)
-	 * @return OrientDB 
+	 * @return \OrientDB
 	 */
 	public function getConnection ()
 	{
@@ -371,15 +368,14 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 		}
 		catch (\Exception $e)
 		{
-			throw new \framework\orm\datasources\OrientDBDatasourceException(
-					'Unable to perform request ' . $query, null, $e);
+			throw new \framework\orm\datasources\exceptions\RequestException($query, $e);
 		}
 	}
 
 	/**
 	 * Execute a query and return the results in an array.
 	 * @param string $query
-	 * @return mixed
+	 * @return \OrientDB
 	 */
 	public function query ($query)
 	{
@@ -393,9 +389,10 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 	/**
 	 * Create a record
 	 * @param string $entity The ID of the cluster where the new record ahs to be created
-	 * @param array|OrientDBRecord $data 
-	 * @param mixed $type The record type @see OrientDBRecordTypes
-	 */
+	 * @param array|\OrientDBRecord $data
+	 * @param mixed $type The record type @see \OrientDBRecordTypes
+     * @return int|bool
+     */
 	public function create ($entity, $data, $type = \OrientDB::RECORD_TYPE_DOCUMENT)
 	{
 		$fields = '';
@@ -443,8 +440,7 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 							break;
 						}
 
-						throw new \framework\orm\datasources\OrientDBDatasourceException('Bad type for value "'
-								. $dataValue . '"');
+						throw new \framework\orm\datasources\exceptions\WrongDataTypeException($dataType, $dataValue);
 						break;
 
 					default:
@@ -487,7 +483,7 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 							break;
 						}
 
-						throw new \framework\orm\datasources\OrientDBDatasourceException('Unknown type ' . $dataType);
+						throw new \framework\orm\datasources\exceptions\WrongDataTypeException($dataType, $dataValue);
 						break;
 				}
 
@@ -516,9 +512,10 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 	 *
 	 * @param string $id
 	 * @param string $entity
-	 * @param \framework\orm\Criteria $where 
+	 * @param \framework\orm\utils\Criteria $where
+     * @return bool True on success, false otherwise
 	 */
-	public function delete ($id, $entity, \framework\orm\utils\Criteria $where = null)
+	public function delete ($id, $entity, \framework\orm\utils\Criteria $where = NULL)
 	{
 		return $this->link->recordDelete($id);
 	}
@@ -528,11 +525,9 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 	 * @throws \framework\orm\datasources\OrientDBDatasourceException
 	 * @param array $primary An array of IDs
 	 * @param string|int The identifier of the entity where to look for (table name, cluster ID, ...)
-	 * @param array $inherits
-	 * @param array $dependents 
 	 * @return \framework\orm\utils\Collection The Collection of elements
 	 */
-	public function find (array $primary, $entity, array $inherits = array(), array $dependents = array())
+	public function find (array $primary, $entity)
 	{
 		$found = $this->getComponent('orm.utils.Collection');
 		$record = null;
@@ -552,16 +547,15 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 	}
 
 	/**
-	 *
+	 * @param $entity
 	 * @param \framework\orm\utils\Criteria $criteria
-	 * @param array $inherits
-	 * @param array $dependents 
+	 * @return \framework\orm\utils\Collection
 	 */
-	public function findAll ($entity, \framework\orm\utils\Criteria $criteria = null, array $inherits = null, array $dependents = null)
+	public function findAll ($entity, \framework\orm\utils\Criteria $criteria = NULL)
 	{
 		if (\strpos(' ', $entity) !== false)
 		{
-			throw new \framework\orm\datasources\OrientDBDatasourceException('Bad entity name ' . $entity);
+			throw new \framework\orm\datasources\exceptions\WrongEntityFormatException($entity);
 		}
 
 		$entities = $this->getComponent('orm.utils.Collection');
@@ -585,14 +579,15 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 		return $entities;
 	}
 
-	/**
-	 *
-	 * @param string $id
-	 * @param string|OrientDBRecord $data
-	 * @param \framework\orm\utils\Criteria $where 
-	 * @return bool Update status
-	 */
-	public function update ($id, $entity, $data, \framework\orm\utils\Criteria $where = null)
+    /**
+     *
+     * @param string $id
+     * @param $entity
+     * @param string|\OrientDBRecord $data
+     * @param \framework\orm\utils\Criteria $where
+     * @return bool Update status
+     */
+	public function update ($id, $entity, $data, \framework\orm\utils\Criteria $where = NULL)
 	{
 		// convert the $data to a record
 		$record = $this->_mapToRecord($data);
