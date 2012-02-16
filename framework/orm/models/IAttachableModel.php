@@ -37,4 +37,11 @@ interface IAttachableModel
 	 * @return int|string|NULL MUST return NULL if no ID exists yet (i.e. if it's never been stored in the datasource)
 	 */
 	public function getId ();
+
+    /**
+     * Set the unique identifier of the instance.
+     * @abstract
+     * @param $id
+     */
+    public function setId($id);
 }

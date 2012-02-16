@@ -166,11 +166,11 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 		$this->init();
 	}
 
-	/**
-	 * Attach a new object to the mapper.
-	 * @param \framework\orm\models\IAttachableModel $object 
-	 * @return string The key where the object is stored in the mapper.
-	 */
+    /**
+     * Attach a new object to the mapper.
+     * @param \framework\orm\models\IAttachableModel $model
+     * @return string The key where the object is stored in the mapper.
+     */
 	public function attach (\framework\orm\models\IAttachableModel $model)
 	{
 		if($model->getId() !== NULL)
@@ -216,8 +216,12 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	public function find ($toFind, $attach = true)
 	{
 		$alreadyFound = array();
+
+        /** @var $attached \framework\orm\utils\Collection */
 		$attached = $this->getComponent('orm.utils.Collection');
-		$found = $this->getComponent('orm.utils.Collection');
+
+		/** @var $found \framework\orm\utils\Collection */
+        $found = $this->getComponent('orm.utils.Collection');
 		$toFind = $this->_wrapInArray($toFind);
 		
 		$searchForUniqueModel = (\count($toFind) == 1);
@@ -269,11 +273,12 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 		return $found->isEmpty() ? NULL : $found;
 	}
 
-	/**
-	 * Retrieve several models from the datasource.
-	 * @param \framework\orm\utils\Criteria A set of constraints the results must match. 
-	 * @return \framework\orm\utils\Collection
-	 */
+    /**
+     * Retrieve several models from the datasource.
+     * @param \framework\orm\utils\Criteria A set of constraints the results must match.
+     * @param bool $attach
+     * @return \framework\orm\utils\Collection
+     */
 	public function findAll (\framework\orm\utils\Criteria $criteria = null, $attach = true)
 	{
 		$data = $this->datasource->findAll($this->getEntityIdentifier(), $criteria);
@@ -353,7 +358,8 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 
 	/**
 	 * Delete a model from the datasource.
-	 * @param \framework\orm\utils\Criteria|\framework\orm\models\IAttachableModel 
+	 * @param \framework\orm\utils\Criteria|\framework\orm\models\IAttachableModel
+     * @return bool
 	 */
 	public function delete ($models)
 	{
@@ -574,7 +580,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	 * @return \framework\orm\models\IAttachableModel
 	 * @throws \framework\orm\mappers\MapperException 
 	 */
-	protected function _persist ($model, $mode = self::CREATE)
+	protected function _persist (\framework\orm\models\IAttachableModel $model, $mode = self::CREATE)
 	{
 		if ($mode != self::CREATE && $mode != self::UPDATE)
 		{
@@ -734,7 +740,6 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	protected function _modelToMap (\framework\orm\models\IAttachableModel $model)
 	{
 		$map = new \framework\orm\utils\Map();
-		$getter = '';
 
 		foreach ($this->nonRelations as $name => $spec)
 		{
