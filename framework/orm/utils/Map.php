@@ -84,16 +84,17 @@ class Map extends \ArrayObject
 		$this->addProperty($name, $specs['type'], $specs['value'], $specs['storageField'], 
 				$specs['relation'], $specs['internal']);
 	}
-	
-	/**
-	 * Add a property by specifying every parameter.
-	 * @param string $name The property name.
-	 * @param string $type The property type.
-	 * @param mixed $value The property value.
-	 * @param string $storageField The property storage field's name. The property's name is used by default. If set to NULL, the property won't be stored in the datasource.
-	 * @param bool $primary Whether or not the property is the primary key. 'false' is used by default.
-	 * @param string $relation The type of the relation for this property.
-	 */
+
+    /**
+     * Add a property by specifying every parameter.
+     * @param string $name The property name.
+     * @param string $type The property type.
+     * @param mixed $value The property value.
+     * @param string $storageField The property storage field's name. The property's name is used by default. If set to NULL, the property won't be stored in the datasource.
+     * @param string $relation The type of the relation for this property.
+     * @param bool $internal
+     * @internal param bool $primary Whether or not the property is the primary key. 'false' is used by default.
+     */
 	public function addProperty($name, $type, $value, $storageField = '', $relation = NULL, $internal = false)
 	{
 		$this[$name] = array();

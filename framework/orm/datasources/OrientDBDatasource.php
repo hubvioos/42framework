@@ -662,7 +662,7 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 		{
 			if ($spec['storageField'] !== NULL)
 			{
-				if(\is_array($spec['value']) || $spec['value'] instanceof \ArrayAccess)
+				if(\is_array($spec['value']) || $spec['value'] instanceof \Traversable)
 				{
 					$data = array();
 					

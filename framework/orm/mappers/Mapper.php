@@ -626,7 +626,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	
 	/**
 	 * Transform a datasource map to a PHP-friendly model
-	 * @param array|\ArrayObject $map 
+	 * @param array|\framework\orm\utils\Map $map
 	 * @return \framework\orm\models\IAttachableModel
 	 */
 	protected function _mapToModel ($map)
@@ -789,7 +789,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 					{
 						$map[$name]['value'] = NULL;
 					}
-					elseif (\is_array($relations) || $relations instanceof \ArrayAccess)
+					elseif (\is_array($relations) || $relations instanceof \Traversable)
 					{
 						foreach ($relations as $relation)
 						{
@@ -860,13 +860,13 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	
 	/**
 	 * Return the passed argument wrapped in an array 
-	 * if it's not already one or an instance of \ArrayAccess
+	 * if it's not already one or an instance of \Traversable
 	 * @param mixed $a
 	 * @return array
 	 */
 	protected function _wrapInArray($a)
 	{
-		return (!\is_array($a) && !($a instanceof \ArrayAccess)) ? array($a) : $a;
+		return (!\is_array($a) && !($a instanceof \Traversable)) ? array($a) : $a;
 	}
 
 }
