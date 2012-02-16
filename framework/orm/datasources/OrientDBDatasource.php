@@ -20,7 +20,7 @@
 
 namespace framework\orm\datasources;
 
-class OrientDBDatasourceException extends \Exception
+class OrientDBDatasourceException extends \framework\orm\datasources\exceptions\DatasourceException
 {
 	
 }
@@ -90,7 +90,7 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 
 	/**
 	 * Constructor
-	 * @throws \framework\orm\datasources\OrientDBDatasourceException
+	 * @throws \framework\orm\datasources\exceptions\ConnectionException
 	 * @param string $host The host's address
 	 * @param string|int $port The host's port
 	 * @param string $user The username used to connect to the host
@@ -119,6 +119,7 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 	/**
 	 * Establish a connection to a database
 	 * @throws \framework\orm\datasources\OrientDBDatasourceException
+     * @throws \framework\orm\datasources\exceptions\ConnectionException
 	 * @param string $database The databases's name
 	 * @param string $user The user's name 
 	 * @param string $password The user's password
@@ -297,7 +298,7 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 
 	/**
 	 * Create a class. By default, this method also creates a new cluster named after the class.
-	 * @throws \framework\orm\datasources\OrientDBDatasourceException
+	 * @throws \framework\orm\datasources\exceptions\WrongEntityFormatException
 	 * @param string $class The name of the new class
 	 * @param string $parent The parent class from wich the new class inherits
 	 * @param int|string $cluster The ID of the cluster the class will use or the name of a new cluster to create
@@ -356,7 +357,7 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 
 	/**
 	 * Execute a request and return the result.
-	 * @throws \framework\orm\datasources\OrientDBDatasourceException
+	 * @throws \framework\orm\datasources\exceptions\RequestException
 	 * @param string $query 
 	 * @return mixed
 	 */
@@ -379,7 +380,14 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 	 */
 	public function query ($query)
 	{
-		return $this->link->select($query);
+        try
+        {
+            return $this->link->select($query);
+        }
+        catch(\Exception $e)
+        {
+            throw new \framework\orm\datasources\exceptions\RequestException($query, $e);
+        }
 	}
 
 	/**
@@ -522,7 +530,6 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 
 	/**
 	 * Find elements from their IDs.
-	 * @throws \framework\orm\datasources\OrientDBDatasourceException
 	 * @param array $primary An array of IDs
 	 * @param string|int The identifier of the entity where to look for (table name, cluster ID, ...)
 	 * @return \framework\orm\utils\Collection The Collection of elements

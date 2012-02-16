@@ -25,12 +25,6 @@ namespace framework\orm\datasources;
  *
  * @author mickael
  */
-
-class MySQLDatasourceException extends \Exception
-{
-
-}
-
 class MySQLDatasource extends \framework\core\FrameworkObject implements \framework\orm\datasources\interfaces\IConnectionDatasource, \framework\orm\datasources\interfaces\IDbDatasource, \framework\orm\datasources\interfaces\IDatasource, \framework\orm\datasources\interfaces\ITransactionDatasource
 {
 
@@ -142,22 +136,38 @@ class MySQLDatasource extends \framework\core\FrameworkObject implements \framew
 
     /**
      * Execute a request.
+     * @throws \framework\orm\datasources\exceptions\RequestException
      * @param $request
      * @return mixed
      */
 	public function exec ($request)
 	{
-		return $this->link->exec($request);
+        try
+        {
+            return $this->link->exec($request);
+        }
+        catch(\Exception $e)
+        {
+            throw new \framework\orm\datasources\exceptions\RequestException($request, $e);
+        }
 	}
 
     /**
      * Execute a query to retrieve data.
+     * @throws \framework\orm\datasources\exceptions\RequestException
      * @param $query
      * @return array
      */
 	public function query ($query)
 	{
-		return $this->link->query($query);
+        try
+        {
+            return $this->link->query($query);
+        }
+        catch(\Exception $e)
+        {
+            throw new \framework\orm\datasources\exceptions\RequestException($query, $e);
+        }
 	}
 
 	/**
@@ -476,7 +486,7 @@ class MySQLDatasource extends \framework\core\FrameworkObject implements \framew
 	 * Bind all the params from a map to a query
      * @param \PDOStatement $query
      * @param array|\framework\orm\utils\Map $map
-	 * @throws \framework\orm\datasources\MySQLDatasourceException
+	 * @throws \framework\orm\datasources\exceptions\WrongEntityFormatException
 	 */
 	protected function _bindQueryValuesFromMap($query, $map)
 	{
@@ -532,7 +542,7 @@ class MySQLDatasource extends \framework\core\FrameworkObject implements \framew
 	/**
 	 * Get a table's config, i.e. each column's type
 	 * @param string $table
-	 * @throws \framework\orm\datasources\MySQLDatasourceException
+	 * @throws \framework\orm\datasources\exceptions\WrongEntityFormatException
 	 */
 	protected function _retrieveTableConfig($table)
 	{
