@@ -10,7 +10,7 @@ $routes = array(
 			'format' => 'html'
 		)
 	),*/
-	'module_action' => array(
+	/*'module_action' => array(
 		'pattern' => '/<:module>/<:action>(.<:format>)',
 		'defaults' => array(
 			'format' => 'html'
@@ -22,7 +22,7 @@ $routes = array(
 			'action' => 'index',
 			'format' => 'html'
 		)
-	),
+	),*/
 	'default' => array(
 		'pattern' => '/',
 		'defaults' => array(

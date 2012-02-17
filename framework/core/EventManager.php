@@ -1,17 +1,17 @@
-<?php 
+<?php
 /**
  * Copyright (C) 2011 - K√©vin O'NEILL, Fran√ßois KLINGLER - <contact@42framework.com>
- * 
+ *
  * 42framework is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * 42framework is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
@@ -21,146 +21,155 @@ namespace framework\core;
 
 class EventManager extends \framework\core\FrameworkObject
 {
-    /**
-     *  All listeners
-     * @var \framework\libs\Registry > The event config
-     */
-    protected $_listeners = null;
+	/**
+	 *  All listeners
+	 * @var \framework\libs\Registry > The event config
+	 */
+	protected $_listeners = null;
 
-    /**
-     * @param \framework\libs\Registry $eventsConfig
-     */
-    public function __construct($eventsConfig)
-    {
-		$this->_listeners = $eventsConfig;	
-    }
+	/**
+	 * @param \framework\libs\Registry $eventsConfig
+	 */
+	public function __construct ($eventsConfig)
+	{
+		$this->_listeners = $eventsConfig;
+	}
 
 
-    /**
-     * Add one or more Listener(s) 
-     * @param string $eventName
-     * @param array $listener
-     * @return \framework\events\EventManager
-     */
-    public function addListener($eventName, Array $listener)
-    {
-        if (!isset($this->_listeners[$eventName]))
-        {
-            $this->_listeners[$eventName] = array();
-        }
-        $this->_listeners[$eventName][] = $listener;
-        return $this;
-    }
-
-    /**
-     * Remove one or more Listener(s)
-     * @param string $eventName
-     * @param array $listener
-     * @return \framework\events\EventManager
-     */
-    public function removeListener($eventName, Array $listener = array())
-    {
-        if (!isset($this->_listeners[$eventName]))
-        {
-            return false;
-        }
-        if ($listener === null)
-        {
-            unset($this->_listeners[$eventName]);
-            return true;
-        }
-        
-		$ok = false;
-		
-		foreach ($this->_listeners[$eventName] as $id => $lis)
-        {
-        	if ($listener === $lis)
-        	{
-        		unset($this->_listeners[$eventName][$id]);
-				$ok = true;
-        	}
-        }
-        return $ok;
-    }
-
-    /**
-     * @param \framework\libs\Event $event
-     * @return mixed
-     */
-    public function dispatchEvent(\framework\libs\Event $event)
-    {
-	$eventName = $event->getName();
-	$params = $event->getParamaters();
-        $returnValue = null;
-        
-        if(isset($this->_listeners[$eventName]))
-        {
-            foreach ($this->_listeners[$eventName] as $listener)
-            {
-		//Check if it's directly callable
-		if(\is_callable($listener['callable']))
-		{		
-			$returnValue= call_user_func_array($listener['callable'], $params);
-		}
-		elseif(\is_a($listener['callable'], '\\framework\\libs\\Registry') && !empty($listener['callable']))
+	/**
+	 * Add one or more Listener(s)
+	 *
+	 * @param string $eventName
+	 * @param array $listener
+	 *
+	 * @return \framework\events\EventManager
+	 */
+	public function addListener ($eventName, Array $listener)
+	{
+		if (!isset($this->_listeners[$eventName]))
 		{
-			//Check if it's an callable array
-			if(\is_callable(array($listener['callable'][0], $listener['callable'][1])))
+			$this->_listeners[$eventName] = array();
+		}
+		$this->_listeners[$eventName][] = $listener;
+		return $this;
+	}
+
+	/**
+	 * Remove one or more Listener(s)
+	 *
+	 * @param string $eventName
+	 * @param array $listener
+	 *
+	 * @return \framework\events\EventManager
+	 */
+	public function removeListener ($eventName, Array $listener = array())
+	{
+		if (!isset($this->_listeners[$eventName]))
+		{
+			return false;
+		}
+		if ($listener === null)
+		{
+			unset($this->_listeners[$eventName]);
+			return true;
+		}
+
+		$ok = false;
+
+		foreach ($this->_listeners[$eventName] as $id => $lis)
+		{
+			if ($listener === $lis)
 			{
-				$returnValue = \call_user_func_array(array($listener['callable'][0], $listener['callable'][1]), $params);
+				unset($this->_listeners[$eventName][$id]);
+				$ok = true;
 			}
-			//Check if it's a component
-			else
+		}
+		return $ok;
+	}
+
+	/**
+	 * @param \framework\libs\Event $event
+	 *
+	 * @return mixed
+	 */
+	public function dispatchEvent (\framework\libs\Event $event)
+	{
+		$eventName   = $event->getName();
+		$params      = $event->getParamaters();
+		$returnValue = null;
+
+		if (isset($this->_listeners[$eventName]))
+		{
+			foreach ($this->_listeners[$eventName] as $listener)
 			{
-				//Get the component...
-				$component = null;
-				if(isset($listener['params']))
+				//Check if it's directly callable
+				if (\is_callable($listener['callable']))
 				{
-					$component = $this->getComponent($listener['callable'][0] , $listener['params']);
+					$returnValue = call_user_func_array($listener['callable'], $params);
+				}
+				elseif (\is_a($listener['callable'], '\\framework\\libs\\Registry') && !empty($listener['callable']))
+				{
+					//Check if it's an callable array
+					if (\is_callable(array($listener['callable'][0], $listener['callable'][1])))
+					{
+						$returnValue = \call_user_func_array(array($listener['callable'][0], $listener['callable'][1]), $params);
+					}
+					//Check if it's a component
+					else
+					{
+						//Get the component...
+						$component = null;
+						if (isset($listener['params']))
+						{
+							$component = $this->getComponent($listener['callable'][0], $listener['params']);
+						}
+						else
+						{
+							$component = $this->getComponent($listener['callable'][0]);
+						}
+						//...and call the specified method
+						$returnValue = \call_user_func_array(array($component, $listener['callable'][1]), $params);
+					}
 				}
 				else
 				{
-					$component = $this->getComponent($listener['callable'][0]);
+					throw new \InvalidArgumentException('The argument is not a callable.');
 				}
-				//...and call the specified method
-				$returnValue = \call_user_func_array(array($component, $listener['callable'][1]) , $params);
+
+				if ($returnValue)
+				{
+					break;
+				}
 			}
 		}
-		else
+		return $returnValue;
+	}
+
+	/**
+	 * Check if the event has at least one listener
+	 *
+	 * @param string $eventName
+	 *
+	 * @return boolean
+	 */
+	public function hasListeners ($eventName)
+	{
+		return (Boolean)count($this->_listeners[$eventName]);
+	}
+
+	/**
+	 * Get all listeners attached to a specific event
+	 *
+	 * @param string $eventName
+	 *
+	 * @return array
+	 */
+	public function getListeners ($eventName)
+	{
+		if (!isset($this->_listeners[$eventName]))
 		{
-			throw new \InvalidArgumentException('The argument is not a callable.');
+			return array();
 		}
-   
-                if ($returnValue)
-                {
-                    break;
-                }
-            }
-        }
-        return $returnValue;
-    }
-
-    /**
-     * Check if the event has at least one listener 
-     * @param string $eventName
-     * @return boolean
-     */
-    public function hasListeners($eventName)
-    {
-        return (Boolean) count($this->_listeners[$eventName]);
-    }
-
-    /**
-     * Get all listeners attached to a specific event 
-     * @param string $eventName
-     * @return array
-     */
-    public function getListeners($eventName)
-    {
-        if (!isset($this->_listeners[$eventName]))
-        {
-            return array();
-        }
-        return $this->_listeners[$eventName];
-    }
+		return $this->_listeners[$eventName];
+	}
 }

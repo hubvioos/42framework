@@ -58,7 +58,9 @@ abstract class FrameworkObject
 	{
 		try
 		{
-			return self::$_container->getComponent('mapper.'.$model);
+			$model = "mapper." . $model;
+
+			return self::$_container->getComponent($model);
 		}
 		catch (\InvalidArgumentException $e)
 		{
@@ -75,7 +77,9 @@ abstract class FrameworkObject
 	{
 		try
 		{
-			return self::$_container->getComponent('model.'.$model);
+			$model = "model.".$model;
+
+			return self::$_container->getComponent($model);
 		}
 		catch (\InvalidArgumentException $e)
 		{
@@ -143,6 +147,14 @@ abstract class FrameworkObject
 	
 	public function raiseEvent($name, $params = null)
 	{
+		if ($params === null)
+		{
+			$params = array();
+		}
+		elseif (!is_array($params))
+		{
+			$params = array($params);
+		}
 		$event = $this->getComponent('event', $name, $params);
 		return $this->getComponent('eventManager')->dispatchEvent($event);
 	}

@@ -140,7 +140,14 @@ abstract class Controller extends \framework\core\FrameworkObject
 				$beforeName = $request->getModule().'.before' . \ucfirst($request->getAction());
 				$afterName = $request->getModule().'.after' . \ucfirst($request->getAction());
 				
-				$methodName = 'process'.\ucfirst($this->getComponent('httpRequest')->getMethod());
+				$httpMethod = $this->_request->getMethod();
+
+				if ($httpMethod === null)
+				{
+					$httpMethod = $this->getComponent('httpRequest')->getMethod();
+				}
+
+				$methodName = 'process'.\ucfirst($httpMethod);
 				
 				if (!\method_exists($this, $methodName))
 				{

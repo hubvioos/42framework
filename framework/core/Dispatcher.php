@@ -28,7 +28,7 @@ class Dispatcher extends \framework\core\FrameworkObject
 		$this->raiseEvent('framework.beforeDispatch', $request);
 
 		$classname = $this->getAction($request->getModule(), $request->getAction());
-		
+
 		if (!$classname)
 		{
 			throw new \framework\core\http\exception\NotFoundException();

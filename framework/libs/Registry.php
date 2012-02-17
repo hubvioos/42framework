@@ -129,18 +129,22 @@ class Registry extends \ArrayObject
 		{
 			$params = \explode('.', $key);
 			$size = \count($params);
-			
+
 			if($this->offsetExists($params[0]))
 			{
 				$value = $this->offsetGet($params[0]);
 
 				// deep into the array if dotted notation was used
-				if ($size > 1)
+				if ($size > 1 && ($value instanceof self))
 				{
 					\array_shift($params);
 					$newKey = \implode('.', $params);
-					
+
 					$value = $value->get($newKey);
+				}
+				else
+				{
+					$value = null;
 				}
 			}
 		}

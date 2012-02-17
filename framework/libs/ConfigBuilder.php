@@ -315,7 +315,7 @@ class ConfigBuilder
 
 	/**
 	 * Build the routes' config
-	 * @return framework\libs\ConfigBuilder
+	 * @return framework\libs\ConfigBuilder $this
 	 */
 	public function buildRouteConfig ()
 	{
@@ -329,7 +329,7 @@ class ConfigBuilder
 		$this->_findAndGetConfig(\AREA_DIR . \DIRECTORY_SEPARATOR . 'config', 'routes.php', $this->_variablesNames['area']['routes'], $this->_routesConfig);
 		
 		// modules routes
-		$this->_getAllModulesConfig('routes');
+		$this->_getAllModulesConfig('routes', $this->_routesConfig);
 		
 		return $this->_mergeInternalConfigs();
 	}
@@ -346,7 +346,7 @@ class ConfigBuilder
 		
 		$this->_findAndGetConfig(\AREA_DIR . \DIRECTORY_SEPARATOR . 'config', 'events.php', $this->_variablesNames['area']['events'], $this->_eventsConfig);
 
-		$this->_getAllModulesConfig('events');
+		$this->_getAllModulesConfig('events', $this->_eventsConfig);
 		
 		//$this->_mergeInternalConfigs();
 		
@@ -413,10 +413,10 @@ class ConfigBuilder
 	public function buildConfig ()
 	{	
 		return $this->buildMinimalConfig()
-						->buildRouteConfig()
 						->buildMinimalModulesConfig()
 						->buildModulesDependencies()
 						->buildComponentsConfig()
+						->buildRouteConfig()
 						->buildEventsConfig();
 	}
 
@@ -534,7 +534,7 @@ class ConfigBuilder
 	 * Get the minimal modules' configs (i.e. without the dependency checking)
 	 * of each module
 	 */
-	private function _getAllModulesConfig ($configType = 'config')
+	private function _getAllModulesConfig ($configType = 'config', &$internal = null)
 	{
 		$directory = \MODULES_DIR . \DIRECTORY_SEPARATOR;
 		$configFile = \DIRECTORY_SEPARATOR . 'config' . \DIRECTORY_SEPARATOR . $configType . '.php';
@@ -553,15 +553,19 @@ class ConfigBuilder
 
 				if (isset(${$this->_variablesNames['modules'][$configType]}))
 				{
+					if ($internal !== null)
+					{
+						$internal = array_merge($internal, ${$this->_variablesNames['modules'][$configType]});
+					}
 					// if the module has already some config options from another level
 					// merge the new ones with them
-					if (isset($this->_modulesConfig[$moduleName]))
+					else if (isset($this->_modulesConfig[$moduleName]))
 					{
 						$this->_modulesConfig[$moduleName] = array_merge($this->_modulesConfig[$moduleName], ${$this->_variablesNames['modules'][$configType]});
 					}
 					else
 					{
-						$this->_modulesConfig[$moduleName] = ${$this->_variablesNames['modules']};
+						$this->_modulesConfig[$moduleName] = array();
 					}
 				}
 			}

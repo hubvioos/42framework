@@ -68,20 +68,36 @@ class View extends \framework\core\FrameworkObject
 		{
 			if ($this->_format !== null)
 			{
-				$globalFile = \APP_DIR . \DIRECTORY_SEPARATOR . 'views' . \DIRECTORY_SEPARATOR . $this->_format . \DIRECTORY_SEPARATOR . $file . $this->_extension;
+				$areaFile = \AREA_DIR . \DIRECTORY_SEPARATOR . 'views' . \DIRECTORY_SEPARATOR . $this->_format . \DIRECTORY_SEPARATOR . $file . $this->_extension;
 			}
 			else
 			{
-				$globalFile = \APP_DIR . \DIRECTORY_SEPARATOR . 'views' . \DIRECTORY_SEPARATOR . $file . $this->_extension;
+				$areaFile = \AREA_DIR . \DIRECTORY_SEPARATOR . 'views' . \DIRECTORY_SEPARATOR . $file . $this->_extension;
 			}
 
-			if (\file_exists($globalFile))
+			if (\file_exists($areaFile))
 			{
-				$this->_file = $globalFile;
+				$this->_file = $areaFile;
 			}
 			else
 			{
-				throw new \RuntimeException('View not found : ' . $this->_file);
+				if ($this->_format !== null)
+				{
+					$globalFile = \APP_DIR . \DIRECTORY_SEPARATOR . 'views' . \DIRECTORY_SEPARATOR . $this->_format . \DIRECTORY_SEPARATOR . $file . $this->_extension;
+				}
+				else
+				{
+					$globalFile = \APP_DIR . \DIRECTORY_SEPARATOR . 'views' . \DIRECTORY_SEPARATOR . $file . $this->_extension;
+				}
+
+				if (\file_exists($globalFile))
+				{
+					$this->_file = $globalFile;
+				}
+				else
+				{
+					throw new \RuntimeException('View not found : ' . $this->_file);
+				}
 			}
 		}
 	}

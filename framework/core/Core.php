@@ -94,13 +94,14 @@ class Core extends \framework\core\FrameworkObject
 			}
 			
 			// Views variables
+			$this->viewSetGlobal('title', $this->getConfig('defaultTitle'));
 			$this->viewSetGlobal('messages', $this->getComponent('message')->getAll());
 			$this->getComponent('message')->clearAll();
 
 			$url = $request->getUrl();
 
 			$params = $this->getComponent('router')->match($request->getMethod(), $url);
-
+			$params["method"] = $request->getMethod();
 			$this->duplicateContentPolicy($url, $params);
 
 			$state = \framework\core\Request::FIRST_REQUEST;

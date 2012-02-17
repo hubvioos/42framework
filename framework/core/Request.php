@@ -44,7 +44,12 @@ class Request extends \framework\core\FrameworkObject
 	 */
 	public function getModule ()
 	{
-		return $this->get('module');
+		return $this->_params['module'];
+	}
+
+	public function getMethod ()
+	{
+		return $this->_params['method'];
 	}
 
 	/**
@@ -52,17 +57,17 @@ class Request extends \framework\core\FrameworkObject
 	 */
 	public function getAction ()
 	{
-		return $this->get('action');
+		return $this->_params['action'];
 	}
 	
 	public function getFormat ()
 	{
-		return $this->get('format');
+		return $this->_params['format'];
 	}
 	
 	public function setFormat ($value)
 	{
-		$this->set('format', $value);
+		$this->_params['format'] = $value;
 		return $this;
 	}
 
@@ -95,19 +100,19 @@ class Request extends \framework\core\FrameworkObject
 	{
 		return $this->set($key, $value);
 	}
-	
+
 	public function get ($key, $default = null)
 	{
-		if (isset($this->_params[$key]))
+		if (isset($this->_params['params'][$key]))
 		{
-			return $this->_params[$key];
+			return $this->_params['params'][$key];
 		}
 		return $default;
 	}
-	
+
 	public function set ($key, $value)
 	{
-		$this->_params[$key] = $value;
+		$this->_params['params'][$key] = $value;
 		return $this;
 	}
 }
