@@ -274,12 +274,12 @@ class MySQLDatasource extends \framework\core\FrameworkObject implements \framew
 		return $found;
 	}
 
-	/**
-	 * Get the datasource-friendly string representation of a criteria
-	 * @param \framework\orm\utils\Criteria $criteria
-	 * @return string
-	 */
-	public function criteriaToString(\framework\orm\utils\Criteria $criteria)
+    /**
+     * Get the datasource-friendly string representation of a criteria
+     * @param \framework\orm\utils\Criteria $criteria
+     * @return string
+     */
+    public function criteriaToString(\framework\orm\utils\Criteria $criteria)
 	{
 		$string = '';
 
@@ -287,57 +287,81 @@ class MySQLDatasource extends \framework\core\FrameworkObject implements \framew
 		{
 			switch ($params[0])
 			{
-				case \framework\orm\utils\Criteria::CRITERIA :
-					if ($params[1][0] == \framework\orm\utils\Criteria::ASSOCIATION_AND)
-					{
+                case \framework\orm\utils\Criteria::CRITERIA :
+                    if ($params[1][0] == \framework\orm\utils\Criteria::ASSOCIATION_AND)
+                    {
 						$string .= ' AND ' . $this->criteriaToString($params[1][1]);
 					}
-					else if ($params[1][0] == \framework\orm\utils\Criteria::ASSOCIATION_OR)
+					elseif ($params[1][0] == \framework\orm\utils\Criteria::ASSOCIATION_OR)
 					{
 						$string .= ' OR ' . $this->criteriaToString($params[1][1]);
 					}
-					break;
+                    elseif ($params[1][0] == \framework\orm\utils\Criteria::ASSOCIATION_NOT)
+                    {
+                        $string .= ' NOT ('.$this->criteriaToString($params[1][1]).')';
+                    }
+                    break;
 
-				case \framework\orm\utils\Criteria::EQUALS :
-					$string .= $params[1][0] . ' = ' . $this->tools->quoteParameter($params[1][1]);
-					break;
-				case \framework\orm\utils\Criteria::GREATER_THAN :
-					$string .= $params[1][0] . ' > ' . $params[1][1];
-					break;
-				case \framework\orm\utils\Criteria::LESS_THAN :
-					$string .= $params[1][0] . ' < ' . $params[1][1];
-					break;
-				case \framework\orm\utils\Criteria::GREATER_THAN_OR_EQUAL :
-					$string .= $params[1][0] . ' >= ' . $params[1][1];
-					break;
-				case \framework\orm\utils\Criteria::LESS_THAN_OR_EQUAL :
-					$string .= $params[1][0] . ' <= ' . $params[1][1];
-					break;
-				case \framework\orm\utils\Criteria::NOT_EQUALS :
-					$string .= $params[1][0] . ' <> ' . $params[1][1];
-					break;
+                case \framework\orm\utils\Criteria::EQUALS :
+                    $string .= $params[1][0] . ' = ' . $this->tools->quoteParameter($params[1][1]);
+                    break;
+                case \framework\orm\utils\Criteria::GREATER_THAN :
+                    $string .= $params[1][0] . ' > ' . $params[1][1];
+                    break;
+                case \framework\orm\utils\Criteria::LESS_THAN :
+                    $string .= $params[1][0] . ' < ' . $params[1][1];
+                    break;
+                case \framework\orm\utils\Criteria::GREATER_THAN_OR_EQUAL :
+                    $string .= $params[1][0] . ' >= ' . $params[1][1];
+                    break;
+                case \framework\orm\utils\Criteria::LESS_THAN_OR_EQUAL :
+                    $string .= $params[1][0] . ' <= ' . $params[1][1];
+                    break;
+                case \framework\orm\utils\Criteria::NOT_EQUALS :
+                    $string .= $params[1][0] . ' <> ' . $params[1][1];
+                    break;
 
-				case \framework\orm\utils\Criteria::IS_NULL :
-					$string .=  'ISNULL('.$params[1].')';
-					break;
-				case \framework\orm\utils\Criteria::LIKE :
-					$string .= $params[1][0] . ' LIKE ' . $this->tools->quoteParameter($params[1][1]);
-					break;
-				case \framework\orm\utils\Criteria::IN :
-					$values = '(';
+                case \framework\orm\utils\Criteria::IS_NULL :
+                    $string .=  'ISNULL('.$params[1].')';
+                    break;
+                case \framework\orm\utils\Criteria::IS_NOT_NULL :
+                    $string .= $params[1].' IS NOT NULL';
+                    break;
+
+                case \framework\orm\utils\Criteria::LIKE :
+                    $string .= $params[1][0] . ' LIKE ' . $this->tools->quoteParameter($params[1][1]);
+                    break;
+                case \framework\orm\utils\Criteria::NOT_LIKE:
+                    $string .= $params[1][0] . ' NOT LIKE ' . $this->tools->quoteParameter($params[1][1]);
+                    break;
+
+                case \framework\orm\utils\Criteria::IN :
+                    $values = '(';
 
 					foreach ($params[1][1] as $value)
 					{
 						$values .= $this->tools->quoteParameter($value) . ', ';
 					}
 
-					$values = \rtrim($values, ', ') . ')';
-					$string .= $params[1][0] . ' IN ' . $values;
-					 break;
+                    $values = \rtrim($values, ', ') . ')';
+                    $string .= $params[1][0] . ' IN ' . $values;
+                    break;
+                case \framework\orm\utils\Criteria::NOT_IN:
+                    $values = '(';
 
-				case \framework\orm\utils\Criteria::LIMIT :
-					$string .= ' LIMIT ' . $params[1][0] . ', ' . $params[1][1];
-					break;
+                    foreach ($params[1][1] as $value)
+                    {
+                        $values .= $this->tools->quoteParameter($value) . ', ';
+                    }
+
+                    $values = \rtrim($values, ', ') . ')';
+                    $string .= $params[1][0] . ' NOT IN ' . $values;
+                    break;
+
+                case \framework\orm\utils\Criteria::LIMIT :
+                    $string .= ' LIMIT ' . $params[1][0] . ', ' . $params[1][1];
+                    break;
+
 
 				case \framework\orm\utils\MySQLCriteria::BETWEEN :
 					$string = $params[1][0].' BETWEEN '.$params[1][1][0].' AND '.$params[1][1][1];

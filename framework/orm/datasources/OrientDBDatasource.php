@@ -711,14 +711,16 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 				case \framework\orm\utils\Criteria::CRITERIA :
 					if ($params[1][0] == \framework\orm\utils\Criteria::ASSOCIATION_AND)
 					{
-						//$string = '('.$string.' AND '.$this->_criteriaToString($params[1][1]).')';
 						$string .= ' AND ' . $this->criteriaToString($params[1][1]);
 					}
-					else if ($params[1][0] == \framework\orm\utils\Criteria::ASSOCIATION_OR)
+					elseif ($params[1][0] == \framework\orm\utils\Criteria::ASSOCIATION_OR)
 					{
-						//$string = '('.$string.' OR '.$this->_criteriaToString($params[1][1]).')';
 						$string .= ' OR ' . $this->criteriaToString($params[1][1]);
 					}
+                    elseif ($params[1][0] == \framework\orm\utils\Criteria::ASSOCIATION_NOT)
+                    {
+                        $string .= ' NOT ' . $this->criteriaToString($params[1][1]);
+                    }
 					break;
 
 				case \framework\orm\utils\Criteria::EQUALS :
