@@ -54,6 +54,7 @@ class Criteria
 
 	const ASSOCIATION_OR = 'or';
 	const ASSOCIATION_AND = 'and';
+	const ASSOCIATION_NOT = 'not';
 
 	protected $constraints = array();
 
@@ -92,7 +93,7 @@ class Criteria
 	 */
 	public function criteria (\framework\orm\utils\Criteria $criteria, $association = self::ASSOCIATION_OR)
 	{
-		if ($association != self::ASSOCIATION_AND || $association != self::ASSOCIATION_OR)
+		if ($association != self::ASSOCIATION_AND || $association != self::ASSOCIATION_OR || $association != self::ASSOCIATION_NOT)
 		{
 			throw new \framework\orm\utils\CriteriaException('Bad association type between criterias');
 		}
@@ -119,6 +120,26 @@ class Criteria
 	{
 		return $this->criteria($criteria, self::ASSOCIATION_OR);
 	}
+
+    /**
+     * Add a logical NOT operation between this Criteria and another.
+     * @param \framework\orm\utils\Criteria $criteria
+     * @return \framework\orm\utils\Criteria $this
+     */
+    public function notCriteria (\framework\orm\utils\Criteria $criteria)
+    {
+        return $this->criteria($criteria, self::ASSOCIATION_NOT);
+    }
+
+    /**
+     * Alias for Criteria->notCriteria();
+     * @param \framework\orm\utils\Criteria $criteria
+     * @return \framework\orm\utils\Criteria $this
+     */
+    public function not (\framework\orm\utils\Criteria $criteria)
+    {
+        return $this->notCriteria($criteria);
+    }
 
 	/**
 	 * Check if a field equals a value.
@@ -244,7 +265,7 @@ class Criteria
 	/**
 	 * Check if a field is like a mask.
 	 * Use the wilcard '%' to mean 'any character'.
-	 * @param sring $field
+	 * @param string $field
 	 * @param string $mask
 	 * @return \framework\orm\utils\Criteria $this 
 	 */
