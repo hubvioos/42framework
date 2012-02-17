@@ -29,11 +29,11 @@
 
 namespace framework\orm\models;
 
-abstract class Model extends \framework\core\FrameworkObject implements \framework\orm\models\IAttachableModel
+abstract class Model implements \framework\orm\models\IAttachableModel
 {
 	protected $id;
-	
-	public function __construct ()
+
+    public function __construct ()
 	{
 		
 	}
