@@ -21,14 +21,14 @@
 namespace framework\orm\types\adapters;
 
 /**
- * Description of OrientDBDateTimeAdapter
+ * Description of MySQLDateTimeAdapter
  *
  * @author mickael
  */
-class OrientDBDateTimeAdapter implements \framework\orm\types\adapters\IAdapter
+class MySQLDateTimeAdapter implements \framework\orm\types\adapters\IAdapter
 {
 	
-	const ORIENTDB_DATE_FORMAT = 'Y-m-d H:i:s:u';
+	const MYSQL_DATETIME_FORMAT = 'Y-m-d H:i:s';
 	
 	public function __construct ()
 	{
@@ -46,14 +46,32 @@ class OrientDBDateTimeAdapter implements \framework\orm\types\adapters\IAdapter
 		{
 			try
 			{
-				$date = new \DateTime();
-				$date->setTimestamp($value);
+				if(\preg_match("#^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}$#", $value))
+				{
+					return \DateTime::createFromFormat(self::MYSQL_DATETIME_FORMAT, $value);
+				}
 				
-				return $date;
+				if(\preg_match('#^[0-9]{14}$#', $value))
+				{
+					return \DateTime::createFromFormat('YmdHis', $value);
+				}
+				if(\preg_match('#^[0-9]{12}$#', $value))
+				{
+					return \DateTime::createFromFormat('ymdHis', $value);
+				}
+				
+				if(\preg_match('#^[0-9]{8}$#', $value))
+				{
+					return \DateTime::createFromFormat('Ymd');
+				}
+				if(\preg_match('#^[0-9]{6}$#', $value))
+				{
+					return \DateTime::createFromFormat('ymd');
+				}
 			}
 			catch(\Exception $e)
 			{
-				throw new \framework\orm\types\adapters\AdapterException('Invalid timestamp.');
+				throw new \framework\orm\types\adapters\AdapterException('Invalid value '.$value);
 			}
 		}
 		
@@ -65,16 +83,17 @@ class OrientDBDateTimeAdapter implements \framework\orm\types\adapters\IAdapter
 	{
 		if($value instanceof \DateTime)
 		{
-			return $value->format(self::ORIENTDB_DATE_FORMAT);
+			return $value->format(self::MYSQL_DATETIME_FORMAT);
 		}
 		else
 		{
-			if(\is_numeric($value) && \strlen($value) == 9)
+			if(\is_numeric($value) && (\strlen($value) == 14 || \strlen($value) == 12 
+					|| \strlen($value) == 8 || \strlen($value) == 6))
 			{
-				return \date(self::ORIENTDB_DATE_FORMAT, $value);
+				return $value;
 			}
 				
-			if(\is_string($value) && \preg_match("#^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}:[0-9]{3}$#", $value))
+			if(\is_string($value) && \preg_match("#^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}$#", $value))
 			{
 				return $value;
 			}

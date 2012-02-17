@@ -1,6 +1,5 @@
 <?php
-
-/**
+/** 
  * Copyright (C) 2011 - Kévin O'NEILL, François KLINGLER - <contact@42framework.com>
  * 
  * 42framework is free software; you can redistribute it and/or
@@ -18,30 +17,34 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-namespace framework\orm\models;
+namespace framework\orm\datasources\exceptions;
 
 /**
- * Interface IAttachableModel
- * 
- * This interface must be implemented by every 
- * model that will be attached to a Mapper.
+ * ConnectionException
+ * Exception to throw on a connection error
+ *
+ * @author mickael
  */
-interface IAttachableModel
+class ConnectionException extends \framework\orm\datasources\exceptions\DatasourceException
 {
-
-	const RELATION_HAS_ONE = 1;
-	const RELATION_HAS_MANY = 2;
-
-	/**
-	 * Get the unique identifier of the instance.
-	 * @return int|string|NULL MUST return NULL if no ID exists yet (i.e. if it's never been stored in the datasource)
-	 */
-	public function getId ();
+	const DATABASE = 1;
+	
+	const HOST = 2;
 
     /**
-     * Set the unique identifier of the instance.
-     * @abstract
-     * @param $id
+     * @param string $target
+     * @param int $targetType
+     * @param \Exception $previous
      */
-    public function setId($id);
+	public function __construct ($target, $targetType = self::HOST, $previous = NULL)
+	{
+		if($targetType == self::DATABASE)
+		{
+			parent::__construct('Unable to connect to database '.$target, $previous);
+		}
+		else
+		{
+			parent::__construct('Unable to connect to host '.$target, $previous);
+		}
+	}
 }

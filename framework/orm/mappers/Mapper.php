@@ -39,14 +39,14 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	const UPDATE = 2;
 
 	/**
-	 * Array containing the model attached to the mapper.
-	 * @var array 
+	 * Array containing the models attached to the mapper.
+	 * @var array
 	 */
 	protected $attachedModels = array();
 
 	/**
 	 * The datasource used to store the data.
-	 * @var \framework\orm\datasources\IDatasource
+	 * @var \framework\orm\datasources\interfaces\IDatasource
 	 */
 	protected $datasource = null;
 
@@ -117,13 +117,15 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 
 	/**
 	 * Constructor
-	 * @param \framework\orm\datasources\IDatasource $datasource The datasource used to store the data.
+	 * @param \framework\orm\datasources\interfaces\IDatasource $datasource The datasource used to store the data.
 	 * @throws \framework\orm\mappers\MapperException 
 	 */
 	public function __construct (\framework\orm\datasources\interfaces\IDatasource $datasource)
 	{
 		$this->datasource = $datasource;
 
+		//$this->attachedModels = $this->getComponent('orm.utils.Collection');
+		
 		if (!isset($this->fields) || $this->fields === array() || $this->fields === NULL)
 		{
 			throw new \framework\orm\mappers\MapperException('No fields specified.');
@@ -164,11 +166,11 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 		$this->init();
 	}
 
-	/**
-	 * Attach a new object to the mapper.
-	 * @param \framework\orm\models\IAttachableModel $object 
-	 * @return string The key where the object is stored in the mapper.
-	 */
+    /**
+     * Attach a new object to the mapper.
+     * @param \framework\orm\models\IAttachableModel $model
+     * @return string The key where the object is stored in the mapper.
+     */
 	public function attach (\framework\orm\models\IAttachableModel $model)
 	{
 		if($model->getId() !== NULL)
@@ -207,77 +209,98 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 
 	/**
 	 * Retrieve a model from the datasource based on its id.
-	 * @param int|string $id The model's id.
+	 * @param mixed $toFind An array of IDs or a unique ID.
 	 * @param bool $attach Attach the retrieved model(s) if found.
 	 * @return \framework\orm\models\IAttachableModel
 	 */
-	public function find ($id, $attach = true)
+	public function find ($toFind, $attach = true)
 	{
-		$data = $this->datasource->find($this->_wrapInArray($id), $this->getEntityIdentifier());
+		$alreadyFound = array();
 
-		if (\count($data) == 0)
-		{
-			return null;
-		}
-		else
-		{
-			$result = NULL;
+        /** @var $attached \framework\orm\utils\Collection */
+		$attached = $this->getComponent('orm.utils.Collection');
 
-			if (\count($data) == 1)
+		/** @var $found \framework\orm\utils\Collection */
+        $found = $this->getComponent('orm.utils.Collection');
+		$toFind = $this->_wrapInArray($toFind);
+		
+		$searchForUniqueModel = (\count($toFind) == 1);
+		
+		foreach($toFind as $index => $id)
+		{
+			if($this->isAttached($id))
 			{
-				$result = $this->_mapToModel($data[0]);
-				
+				$attached->add($this->attachedModels[(string) $id]);
+				$alreadyFound[] = $index;
+			}
+		}
+		
+		foreach($alreadyFound as $index)
+		{
+			unset($toFind[$index]);
+		}
+		
+		if(\count($toFind) != 0)
+		{
+			$data = $this->datasource->find($toFind, $this->getEntityIdentifier());
+			
+			foreach ($data as $map)
+			{
+				$newModel = $this->_mapToModel($map);
+
 				if($this->externalRelations != NULL)
 				{
-					$this->_findExternalRelations($result);
+					$this->_findExternalRelations($newModel);
 				}
-				
+
 				if ($attach)
 				{
-					$this->attach($result);
+					$this->attach($newModel);
 				}
-			}
-			else
-			{
-				$result = $this->getComponent('orm.utils.Collection');
 
-				foreach ($data as $map)
-				{
-					$newModel = $this->_mapToModel($map);
-					
-					if($this->externalRelations != NULL)
-					{
-						$this->_findExternalRelations($newModel);
-					}
-					
-					if ($attach)
-					{
-						$this->attach($newModel);
-					}
-
-					$result[] = $newModel;
-				}
+				$found[] = $newModel;
 			}
 
-			return $result;
 		}
+		
+		$found->merge($attached);
+
+		if($searchForUniqueModel)
+		{
+			return $found->isEmpty() ? NULL : $found[0];
+		}
+		
+		return $found->isEmpty() ? NULL : $found;
 	}
 
-	/**
-	 * Retrieve several models from the datasource.
-	 * @param \framework\orm\utils\Criteria A set of constraints the results must match. 
-	 * @return \framework\orm\utils\Collection
-	 */
-	public function findAll (\framework\orm\utils\Criteria $criteria = null)
+    /**
+     * Retrieve several models from the datasource.
+     * @param \framework\orm\utils\Criteria A set of constraints the results must match.
+     * @param bool $attach
+     * @return \framework\orm\utils\Collection
+     */
+	public function findAll (\framework\orm\utils\Criteria $criteria = null, $attach = true)
 	{
 		$data = $this->datasource->findAll($this->getEntityIdentifier(), $criteria);
 		$results = $this->getComponent('orm.utils.Collection');
 
-		if (\count($data) != 0)
+		if (!$data->isEmpty())
 		{
 			foreach ($data as $map)
 			{
-				$results[] = $this->_mapToModel($map);
+				$model = $this->_mapToModel($map);
+				$id = (string) $model->getId();
+				
+				if($this->isAttached($id))
+				{
+					$model = $this->getAttachedModel($id);
+				}
+				elseif($attach)
+				{
+					$this->attach($model);
+				}
+				
+				$results[] = $model;
 			}
 		}
 
@@ -303,7 +326,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	 * @param \framework\orm\models\IAttachableModel The model to save.
 	 * @return \framework\orm\models\IAttachableModel The saved model on succes, NULL on failure.
 	 */
-	public function save (\framework\orm\models\IAttachableModel &$model)
+	public function save (\framework\orm\models\IAttachableModel $model)
 	{
 		$r = NULL;
 		
@@ -325,7 +348,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	 */
 	public function saveAll()
 	{
-		foreach ($this->attachedModels as $id => &$model)
+		foreach ($this->attachedModels as $id => $model)
 		{
 			$this->save($model);
 		}
@@ -335,7 +358,8 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 
 	/**
 	 * Delete a model from the datasource.
-	 * @param \framework\orm\utils\Criteria|\framework\orm\models\IAttachableModel 
+	 * @param \framework\orm\utils\Criteria|\framework\orm\models\IAttachableModel
+     * @return bool
 	 */
 	public function delete ($models)
 	{
@@ -347,21 +371,31 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 		{
 			if ($models instanceof \framework\orm\models\IAttachableModel)
 			{
-				$models = $models->getId();
+				$this->detach($models);
+				return $this->_deleteModel($models->getId());
 			}
-			
-			return $this->_deleteModel($models);
 		}
+		
+		throw new \framework\orm\mappers\MapperException('Wrong parameter type');
 	}
 
 	/**
 	 * Check if a model is attached to the mapper
-	 * @param \framework\orm\models\IAttachableModel $model
+	 * @param mixed $model
 	 * @return bool 
 	 */
-	public final function isAttached (\framework\orm\models\IAttachableModel $model)
+	public final function isAttached ($model)
 	{
-		return \in_array($model, $this->attachedModels, true);
+		if(\is_scalar($model))
+		{
+			return \array_key_exists((string) $model, $this->attachedModels); 
+		}
+		elseif($model instanceof \framework\orm\models\IAttachableModel)
+		{
+			return \in_array($model, $this->attachedModels, true);
+		}
+		
+		throw new \framework\orm\mappers\MapperException('Mapper::isAttached() can only take a model or an ID as parameter.');
 	}
 
 	/**
@@ -399,7 +433,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 
 	/**
 	 * Get the datasource used by the mapper.
-	 * @return \framework\orm\datasources\IDatasource
+	 * @return \framework\orm\datasources\interfaces\IDatasource
 	 */
 	public final function getDatasource ()
 	{
@@ -418,7 +452,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	 * Find the external relations of a model
 	 * @param \framework\orm\models\IAttachableModel $model 
 	 */
-	protected function _findExternalRelations(\framework\orm\models\IAttachableModel &$model)
+	protected function _findExternalRelations(\framework\orm\models\IAttachableModel $model)
 	{
 		foreach($this->externalRelations as $name => $spec)
 		{
@@ -445,7 +479,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	 */
 	protected function _deleteModel ($model)
 	{
-		return $this->datasource->delete($model, NULL);
+		return $this->datasource->delete($model, $this->getEntityIdentifier(), NULL);
 	}
 
 	/**
@@ -455,14 +489,14 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	 */
 	protected function _deleteCriteria (\framework\orm\utils\Criteria $criteria)
 	{
-		return $this->datasource->delete(NULL, $criteria);
+		return $this->datasource->delete(NULL, $this->getEntityIdentifier(), $criteria);
 	}
 	
 	/**
 	 * Save the internal relations of a model
 	 * @param \framework\orm\models\IAttachableModel $model 
 	 */
-	protected function _saveInternalRelations(&$model)
+	protected function _saveInternalRelations($model)
 	{
 		foreach ($this->internalRelations as $name => $spec)
 		{
@@ -489,7 +523,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	 * @param \framework\orm\models\IAttachableModel $model
 	 * @throws \framework\orm\mappers\MapperException 
 	 */
-	protected function _saveExternalRelations(&$model)
+	protected function _saveExternalRelations($model)
 	{
 		foreach ($this->externalRelations as $name => $spec)
 		{
@@ -546,7 +580,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	 * @return \framework\orm\models\IAttachableModel
 	 * @throws \framework\orm\mappers\MapperException 
 	 */
-	protected function _persist (&$model, $mode = self::CREATE)
+	protected function _persist (\framework\orm\models\IAttachableModel $model, $mode = self::CREATE)
 	{
 		if ($mode != self::CREATE && $mode != self::UPDATE)
 		{
@@ -570,7 +604,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 		}
 		else
 		{
-			if ($this->datasource->update($model->getId(), $this->getEntityIdentifier(), $model, NULL) == true)
+			if ($this->datasource->update($model->getId(), $this->getEntityIdentifier(), $this->_modelToMap($model), NULL) == true)
 			{
 				$id = $model->getId();
 			}
@@ -592,7 +626,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	
 	/**
 	 * Transform a datasource map to a PHP-friendly model
-	 * @param array|\ArrayObject $map 
+	 * @param array|\framework\orm\utils\Map $map
 	 * @return \framework\orm\models\IAttachableModel
 	 */
 	protected function _mapToModel ($map)
@@ -618,7 +652,14 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 					// else, use the value as provided
 					else
 					{
-						$model->$setter($map[$name]['value']);
+						$value = $map[$name]['value'];
+						
+						// convert numeric types into actual numeric values (int, float)
+						if(\in_array($spec['type'], $this->getComponent('orm.numericTypes')))
+						{
+							$value = $value + 0;
+						}
+						$model->$setter($value);
 					}
 				}
 				else
@@ -647,7 +688,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 						{
 							if ($spec['internal'])
 							{
-								$entities = $relationMapper->find($spec['value']);
+								$entities = $relationMapper->find($map[$spec['storageField']]['value']);
 							}
 							else
 							{
@@ -699,7 +740,6 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	protected function _modelToMap (\framework\orm\models\IAttachableModel $model)
 	{
 		$map = new \framework\orm\utils\Map();
-		$getter = '';
 
 		foreach ($this->nonRelations as $name => $spec)
 		{
@@ -745,12 +785,11 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 					$map[$name]['type'] = $relationMapper->getEntityIdentifier();
 					$map[$name]['value'] = array();
 
-
 					if ($relations === NULL)
 					{
 						$map[$name]['value'] = NULL;
 					}
-					elseif (\is_array($relations) || $relations instanceof \ArrayAccess)
+					elseif (\is_array($relations) || $relations instanceof \Traversable)
 					{
 						foreach ($relations as $relation)
 						{
@@ -821,13 +860,13 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	
 	/**
 	 * Return the passed argument wrapped in an array 
-	 * if it's not already one or an instance of \ArrayAccess
+	 * if it's not already one or an instance of \Traversable
 	 * @param mixed $a
 	 * @return array
 	 */
 	protected function _wrapInArray($a)
 	{
-		return (!\is_array($a) && !($a instanceof \ArrayAccess)) ? array($a) : $a;
+		return (!\is_array($a) && !($a instanceof \Traversable)) ? array($a) : $a;
 	}
 
 }

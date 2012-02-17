@@ -33,35 +33,294 @@ class CollectionException extends \Exception
  *
  * @author mickael
  */
-class Collection extends \ArrayObject
+class Collection implements \ArrayAccess, \Iterator, \Countable
 {
-	const SORT_ASC = 'asc';
-	const SORT_DESC = 'desc';
-	
+
+    const SORT_ASC = 'asc';
+    const SORT_DESC = 'desc';
+
+    protected $storage = array();
+
+    protected $property = '';
+
+    protected $order = self::SORT_ASC;
+
+    protected $ignoreStringCase = true;
+
+    protected $index = 0;
+
+
 	public function __construct ($array = array())
 	{
 		if(\count($array) > 0)
 		{
 			foreach ($array as $element)
 			{
-				$this[] = $element;
+				$this->storage[] = $element;
 			}
 		}
 	}
-	
-	public function add($element)
+
+    /**
+     * ArrayAccess methods
+     */
+
+    /**
+     * Whether a offset exists
+     * @link http://php.net/manual/en/arrayaccess.offsetexists.php
+     * @param mixed $offset
+     * @return boolean Returns true on success or false on failure.
+     */
+    public function offsetExists($offset)
+    {
+        return array_key_exists($offset, $this->storage);
+    }
+
+    /**
+     * Offset to retrieve
+     * @link http://php.net/manual/en/arrayaccess.offsetget.php
+     * @param mixed $offset
+     * @return mixed Can return all value types.
+     */
+    public function offsetGet($offset)
+    {
+        return $this->storage[$offset];
+    }
+
+    /**
+     * Offset to set
+     * @link http://php.net/manual/en/arrayaccess.offsetset.php
+     * @param mixed $offset
+     * @param mixed $value
+     */
+    public function offsetSet($offset, $value)
+    {
+        if($offset == '')
+        {
+            $this->storage[] = $value;
+
+        }
+        else
+        {
+            $this->storage[$offset] = $value;
+        }
+    }
+
+    /**
+     * Offset to unset
+     * @link http://php.net/manual/en/arrayaccess.offsetunset.php
+     * @param mixed $offset
+     * @return void
+     */
+    public function offsetUnset($offset)
+    {
+        unset($this->storage[$offset]);
+    }
+
+    /**
+     * Iterator methods
+     */
+
+    /**
+     * Return the current element
+     * @link http://php.net/manual/en/iterator.current.php
+     * @return mixed Can return any type.
+     */
+    public function current()
+    {
+        return $this->storage[$this->index];
+    }
+
+    /**
+     * Move forward to next element
+     * @link http://php.net/manual/en/iterator.next.php
+     * @return void Any returned value is ignored.
+     */
+    public function next()
+    {
+        $this->index += 1;
+    }
+
+    /**
+     * Return the key of the current element
+     * @link http://php.net/manual/en/iterator.key.php
+     * @return mixed scalar on success, integer
+     * 0 on failure.
+     */
+    public function key()
+    {
+        return $this->index;
+    }
+
+    /**
+     * Checks if current position is valid
+     * @link http://php.net/manual/en/iterator.valid.php
+     * @return boolean The return value will be casted to boolean and then evaluated.
+     * Returns true on success or false on failure.
+     */
+    public function valid()
+    {
+        return ($this->index < \count($this->storage));
+    }
+
+    /**
+     * Rewind the Iterator to the first element
+     * @link http://php.net/manual/en/iterator.rewind.php
+     * @return void Any returned value is ignored.
+     */
+    public function rewind()
+    {
+        $this->index = 0;
+    }
+
+    /**
+     * Countable methods
+     */
+
+    /**
+     * Count elements of an object
+     * @link http://php.net/manual/en/countable.count.php
+     * @return int The custom count as an integer.
+     */
+    public function count()
+    {
+        return \count($this->storage);
+    }
+
+    /**
+     * Custom methods
+     */
+
+    /**
+     * @param $element
+     * @return \framework\orm\utils\Collection
+     */
+    public function add($element)
+    {
+        $this->storage[] = $element;
+        return $this;
+    }
+
+    /**
+     * The function used to provide the Collection->sort() method
+     * @param $a
+     * @param $b
+     * @return int
+     * @throws CollectionException
+     */
+    protected function _sortAlgorithm($a, $b)
+    {
+        $getter = 'get' . $this->property;
+
+        $aOffset = $a->{$getter}();
+        $bOffset = $b->{$getter}();
+
+        // swap the variables if the sorting must be done in reverse
+        if($this->order == self::SORT_DESC)
+        {
+            $tmp = $aOffset;
+            $aOffset = $bOffset;
+            $bOffset = $tmp;
+        }
+
+        if(\is_scalar($aOffset) && \is_scalar($bOffset))
+        {
+            if(\is_numeric($aOffset) && \is_numeric($bOffset))
+            {
+                $aOffset = $aOffset + 0;
+                $bOffset = $bOffset + 0;
+
+                if($aOffset == $bOffset)
+                {
+                    return 0;
+                }
+
+                return ($aOffset < $bOffset) ? -1 : 1 ;
+            }
+            elseif(\is_string($aOffset) && \is_string($bOffset))
+            {
+                return ($this->ignoreStringCase) ? \strcmp($aOffset, $bOffset) : \strcasecmp($aOffset, $bOffset);
+            }
+        }
+        elseif((\is_array($aOffset) && \is_array($bOffset))
+            || ($aOffset instanceof \Countable && $bOffset instanceof \Countable))
+        {
+            if(\count($aOffset) == \count($bOffset))
+            {
+                return 0;
+            }
+
+            return (\count($aOffset) < \count($bOffset)) ? -1 : 1 ;
+        }
+
+        throw new \framework\orm\utils\CollectionException('A Collection can anly be sorted using arrays or scalar values.');
+    }
+
+
+    /**
+     * Sort the Collection's elements according to a property
+     * If the property is a string, it's sorted in alphabetical order, if it's countable, its length is used
+     * @param $property
+     * @param string $order
+     * @param bool $ignoreStringCase
+     * @return \framework\orm\utils\Collection
+     */
+    public function sort($property, $order = self::SORT_ASC, $ignoreStringCase = true)
+    {
+        $this->property = ucfirst($property);
+        $this->order = $order;
+        $this->ignoreStringCase = $ignoreStringCase;
+
+        if($this->order != self::SORT_ASC && $this->order != self::SORT_DESC)
+        {
+            throw new \framework\orm\utils\CollectionException('Wrong sort order <strong>'.$this->order.'</strong>');
+        }
+
+        usort($this->storage, array($this, '_sortAlgorithm'));
+
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function asArray()
+    {
+        return $this->storage;
+    }
+
+
+    /**
+	 * Merge with an array or another Collection
+	 * @param array|\framework\orm\utils\Collection $collection
+	 * @return \framework\orm\utils\Collection $this
+	 * @throws \framework\orm\utils\CollectionException 
+	 */
+	public function merge($collection)
 	{
-		$this[] = $element;
+		if(!\is_array($collection) && !($collection instanceof self))
+		{
+			throw new \framework\orm\utils\CollectionException('A Collection can only be merged with an array or another Collection');
+		}
+
+        if($collection instanceof self)
+        {
+            array_merge($this->storage, $collection->storage);
+        }
+        else
+        {
+            array_merge($this->storage, $collection);
+        }
+
 		return $this;
 	}
 	
-	public function sort($property, $order = self::SORT_ASC)
+	/**
+	 * Find whether the Collection is empty or not.
+	 * @return bool
+	 */
+	public function isEmpty()
 	{
-		// nope !
-	}
-	
-	public function asArray()
-	{
-		return $this->getArrayCopy();
+		return \count($this->storage) == 0;
 	}
 }

@@ -299,6 +299,22 @@ $components = array(
 			return new \framework\orm\utils\OrientDBCriteria();
 		},
 		'isUnique' => false
+	),			
+	'orm.utils.MySQLCriteria' => array(
+		'callable' => function($c, $args)
+		{
+			if(\count($args) == 1)
+			{
+				return new \framework\orm\utils\MySQLCriteria($args[0]);
+			}
+			if(\count($args) == 2)
+			{
+				return new \framework\orm\utils\MySQLCriteria($args[0], $args[1]);
+			}
+			
+			return new \framework\orm\utils\MySQLCriteria();
+		},
+		'isUnique' => false
 	),
 
 	/* ADAPTERS */
@@ -313,6 +329,13 @@ $components = array(
 		'callable' => function($c, $args)
 		{
 			return new \framework\orm\types\adapters\OrientDBBooleanAdapter();
+		},
+		'isUnique' => true
+	),
+	'MySQLDateTimeAdapter' => array(
+		'callable' => function($c, $args)
+		{
+			return new \framework\orm\types\adapters\MySQLDateTimeAdapter();
 		},
 		'isUnique' => true
 	),
@@ -335,6 +358,35 @@ $components = array(
 		'callable' => function($c, $args)
 		{
 			return new \framework\orm\types\OrientDBBoolean($c->getComponent('OrientDBBooleanAdapter'));
+		},
+		'isUnique' => true
+	),
+	'MySQLDateTime' => array(
+		'callable' => function($c, $args)
+		{
+			return new \framework\orm\types\MySQLDateTime($c->getComponent('MySQLDateTimeAdapter'));
+		},
+		'isUnique' => true
+	),
+	'MySQLDate' => array(
+		'callable' => function($c, $args)
+		{
+			return new \framework\orm\types\MySQLDate($c->getComponent('MySQLDateTimeAdapter'));
+		},
+		'isUnique' => true
+	),
+	'MySQLTimestamp' => array(
+		'callable' => function($c, $args)
+		{
+			return new \framework\orm\types\MySQLTimestamp($c->getComponent('MySQLDateTimeAdapter'));
+		},
+		'isUnique' => true
+	),
+				
+	'orm.utils.DatasourceTools' => array(
+		'callable' => function($c, $args)
+		{
+			return new \framework\orm\utils\DatasourceTools();
 		},
 		'isUnique' => true
 	)

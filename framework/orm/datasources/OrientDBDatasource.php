@@ -17,73 +17,80 @@
  * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
+
+namespace framework\orm\datasources;
+
+class OrientDBDatasourceException extends \framework\orm\datasources\exceptions\DatasourceException
+{
+	
+}
+
 /**
  * Library OrientDBDatasource
  *
  * @author mickael
  */
 
-namespace framework\orm\datasources;
-
-class OrientDBDatasourceException extends \Exception
-{
-	
-}
-
 class OrientDBDatasource extends \framework\core\FrameworkObject implements \framework\orm\datasources\interfaces\IConnectionDatasource, \framework\orm\datasources\interfaces\IDbDatasource, \framework\orm\datasources\interfaces\IDatasource
 {
 
 	/**
 	 * The connection to the database
-	 * @var OrientDB 
+	 * @var \OrientDB
 	 */
-	private $link = null;
+	protected $link = NULL;
 
 	/**
 	 * The host
 	 * @var string 
 	 */
-	private $host;
+	protected $host;
 
 	/**
 	 * The connection's port
 	 * @var int
 	 */
-	private $port;
+	protected $port;
 
 	/**
 	 * The user name used for the connection to the host
 	 * @var string 
 	 */
-	private $user = '';
+	protected $user = '';
 
 	/**
 	 * The password used for the connection to the host
 	 * @var string
 	 */
-	private $password = '';
+	protected $password = '';
 
 	/**
 	 * The name of the active database
 	 * @var string 
 	 */
-	private $active = '';
+	protected $active = '';
 
 	/**
 	 * The configuration of the datasource. Named "configuration" to prevent confusing with $this->getConfig().
 	 * @var array 
 	 */
-	private $configuration = array();
+	protected $configuration = array();
 
 	/**
 	 * Regex pattern the IDs must match
 	 * @var string
 	 */
-	private $pattern = '/^[^ \t\n\r]*$/';
+	protected $pattern = '/^[^ \t\n\r]*$/';
+	
+	/**
+	 *
+	 * @var \framework\orm\utils\DatasourceTools
+	 */
+	protected $tools = NULL;
 
 	/**
 	 * Constructor
-	 * @throws \framework\orm\datasources\OrientDBDatasourceException
+	 * @throws \framework\orm\datasources\exceptions\ConnectionException
 	 * @param string $host The host's address
 	 * @param string|int $port The host's port
 	 * @param string $user The username used to connect to the host
@@ -91,6 +98,8 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 	 */
 	public function __construct ($user, $password, $host = 'localhost', $port = 2424)
 	{
+		$this->tools = $this->getComponent('orm.utils.DatasourceTools');
+		
 		$this->host = $host;
 		$this->port = $port;
 		$this->user = $user;
@@ -103,16 +112,14 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 		}
 		catch (\Exception $e)
 		{
-			$message = 'Unable to connect to ' . $this->_getFullHost()
-					. ' with user ' . $this->user . ' and the password you specified';
-
-			throw new \framework\orm\datasources\OrientDBDatasourceException($message, null, $e);
+			throw new \framework\orm\datasources\exceptions\ConnectionException($this->_getFullHost(), $e);
 		}
 	}
 
 	/**
 	 * Establish a connection to a database
 	 * @throws \framework\orm\datasources\OrientDBDatasourceException
+     * @throws \framework\orm\datasources\exceptions\ConnectionException
 	 * @param string $database The databases's name
 	 * @param string $user The user's name 
 	 * @param string $password The user's password
@@ -134,8 +141,8 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 		}
 		else
 		{
-			$message = 'Database ' . $database . ' doesn\'t exist on host ' . $this->_getFullHost();
-			throw new \framework\orm\datasources\OrientDBDatasourceException($message);
+			throw new \framework\orm\datasources\exceptions\ConnectionException($database, 
+					\framework\orm\datasources\exceptions\ConnectionException::DATABASE);
 		}
 	}
 
@@ -291,7 +298,7 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 
 	/**
 	 * Create a class. By default, this method also creates a new cluster named after the class.
-	 * @throws \framework\orm\datasources\OrientDBDatasourceException
+	 * @throws \framework\orm\datasources\exceptions\WrongEntityFormatException
 	 * @param string $class The name of the new class
 	 * @param string $parent The parent class from wich the new class inherits
 	 * @param int|string $cluster The ID of the cluster the class will use or the name of a new cluster to create
@@ -299,7 +306,7 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 	 * @param string $clusterType The type of the new cluster if one must be created. Will be ignored if $createCluster == false
 	 * @return bool 
 	 */
-	public function createClass ($class, $parent = '', $cluster = null, $createCluster = false, $clusterType = \OrientDB::DATACLUSTER_TYPE_PHYSICAL)
+	public function createClass ($class, $parent = '', $cluster = NULL, $createCluster = false, $clusterType = \OrientDB::DATACLUSTER_TYPE_PHYSICAL)
 	{
 		if ($createCluster === true && is_string($cluster))
 		{
@@ -320,8 +327,7 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 				}
 				else
 				{
-					throw new \framework\orm\datasources\OrientDBDatasourceException('Invalid parent class name '
-							. $parent);
+					throw new \framework\orm\datasources\exceptions\WrongEntityFormatException($parent);
 				}
 			}
 
@@ -334,7 +340,7 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 		}
 		else
 		{
-			throw new \framework\orm\datasources\OrientDBDatasourceException('Invalid class name ' . $class);
+			throw new \framework\orm\datasources\exceptions\WrongEntityFormatException($class);
 		}
 	}
 
@@ -342,7 +348,7 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 
 	/**
 	 * Get the connection (a.k.a the OrientDB instance)
-	 * @return OrientDB 
+	 * @return \OrientDB
 	 */
 	public function getConnection ()
 	{
@@ -351,7 +357,7 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 
 	/**
 	 * Execute a request and return the result.
-	 * @throws \framework\orm\datasources\OrientDBDatasourceException
+	 * @throws \framework\orm\datasources\exceptions\RequestException
 	 * @param string $query 
 	 * @return mixed
 	 */
@@ -363,19 +369,25 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 		}
 		catch (\Exception $e)
 		{
-			throw new \framework\orm\datasources\OrientDBDatasourceException(
-					'Unable to perform request ' . $query, null, $e);
+			throw new \framework\orm\datasources\exceptions\RequestException($query, $e);
 		}
 	}
 
 	/**
 	 * Execute a query and return the results in an array.
 	 * @param string $query
-	 * @return mixed
+	 * @return \OrientDB
 	 */
 	public function query ($query)
 	{
-		return $this->link->select($query);
+        try
+        {
+            return $this->link->select($query);
+        }
+        catch(\Exception $e)
+        {
+            throw new \framework\orm\datasources\exceptions\RequestException($query, $e);
+        }
 	}
 
 	/**
@@ -385,9 +397,10 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 	/**
 	 * Create a record
 	 * @param string $entity The ID of the cluster where the new record ahs to be created
-	 * @param array|OrientDBRecord $data 
-	 * @param mixed $type The record type @see OrientDBRecordTypes
-	 */
+	 * @param array|\OrientDBRecord $data
+	 * @param mixed $type The record type @see \OrientDBRecordTypes
+     * @return int|bool
+     */
 	public function create ($entity, $data, $type = \OrientDB::RECORD_TYPE_DOCUMENT)
 	{
 		$fields = '';
@@ -418,25 +431,24 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 				switch ($dataType)
 				{
 					case \framework\orm\types\OrientDBDateTime::TYPE_IDENTIFIER :
-						$dataValue = $this->_quoteString($dataValue);
+						$dataValue = $this->tools->quoteString($dataValue);
 						break;
 
 					case \framework\orm\types\OrientDBBoolean::TYPE_IDENTIFIER :
 						break;
 					
 					case \framework\orm\types\Type::RELATION_KEY :
-						$dataValue = $this->_quoteString($dataValue);
+						$dataValue = $this->tools->quoteString($dataValue);
 						break;
 					
 					case \framework\orm\types\Type::UNKNOWN :
 						if (\is_string($dataValue))
 						{
-							$dataValue = $this->_quoteString($dataValue);
+							$dataValue = $this->tools->quoteString($dataValue);
 							break;
 						}
 
-						throw new \framework\orm\datasources\OrientDBDatasourceException('Bad type for value "'
-								. $dataValue . '"');
+						throw new \framework\orm\datasources\exceptions\WrongDataTypeException($dataType, $dataValue);
 						break;
 
 					default:
@@ -447,7 +459,7 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 
 						if (\in_array($dataType, $this->getComponent('orm.textualTypes')))
 						{
-							$dataValue = $this->_quoteString($dataValue);
+							$dataValue = $this->tools->quoteString($dataValue);
 							break;
 						}
 
@@ -479,7 +491,7 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 							break;
 						}
 
-						throw new \framework\orm\datasources\OrientDBDatasourceException('Unknown type ' . $dataType);
+						throw new \framework\orm\datasources\exceptions\WrongDataTypeException($dataType, $dataValue);
 						break;
 				}
 
@@ -507,23 +519,22 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 	/**
 	 *
 	 * @param string $id
-	 * @param \framework\orm\Criteria $where 
+	 * @param string $entity
+	 * @param \framework\orm\utils\Criteria $where
+     * @return bool True on success, false otherwise
 	 */
-	public function delete ($id, \framework\orm\utils\Criteria $where = null)
+	public function delete ($id, $entity, \framework\orm\utils\Criteria $where = NULL)
 	{
 		return $this->link->recordDelete($id);
 	}
 
 	/**
 	 * Find elements from their IDs.
-	 * @throws \framework\orm\datasources\OrientDBDatasourceException
 	 * @param array $primary An array of IDs
 	 * @param string|int The identifier of the entity where to look for (table name, cluster ID, ...)
-	 * @param array $inherits
-	 * @param array $dependents 
 	 * @return \framework\orm\utils\Collection The Collection of elements
 	 */
-	public function find (array $primary, $entity, array $inherits = array(), array $dependents = array())
+	public function find (array $primary, $entity)
 	{
 		$found = $this->getComponent('orm.utils.Collection');
 		$record = null;
@@ -543,24 +554,23 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 	}
 
 	/**
-	 *
+	 * @param $entity
 	 * @param \framework\orm\utils\Criteria $criteria
-	 * @param array $inherits
-	 * @param array $dependents 
+	 * @return \framework\orm\utils\Collection
 	 */
-	public function findAll ($entity, \framework\orm\utils\Criteria $criteria = null, array $inherits = null, array $dependents = null)
+	public function findAll ($entity, \framework\orm\utils\Criteria $criteria = NULL)
 	{
 		if (\strpos(' ', $entity) !== false)
 		{
-			throw new \framework\orm\datasources\OrientDBDatasourceException('Bad entity name ' . $entity);
+			throw new \framework\orm\datasources\exceptions\WrongEntityFormatException($entity);
 		}
 
-		$entities = array();
+		$entities = $this->getComponent('orm.utils.Collection');
 
 		try
 		{
-			$data = $this->query('SELECT FROM ' . $entity . ' WHERE ' . $this->_criteriaToString($criteria));
-
+			$data = $this->query('SELECT FROM ' . $entity . ' WHERE ' . $this->criteriaToString($criteria));
+			
 			foreach ($data as $record)
 			{
 				$record->parse();
@@ -576,14 +586,15 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 		return $entities;
 	}
 
-	/**
-	 *
-	 * @param string $id
-	 * @param string|OrientDBRecord $data
-	 * @param \framework\orm\utils\Criteria $where 
-	 * @return bool Update status
-	 */
-	public function update ($id, $entity, $data, \framework\orm\utils\Criteria $where = null)
+    /**
+     *
+     * @param string $id
+     * @param $entity
+     * @param string|\OrientDBRecord $data
+     * @param \framework\orm\utils\Criteria $where
+     * @return bool Update status
+     */
+	public function update ($id, $entity, $data, \framework\orm\utils\Criteria $where = NULL)
 	{
 		// convert the $data to a record
 		$record = $this->_mapToRecord($data);
@@ -599,14 +610,6 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 	public function getNativeCriteria ()
 	{
 		return $this->getComponent('orm.utils.OrientDBCriteria');
-	}
-
-	/**
-	 * Not supported yet
-	 */
-	public function getQuery ()
-	{
-		return '';
 	}
 
 	
@@ -659,7 +662,7 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 		{
 			if ($spec['storageField'] !== NULL)
 			{
-				if(\is_array($spec['value']) || $spec['value'] instanceof \ArrayAccess)
+				if(\is_array($spec['value']) || $spec['value'] instanceof \Traversable)
 				{
 					$data = array();
 					
@@ -692,27 +695,11 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 	}
 
 	/**
-	 * Properly quote a string (i.e. escape the '"' character since it's the one we use to enclose string in requests).
-	 * @param string $string The string to quote
-	 * @return string 
-	 */
-	protected function _quoteString ($string)
-	{
-		return '"' . \str_replace('"', '\\"', $string) . '"';
-	}
-
-	protected function _quoteParameter ($param)
-	{
-		return ((\is_string($param) && \is_numeric($param))
-				|| \is_float($param) || \is_int($param)) ? $param : $this->_quoteString($param);
-	}
-
-	/**
 	 * Get the string representation of a criteria.
 	 * @param \framework\orm\utils\Criteria $criteria
 	 * @return string 
 	 */
-	protected function _criteriaToString (\framework\orm\utils\Criteria $criteria)
+	public function criteriaToString (\framework\orm\utils\Criteria $criteria)
 	{
 		$string = '';
 		$constraints = $criteria->getConstraints();
@@ -724,47 +711,49 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 				case \framework\orm\utils\Criteria::CRITERIA :
 					if ($params[1][0] == \framework\orm\utils\Criteria::ASSOCIATION_AND)
 					{
-						//$string = '('.$string.' AND '.$this->_criteriaToString($params[1][1]).')';
-						$string .= ' AND ' . $this->_criteriaToString($params[1][1]);
+						$string .= ' AND ' . $this->criteriaToString($params[1][1]);
 					}
-					else if ($params[1][0] == \framework\orm\utils\Criteria::ASSOCIATION_OR)
+					elseif ($params[1][0] == \framework\orm\utils\Criteria::ASSOCIATION_OR)
 					{
-						//$string = '('.$string.' OR '.$this->_criteriaToString($params[1][1]).')';
-						$string .= ' OR ' . $this->_criteriaToString($params[1][1]);
+						$string .= ' OR ' . $this->criteriaToString($params[1][1]);
 					}
+                    elseif ($params[1][0] == \framework\orm\utils\Criteria::ASSOCIATION_NOT)
+                    {
+                        $string .= ' NOT ' . $this->criteriaToString($params[1][1]);
+                    }
 					break;
 
 				case \framework\orm\utils\Criteria::EQUALS :
-					$string .= $params[1][0] . ' = ' . $this->_quoteParameter($params[1][1]);
+					$string .= $params[1][0] . ' = ' . $this->tools->quoteParameter($params[1][1]);
 					break;
 				case \framework\orm\utils\Criteria::GREATER_THAN :
-					$string .= $params[1][0] . ' > ' . $this->_quoteParameter($params[1][1]);
+					$string .= $params[1][0] . ' > ' . $this->tools->quoteParameter($params[1][1]);
 					break;
 				case \framework\orm\utils\Criteria::LESS_THAN :
-					$string .= $params[1][0] . ' < ' . $this->_quoteParameter($params[1][1]);
+					$string .= $params[1][0] . ' < ' . $this->tools->quoteParameter($params[1][1]);
 					break;
 				case \framework\orm\utils\Criteria::GREATER_THAN_OR_EQUAL :
-					$string .= $params[1][0] . ' >= ' . $this->_quoteParameter($params[1][1]);
+					$string .= $params[1][0] . ' >= ' . $this->tools->quoteParameter($params[1][1]);
 					break;
 				case \framework\orm\utils\Criteria::LESS_THAN_OR_EQUAL :
-					$string .= $params[1][0] . ' <= ' . $this->_quoteParameter($params[1][1]);
+					$string .= $params[1][0] . ' <= ' . $this->tools->quoteParameter($params[1][1]);
 					break;
 				case \framework\orm\utils\Criteria::NOT_EQUALS :
-					$string .= $params[1][0] . ' <> ' . $this->_quoteParameter($params[1][1]);
+					$string .= $params[1][0] . ' <> ' . $this->tools->quoteParameter($params[1][1]);
 					break;
 
 				case \framework\orm\utils\Criteria::IS_NULL :
 					$string .= $params[1] . ' is null';
 					break;
 				case \framework\orm\utils\Criteria::LIKE :
-					$string .= $params[1][0] . ' like ' . $this->_quoteParameter($params[1][1]);
+					$string .= $params[1][0] . ' like ' . $this->tools->quoteParameter($params[1][1]);
 					break;
 				case \framework\orm\utils\Criteria::IN :
 					$values = '[';
 
 					foreach ($params[1][1] as $value)
 					{
-						$values .= $this->_quoteParameter($value) . ', ';
+						$values .= $this->tools->quoteParameter($value) . ', ';
 					}
 
 					$values = \rtrim($values, ', ') . ']';
@@ -776,10 +765,10 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 					break;
 
 				case \framework\orm\utils\OrientDBCriteria::CONTAINS_TEXT :
-					$string .= $params[1][0] . ' containsText ' . $this->_quoteString($params[1][1]);
+					$string .= $params[1][0] . ' containsText ' . $this->tools->quoteString($params[1][1]);
 					break;
 				case \framework\orm\utils\OrientDBCriteria::MATCHES :
-					$string .= $params[1][0] . ' matches ' . $this->_quoteString($params[1][1]);
+					$string .= $params[1][0] . ' matches ' . $this->tools->quoteString($params[1][1]);
 					break;
 
 				default:

@@ -1,6 +1,6 @@
-<?php 
-/**
- * Copyright (C) 2011 - K√©vin O'NEILL, Fran√ßois KLINGLER - <contact@42framework.com>
+<?php
+/** 
+ * Copyright (C) 2011 - Kévin O'NEILL, François KLINGLER - <contact@42framework.com>
  * 
  * 42framework is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,22 +17,21 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-namespace framework\orm\datasources\interfaces;
+namespace framework\orm\datasources\exceptions;
 
-interface IDbDatasource
+/**
+ * WrongEntityFormatException
+ * Exception to throw when an entity name is invalid
+ * @author mickael
+ */
+class WrongEntityFormatException extends \framework\orm\datasources\exceptions\DatasourceException
 {
-	/**
-	 * Execute a request.
-	 * @abstract
-	 * @return mixed
-	 */
-	public function exec ($query);
-	
-	/**
-	 * Execute a query to retrieve data.
-	 * @abstract
-	 * @return mixed
-	 */
-	public function query ($query);
-	
+    /**
+     * @param string $entityName
+     * @param \Exception $previous
+     */
+	public function __construct ($entityName, $previous = NULL)
+	{
+		parent::__construct('Wrong entity name <strong>'.$entityName.'</strong>', $previous);
+	}
 }

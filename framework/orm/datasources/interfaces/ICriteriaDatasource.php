@@ -1,6 +1,6 @@
-<?php 
+<?php
 /**
- * Copyright (C) 2011 - K√©vin O'NEILL, Fran√ßois KLINGLER - <contact@42framework.com>
+ * Copyright (C) 2011 - Kévin O'NEILL, François KLINGLER - <contact@42framework.com>
  * 
  * 42framework is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,20 +19,13 @@
 
 namespace framework\orm\datasources\interfaces;
 
-interface IDbDatasource
+/**
+ *
+ * @author mickael
+ */
+interface ICriteriaDatasource
 {
-	/**
-	 * Execute a request.
-	 * @abstract
-	 * @return mixed
-	 */
-	public function exec ($query);
+	public function getNativeCriteria();
 	
-	/**
-	 * Execute a query to retrieve data.
-	 * @abstract
-	 * @return mixed
-	 */
-	public function query ($query);
-	
+	public function criteriaToString(\framework\orm\utils\Criteria $criteria);
 }

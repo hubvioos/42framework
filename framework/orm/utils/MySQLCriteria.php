@@ -1,6 +1,7 @@
-<?php 
+<?php
+
 /**
- * Copyright (C) 2011 - K√©vin O'NEILL, Fran√ßois KLINGLER - <contact@42framework.com>
+ * Copyright (C) 2011 - Kévin O'NEILL, François KLINGLER - <contact@42framework.com>
  * 
  * 42framework is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,22 +18,31 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-namespace framework\orm\datasources\interfaces;
+namespace framework\orm\utils;
 
-interface IDbDatasource
+class MySQLCriteriaException extends \Exception 
 {
-	/**
-	 * Execute a request.
-	 * @abstract
-	 * @return mixed
-	 */
-	public function exec ($query);
 	
-	/**
-	 * Execute a query to retrieve data.
-	 * @abstract
-	 * @return mixed
-	 */
-	public function query ($query);
-	
+}
+
+
+/**
+ * Class MySQLCriteria
+ *
+ * @author mickael
+ */
+
+class MySQLCriteria extends \framework\orm\utils\Criteria
+{
+	const BETWEEN = 'between';
+
+	public function between ($field, array $boundaries)
+	{
+		if(\count($boundaries) != 2)
+		{
+			throw new \framework\orm\utils\MySQLCriteriaException('BETWEEN operator expects 2 boundaries');
+		}
+		
+		return $this->_addConstraint(self::BETWEEN, array($field, $boundaries));
+	}
 }

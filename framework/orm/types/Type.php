@@ -67,9 +67,11 @@ abstract class Type extends \framework\core\FrameworkObject
 	const BOOLEAN = 'boolean';
 	
 	/** 
-	 * TIMESTAMP TYPES 
+	 * TEMPORAL TYPES
 	 */
 	const TIMESTAMP = 'timestamp';
+	const DATE = 'date';
+	const DATETIME = 'datetime';
 
 	
 	protected $adapter = NULL;

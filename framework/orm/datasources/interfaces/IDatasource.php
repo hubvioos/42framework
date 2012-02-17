@@ -24,28 +24,26 @@ interface IDatasource
 	/**
 	 * @abstract
 	 * @param string|int $id
+     * @param string $entity
 	 * @param \framework\orm\utils\Criteria $where
 	 * @return boolean
 	 */
-	public function delete($id, \framework\orm\utils\Criteria $where);
+	public function delete($id, $entity, \framework\orm\utils\Criteria $where = NULL);
 
-	/**
-	 * @abstract
-	 * @param array $primary An array of IDs
-	 * @param array $inherits
-	 * @param array $dependends
-	 * @return array
-	 */
-	public function find(array $primary, $entity, array $inherits = array(), array $dependents = array());
+    /**
+     * @abstract
+     * @param array $primary An array of IDs
+     * @param string $entity
+     * @return \framework\orm\utils\Collection
+     */
+	public function find(array $primary, $entity);
 
 	/**
 	 * @abstract
 	 * @param \framework\orm\utils\Criteria $criteria
-	 * @param array $inherits
-	 * @param array $dependents
-	 * @return array
+	 * @return \framework\orm\utils\Collection
 	 */
-	public function findAll($entity, \framework\orm\utils\Criteria $criteria = null, array $inherits = array(), array $dependents = array());
+	public function findAll($entity, \framework\orm\utils\Criteria $criteria = NULL);
 
 	/**
 	 * @abstract
@@ -55,7 +53,7 @@ interface IDatasource
 	 * @param mixed $type The type of resource to create if necessary
 	 * @return int|boolean Last insert id (if supported by the DataSource and Resource) otherwise a boolean
 	 */
-	public function create($entity, $data, $type = null);
+	public function create($entity, $data, $type = NULL);
 
 	/**
 	 * @abstract
@@ -65,11 +63,19 @@ interface IDatasource
 	 * @param \framework\orm\utils\Criteria $where
 	 * @return boolean
 	 */
-	public function update($id, $entity, $data, \framework\orm\utils\Criteria $where);
+	public function update($id, $entity, $data, \framework\orm\utils\Criteria $where = NULL);
 	
-	/**
+    /**
 	 * @abstract
 	 * @return \framework\orm\utils\Criteria
 	 */
 	public function getNativeCriteria();
+	
+	/**
+	 * Get the string representation of a Criteria
+	 * @abstract
+	 * @param \framework\orm\utils\Criteria
+	 * @return string 
+	 */
+	public function criteriaToString(\framework\orm\utils\Criteria $criteria);
 }

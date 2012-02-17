@@ -54,13 +54,14 @@ class Criteria
 
 	const ASSOCIATION_OR = 'or';
 	const ASSOCIATION_AND = 'and';
+	const ASSOCIATION_NOT = 'not';
 
 	protected $constraints = array();
 
 	/**
 	 * Construct a Criteria from another criteria, building a logical operation between them.
 	 * @param \framework\orm\utils\Criteria $criteria
-	 * @param type $association 
+	 * @param string $association 
 	 */
 	public function __construct (\framework\orm\utils\Criteria $criteria = null, $association = self::ASSOCIATION_OR)
 	{
@@ -72,8 +73,8 @@ class Criteria
 
 	/**
 	 * Add a constraint
-	 * @param type $operator
-	 * @param type $params
+	 * @param string $operator
+	 * @param mixed $params
 	 * @return \framework\orm\utils\Criteria $this  
 	 */
 	protected function _addConstraint ($operator, $params)
@@ -86,13 +87,13 @@ class Criteria
 	/**
 	 * Add a logical (AND or OR) between this Criteria ans adnother.
 	 * @param \framework\orm\utils\Criteria $criteria
-	 * @param type $association
+	 * @param string $association
 	 * @throws \framework\orm\utils\CriteriaException
 	 * @return \framework\orm\utils\Criteria $this 
 	 */
 	public function criteria (\framework\orm\utils\Criteria $criteria, $association = self::ASSOCIATION_OR)
 	{
-		if ($association != self::ASSOCIATION_AND || $association != self::ASSOCIATION_OR)
+		if ($association != self::ASSOCIATION_AND || $association != self::ASSOCIATION_OR || $association != self::ASSOCIATION_NOT)
 		{
 			throw new \framework\orm\utils\CriteriaException('Bad association type between criterias');
 		}
@@ -120,10 +121,30 @@ class Criteria
 		return $this->criteria($criteria, self::ASSOCIATION_OR);
 	}
 
+    /**
+     * Add a logical NOT operation between this Criteria and another.
+     * @param \framework\orm\utils\Criteria $criteria
+     * @return \framework\orm\utils\Criteria $this
+     */
+    public function notCriteria (\framework\orm\utils\Criteria $criteria)
+    {
+        return $this->criteria($criteria, self::ASSOCIATION_NOT);
+    }
+
+    /**
+     * Alias for Criteria->notCriteria();
+     * @param \framework\orm\utils\Criteria $criteria
+     * @return \framework\orm\utils\Criteria $this
+     */
+    public function not (\framework\orm\utils\Criteria $criteria)
+    {
+        return $this->notCriteria($criteria);
+    }
+
 	/**
 	 * Check if a field equals a value.
-	 * @param type $field
-	 * @param type $value
+	 * @param string $field
+	 * @param mixed $value
 	 * @return \framework\orm\utils\Criteria $this 
 	 */
 	public function equals ($field, $value)
@@ -133,52 +154,72 @@ class Criteria
 
 	/**
 	 * Check if a field is greater than a value.
-	 * @param type $field
-	 * @param type $value
+	 * @param string $field
+	 * @param int|float $value
 	 * @return \framework\orm\utils\Criteria $this 
 	 */
 	public function greaterThan ($field, $value)
 	{
+		if(!\is_numeric($value))
+		{
+			throw new \framework\orm\utils\CriteriaException('GREATER THAN operator expects a numeric value.');
+		}
+		
 		return $this->_addConstraint(self::GREATER_THAN, array($field, $value));
 	}
 
 	/**
 	 * Check if a field is less than a value.
-	 * @param type $field
-	 * @param type $value
+	 * @param string $field
+	 * @param int|float $value
 	 * @return \framework\orm\utils\Criteria $this 
 	 */
 	public function lessThan ($field, $value)
 	{
+		if(!\is_numeric($value))
+		{
+			throw new \framework\orm\utils\CriteriaException('LESS THAN operator expects a numeric value.');
+		}
+
 		return $this->_addConstraint(self::LESS_THAN, array($field, $value));
 	}
 
 	/**
 	 * CHeck if a field is greater than or equal to a value
-	 * @param type $field
-	 * @param type $value
+	 * @param string $field
+	 * @param int|float $value
 	 * @return \framework\orm\utils\Criteria $this 
 	 */
 	public function greaterThanOrEqual ($field, $value)
 	{
+		if(!\is_numeric($value))
+		{
+			throw new \framework\orm\utils\CriteriaException('GREATER THAN OR EQUAL operator expects a numeric value.');
+		}
+
 		return $this->_addConstraint(self::GREATER_THAN_OR_EQUAL, array($field, $value));
 	}
 
 	/**
 	 * Check if a field is less than or equal to a value.
-	 * @param type $field
-	 * @param type $value
+	 * @param string $field
+	 * @param int|float $value
 	 * @return \framework\orm\utils\Criteria $this 
 	 */
 	public function lessThanOrEqual ($field, $value)
 	{
+		if(!\is_numeric($value))
+		{
+			throw new \framework\orm\utils\CriteriaException('LESS THAN OR EQUAL operator expects a numeric value.');
+		}
+		
 		return $this->_addConstraint(self::LESS_THAN_OR_EQUAL, array($field, $value));
 	}
 
 	/**
 	 * Check if a field isn't equal to a value.
-	 * @param type $field
-	 * @param type $value
+	 * @param string $field
+	 * @param int|float $value
 	 * @return \framework\orm\utils\Criteria $this  
 	 */
 	public function notEquals ($field, $value)
@@ -188,29 +229,22 @@ class Criteria
 
 	/**
 	 * Check if a field's value is one of a set of values.
-	 * @param type $field
+	 * @param string $field
 	 * @param array $values
 	 * @return \framework\orm\utils\Criteria $this  
 	 */
 	public function in ($field, array $values)
 	{
+		if(\count($values) < 2)
+		{
+			throw new \framework\orm\utils\CriteriaException('IN operator expects at least 2 values.');
+		}
 		return $this->_addConstraint(self::IN, array($field, $values));
 	}
 
 	/**
-	 * Check if a field's value isn't any of a set of values.
-	 * @param type $field
-	 * @param array $values
-	 * @return \framework\orm\utils\Criteria $this
-	 */
-	public function notIn ($field, array $values)
-	{
-		return $this->_addConstraint(self::NOT_IN, array($field, $values));
-	}
-
-	/**
 	 * Check if a field is NULL.
-	 * @param type $field
+	 * @param string $field
 	 * @return \framework\orm\utils\Criteria $this 
 	 */
 	public function isNull ($field)
@@ -220,7 +254,7 @@ class Criteria
 
 	/**
 	 * Check if a field is not NULL.
-	 * @param type $field
+	 * @param string $field
 	 * @return \framework\orm\utils\Criteria $this 
 	 */
 	public function isNotNull ($field)
@@ -231,8 +265,8 @@ class Criteria
 	/**
 	 * Check if a field is like a mask.
 	 * Use the wilcard '%' to mean 'any character'.
-	 * @param type $field
-	 * @param type $mask
+	 * @param string $field
+	 * @param string $mask
 	 * @return \framework\orm\utils\Criteria $this 
 	 */
 	public function like ($field, $mask)
