@@ -122,7 +122,8 @@ class MySQLDatasource extends \framework\core\FrameworkObject implements \framew
 		catch (\Exception $e)
 		{
 			throw new \framework\orm\datasources\exceptions\ConnectionException($this->host
-                . ', ' . $this->user . '@' . $database);
+                . ', ' . $this->user . '@' . $database,
+                \framework\orm\datasources\exceptions\ConnectionException::DATABASE, $e);
 		}
 	}
 
