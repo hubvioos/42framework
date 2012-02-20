@@ -872,7 +872,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	public function __call ($method, $arguments)
 	{
 		// findByFoo('bar')
-		if(\strpos($method, 'findBy') === 0 && \is_scalar($arguments[0]) && !\is_object($arguments[0]))
+		if(\strpos($method, 'findBy') === 0 && \count($arguments) != 0)
 		{
 			return $this->findBy(\lcfirst(\substr($method, 6)), $arguments[0]);
 		}
