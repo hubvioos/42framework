@@ -549,7 +549,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 				$saved[] = $relationMapper->save($relation);
 			}
 			
-			if($spec['relation'] == \framework\orm\models\IAttachableModel::RELATION_HAS_ONE)
+			if($spec['relation'] == \framework\orm\models\IAttachableModel::RELATION_HAS_ONE && \count($saved) > 0)
 			{
 				$saved = $saved[0];
 			}
@@ -576,7 +576,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 				$map = $relationMapper->_modelToMap($relation);
 				$map[$spec['storageField']] = array(
 					'value' => $model->getId(),
-					'relation' => \framework\orm\models\IAttachableModel::RELATION_HAS_ONE,
+					'relation' => $spec['relation'],
 					'type' => \framework\orm\types\Type::RELATION_KEY,
 					'storageField' => $spec['storageField']
 				);
@@ -602,7 +602,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 				$saved[] = $relation;
 			}
 				
-			if($spec['relation'] == \framework\orm\models\IAttachableModel::RELATION_HAS_ONE)
+			if($spec['relation'] == \framework\orm\models\IAttachableModel::RELATION_HAS_ONE && \count($saved) > 0)
 			{
 				$saved = $saved[0];
 			}

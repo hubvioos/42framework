@@ -38,11 +38,12 @@ interface IDatasource
      */
 	public function find(array $primary, $entity);
 
-	/**
-	 * @abstract
-	 * @param \framework\orm\utils\Criteria $criteria
-	 * @return \framework\orm\utils\Collection
-	 */
+    /**
+     * @abstract
+     * @param string $entity
+     * @param \framework\orm\utils\Criteria $criteria
+     * @return \framework\orm\utils\Collection
+     */
 	public function findAll($entity, \framework\orm\utils\Criteria $criteria = NULL);
 
 	/**

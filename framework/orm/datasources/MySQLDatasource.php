@@ -548,7 +548,7 @@ class MySQLDatasource extends \framework\core\FrameworkObject implements \framew
 						$bindType = \PDO::PARAM_NULL;
 						break;
 					}
-					elseif(\array_key_exists('internal', $spec))
+					elseif(\array_key_exists('internal', $spec) && $spec['internal'] === true)
 					{
 						$dataValue = $dataValue['id']['value'];
 						break;
