@@ -29,66 +29,83 @@ interface IMapper
 
 	/**
 	 * Attach a model to the mapper.
-	 * @param \framework\orm\models\IAttachableModel The model to attach.
-	 */
-	public function attach (\framework\orm\models\IAttachableModel $object);
+     * @abstract
+     * @param \framework\orm\models\IAttachableModel The model to attach.
+     */
+    public function attach ($object);
 
-	/**
-	 * Detach a model from the mapper.
-	 * @param mixed $model The model to detach or its id
-	 */
-	public function detach ($model);
+    /**
+     * Detach a model from the mapper.
+     * @abstract
+     * @param mixed $model The model to detach or its id
+     */
+    public function detach ($model);
 
-	/* Datasource manipulation */
+    /* Datasource manipulation */
 
-	/**
-	 * Retrieve a model from the datasource based on its id.
-	 * @param int|string|array $id The models' id(s).
-	 * @param bool $attach Attach the retrieved model(s) if found.
-	 */
-	public function find ($id, $attach = true);
+    /**
+     * Retrieve a model from the datasource based on its id.
+     * @abstract
+     * @param int|string|array $id The models' id(s).
+     * @param bool $attach Attach the retrieved model(s) if found.
+     */
+    public function find ($id, $attach = true);
 
-	/**
-	 * Retrieve several models from the datasource.
-	 * @param \framework\orm\Criteria A set of constraints the results must match. 
-	 */
-	public function findAll (\framework\orm\utils\Criteria $criteria = null, $attach = true);
+    /**
+     * Retrieve several models from the datasource.
+     * @abstract
+     * @param \framework\orm\utils\Criteria $criteria A set of constraints the results must match.
+     * @param bool $attach
+     * @return \framework\orm\utils\Collection
+     */
+    public function findAll (\framework\orm\utils\Criteria $criteria = null, $attach = true);
 
-	/**
-	 * Save a model in the datasource. 
-	 * @param \framework\orm\models\IAttachableModel The model to save.
-	 */
-	public function save (\framework\orm\models\IAttachableModel $model);
+    /**
+     * Save a model in the datasource.
+     * @abstract
+     * @param \framework\orm\models\IAttachableModel The model to save.
+     */
+    public function save (\framework\orm\models\IAttachableModel $model);
 
-	/**
-	 * Delete a model from the datasource.
-	 * @param \framework\orm\Criteria|\framework\orm\models\IAttachableModel   
-	 */
-	public function delete ($criteria);
+    /**
+     * Save all the models attached to the mapper.)
+     * @abstract
+     */
+    public function saveAll ();
+
+    /**
+     * Delete a model from the datasource.
+     * @param \framework\orm\utils\Criteria|\framework\orm\models\IAttachableModel $criteria
+     */
+    public function delete ($criteria);
 
 
 
-	/* Mapper manipulation */
+    /* Mapper manipulation */
 
-	/**
-	 * Customisable initialisation operations called at the end of the mapper's constructor.
-	 */
-	public function init ();
+    /**
+     * Customisable initialisation operations called at the end of the mapper's constructor.
+     * @abstract
+     */
+    public function init ();
 
-	/**
-	 * Get the identifier of the entity where the models are stored in the datasource.
-	 * (i.e. table name, cluster ID, collection name, ect...)
-	 * @return string|int
-	 */
-	public function getEntityIdentifier ();
+    /**
+     * Get the identifier of the entity where the models are stored in the datasource.
+     * (i.e. table name, cluster ID, collection name, ect...)
+     * @abstract
+     * @return string|int
+     */
+    public function getEntityIdentifier ();
 
-	/**
-	 * Get the key used to retrieve the model from the components container. 
-	 */
-	public function getModelName ();
+    /**
+     * Get the key used to retrieve the model from the components container.
+     * @abstract
+     */
+    public function getModelName ();
 
-	/**
-	 * Get all the attached models.
-	 */
-	public function getAttachedModels ();
+    /**
+     * Get all the attached models.
+     * @abstract
+     */
+    public function getAttachedModels ();
 }

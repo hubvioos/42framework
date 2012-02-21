@@ -124,8 +124,6 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	{
 		$this->datasource = $datasource;
 
-		//$this->attachedModels = $this->getComponent('orm.utils.Collection');
-		
 		if (!isset($this->fields) || $this->fields === array() || $this->fields === NULL)
 		{
 			throw new \framework\orm\mappers\MapperException('No fields specified.');
@@ -168,41 +166,55 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 
     /**
      * Attach a new object to the mapper.
-     * @param \framework\orm\models\IAttachableModel $model
-     * @return string The key where the object is stored in the mapper.
+     * @param array|\Traversable|\framework\orm\models\IAttachableModel $models
      */
-	public function attach (\framework\orm\models\IAttachableModel $model)
+	public function attach ($models)
 	{
-		if($model->getId() !== NULL)
-		{
-			$this->attachedModels[(string) $model->getId()] = $model;
-			return (string) $model->getId();
-		}
-		else
-		{
-			$this->attachedModels[] = $model;
-			return '';
-		}
-
+        if($models instanceof \framework\orm\models\IAttachableModel)
+        {
+            if($models->getId() !== NULL)
+            {
+                $this->attachedModels[(string) $models->getId()] = $models;
+            }
+            else
+            {
+                $this->attachedModels[] = $models;
+            }
+        }
+        if(\is_array($models) || $models instanceof \Traversable)
+        {
+            foreach($models as $model)
+            {
+                $this->attach($model);
+            }
+        }
 	}
 
 	/**
 	 * Dettach an object from the mapper.
-	 * @param mixed $model The model to detach or its id
+	 * @param int|string|array|\Traversable|\framework\orm\models\IAttachableModel $models The model to detach or its id or a traversable variable of these
 	 * @return bool
 	 */
-	public function detach ($model)
+	public function detach ($models)
 	{
-		if ($model instanceof \framework\orm\models\IAttachableModel && $this->isAttached($model))
+		if ($models instanceof \framework\orm\models\IAttachableModel && $this->isAttached($models))
 		{
-			unset($this->attachedModels[$model->getId()]);
+			unset($this->attachedModels[$models->getId()]);
 			return true;
 		}
-		elseif (\array_key_exists((string) $model, $this->attachedModels))
-		{
-			unset($this->attachedModels[(string) $model]);
-			return true;
-		}
+        elseif (\is_scalar($models) && $this->isAttached($models))
+        {
+            unset($this->attachedModels[(string) $models]);
+            return true;
+        }
+        elseif(\is_array($models) || $models instanceof \Traversable)
+        {
+            foreach($models as $model)
+            {
+                $this->detach($model);
+            }
+            return true;
+        }
 
 		return false;
 	}
@@ -211,7 +223,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	 * Retrieve a model from the datasource based on its id.
 	 * @param mixed $toFind An array of IDs or a unique ID.
 	 * @param bool $attach Attach the retrieved model(s) if found.
-	 * @return \framework\orm\models\IAttachableModel
+	 * @return \framework\orm\models\IAttachableModel|\framework\orm\utils\Collection
 	 */
 	public function find ($toFind, $attach = true)
 	{
@@ -265,12 +277,14 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 		
 		$found->merge($attached);
 
+        // return NULL if a unique model was expected but not found
 		if($searchForUniqueModel)
 		{
 			return $found->isEmpty() ? NULL : $found[0];
 		}
-		
-		return $found->isEmpty() ? NULL : $found;
+
+        // else, return a Collection
+		return $found;
 	}
 
     /**
@@ -358,7 +372,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 
 	/**
 	 * Delete a model from the datasource.
-	 * @param \framework\orm\utils\Criteria|\framework\orm\models\IAttachableModel
+	 * @param string|int|\framework\orm\utils\Criteria|\framework\orm\models\IAttachableModel|\Traversable|array
      * @return bool
 	 */
 	public function delete ($models)
@@ -367,16 +381,41 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 		{
 			return $this->_deleteCriteria($models);
 		}
-		else
-		{
-			if ($models instanceof \framework\orm\models\IAttachableModel)
-			{
-				$this->detach($models);
-				return $this->_deleteModel($models->getId());
-			}
-		}
+		elseif ($models instanceof \framework\orm\models\IAttachableModel)
+        {
+            if($this->_deleteModel($models->getId()))
+            {
+                $this->detach($models);
+                return true;
+            }
+
+            return false;
+        }
+        elseif(\is_scalar($models))
+        {
+            if($this->_deleteModel($models))
+            {
+                $this->detach($models);
+                return true;
+            }
+
+            return false;
+        }
+        elseif(\is_array($models) || $models instanceof \Traversable)
+        {
+            foreach($models as $model)
+            {
+                if($this->delete($model) === false)
+                {
+                    throw new \framework\orm\mappers\MapperException('An error occured while deleting a '
+                        . $this->getModelName().' model');
+                }
+            }
+
+            return true;
+        }
 		
-		throw new \framework\orm\mappers\MapperException('Wrong parameter type');
+		throw new \framework\orm\mappers\MapperException('Wrong parameter type.');
 	}
 
 	/**
@@ -388,7 +427,8 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	{
 		if(\is_scalar($model))
 		{
-			return \array_key_exists((string) $model, $this->attachedModels); 
+			return (\array_key_exists((string) $model, $this->attachedModels)
+                && !is_null($this->attachedModels[(string) $model]));
 		}
 		elseif($model instanceof \framework\orm\models\IAttachableModel)
 		{
@@ -410,7 +450,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	/**
 	 * Get an attached model 
 	 * @param string|int $id The model's id
-	 * @return null 
+	 * @return \framework\orm\models\IAttachableModel
 	 */
 	public final function getAttachedModel ($id)
 	{
@@ -424,11 +464,11 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 
 	/**
 	 * Get all the attached models.
-	 * @return array
+	 * @return \framework\orm\utils\Collection
 	 */
 	public final function getAttachedModels ()
 	{
-		return $this->attachedModels;
+		return new \framework\orm\utils\Collection($this->attachedModels);
 	}
 
 	/**
@@ -509,7 +549,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 				$saved[] = $relationMapper->save($relation);
 			}
 			
-			if($spec['relation'] == \framework\orm\models\IAttachableModel::RELATION_HAS_ONE)
+			if($spec['relation'] == \framework\orm\models\IAttachableModel::RELATION_HAS_ONE && \count($saved) > 0)
 			{
 				$saved = $saved[0];
 			}
@@ -536,7 +576,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 				$map = $relationMapper->_modelToMap($relation);
 				$map[$spec['storageField']] = array(
 					'value' => $model->getId(),
-					'relation' => \framework\orm\models\IAttachableModel::RELATION_HAS_ONE,
+					'relation' => $spec['relation'],
 					'type' => \framework\orm\types\Type::RELATION_KEY,
 					'storageField' => $spec['storageField']
 				);
@@ -562,7 +602,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 				$saved[] = $relation;
 			}
 				
-			if($spec['relation'] == \framework\orm\models\IAttachableModel::RELATION_HAS_ONE)
+			if($spec['relation'] == \framework\orm\models\IAttachableModel::RELATION_HAS_ONE && \count($saved) > 0)
 			{
 				$saved = $saved[0];
 			}
@@ -832,7 +872,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	public function __call ($method, $arguments)
 	{
 		// findByFoo('bar')
-		if(\strpos($method, 'findBy') === 0 && \is_scalar($arguments[0]) && !\is_object($arguments[0]))
+		if(\strpos($method, 'findBy') === 0 && \count($arguments) != 0)
 		{
 			return $this->findBy(\lcfirst(\substr($method, 6)), $arguments[0]);
 		}

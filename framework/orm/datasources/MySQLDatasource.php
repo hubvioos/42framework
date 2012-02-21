@@ -122,7 +122,8 @@ class MySQLDatasource extends \framework\core\FrameworkObject implements \framew
 		catch (\Exception $e)
 		{
 			throw new \framework\orm\datasources\exceptions\ConnectionException($this->host
-                . ', ' . $this->user . '@' . $database);
+                . ', ' . $this->user . '@' . $database,
+                \framework\orm\datasources\exceptions\ConnectionException::DATABASE, $e);
 		}
 	}
 
@@ -548,7 +549,7 @@ class MySQLDatasource extends \framework\core\FrameworkObject implements \framew
 						$bindType = \PDO::PARAM_NULL;
 						break;
 					}
-					elseif(\array_key_exists('internal', $spec))
+					elseif(\array_key_exists('internal', $spec) && $spec['internal'] === true)
 					{
 						$dataValue = $dataValue['id']['value'];
 						break;

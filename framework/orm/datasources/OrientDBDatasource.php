@@ -112,7 +112,8 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 		}
 		catch (\Exception $e)
 		{
-			throw new \framework\orm\datasources\exceptions\ConnectionException($this->_getFullHost(), $e);
+			throw new \framework\orm\datasources\exceptions\ConnectionException($this->_getFullHost(),
+                \framework\orm\datasources\exceptions\ConnectionException::HOST, $e);
 		}
 	}
 

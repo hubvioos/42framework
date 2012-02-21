@@ -79,6 +79,17 @@ class Criteria
 	 */
 	protected function _addConstraint ($operator, $params)
 	{
+        if(\is_array($params))
+        {
+            array_walk_recursive($params, function(&$item, $key)
+            {
+                if($item instanceof \framework\orm\models\IAttachableModel)
+                {
+                    $item = $item->getId();
+                }
+            });
+        }
+
 		$this->constraints[] = array($operator, $params);
 
 		return $this;
