@@ -81,7 +81,8 @@ class SuperClosure {
 	protected function _fetchUsedVariables()
 	{
 		// Make sure the use construct is actually used
-		$use_index = stripos($this->code, 'use');
+		$use_index = stripos($this->code, ' use');
+
 		if ( ! $use_index)
 			return array();
 

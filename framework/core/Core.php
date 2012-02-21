@@ -72,6 +72,8 @@ class Core extends \framework\core\FrameworkObject
 		{
 			$params = \modules\cli\CliUtils::extractParams();
 			$params['module'] = 'cli';
+			$params["format"] = 'html';
+			$params["method"] = 'get';
 
 			$state = \framework\core\Request::CLI_STATE;
 		}
@@ -106,13 +108,13 @@ class Core extends \framework\core\FrameworkObject
 
 			$state = \framework\core\Request::FIRST_REQUEST;
 		}
-		
+
 		$execute = $this->createRequest($params, $state);
 
 		$this->raiseEvent('framework.beforeExecute', $execute);
 
 		$executeResponse = $execute->execute();
-		
+
 		$this->raiseEvent('framework.afterExecute', $executeResponse);
 		
 		if ($executeResponse->getStatus() == \framework\core\Response::SUCCESS)

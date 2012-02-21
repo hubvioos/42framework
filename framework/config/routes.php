@@ -16,7 +16,7 @@ $routes = array(
 			'format' => 'html'
 		)
 	),
-	'module' => array(
+	/*'module' => array(
 		'pattern' => '/<:module>(.<:format>)',
 		'defaults' => array(
 			'action' => 'index',
