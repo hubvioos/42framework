@@ -822,6 +822,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 
 					$map[$name]['storageField'] = $spec['storageField'];
 					$map[$name]['internal'] = $spec['internal'];
+					$map[$name]['relation'] = $spec['relation'];
 					$map[$name]['type'] = $relationMapper->getEntityIdentifier();
 					$map[$name]['value'] = array();
 
