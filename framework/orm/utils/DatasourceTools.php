@@ -52,7 +52,7 @@ class DatasourceTools
 	 */
 	public function quoteString ($string)
 	{
-		return '"' . \str_replace(array('"'/*, '\\'*/), array('\\"'/*, '\\\\'*/), $string . '"');
+		return '"' . \str_replace(array('"'/*, '\\'*/), array('\\"'/*, '\\\\'*/), $string) . '"';
 	}
 
 }
