@@ -471,26 +471,38 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 						}
 						
 						if(\array_key_exists('internal', $data[$property]))
-						{
-							if($data[$property]['internal'] == true)
-							{
-								// build a string of IDs surrounded by square-barces [#3:21, #3:17, 3:56]
-								$dataValue = '[';
-								
-								foreach($data[$property]['value'] as $relation)
-								{
-									$dataValue .= '#'.$relation['id']['value'].', ';
-								}
-								
-								$dataValue = \rtrim($dataValue, ', ').']';
-							}
-							else
-							{
-								$dataValue = '';
-							}
-							
-							break;
-						}
+                        {
+                            if($data[$property]['internal'] == true)
+                            {
+                                if($data[$property]['relation'] == \framework\orm\models\IAttachableModel::RELATION_HAS_ONE)
+                                {
+                                    //$dataValue = $this->tools->quoteString($dataValue['id']['value']);
+                                    $dataValue = '#'.$dataValue['id']['value'];
+                                    break;
+                                }
+                                elseif($data[$property]['relation'] ==
+                                    \framework\orm\models\IAttachableModel::RELATION_HAS_MANY)
+                                {
+                                    $dataValue = '[';
+
+                                    // build a string of IDs surrounded by square-barces [#3:21, #3:17, 3:56]
+                                    foreach($data[$property]['value'] as $relation)
+                                    {
+                                        $dataValue .= '#'.$relation['id']['value'].', ';
+                                    }
+
+                                    $dataValue = \rtrim($dataValue, ', ').']';
+
+                                    break;
+                                }
+                            }
+                            else
+                            {
+                                $dataValue = '';
+                            }
+
+                            break;
+                        }
 
 						throw new \framework\orm\datasources\exceptions\WrongDataTypeException($dataType, $dataValue);
 						break;
