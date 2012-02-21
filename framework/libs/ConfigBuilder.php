@@ -330,6 +330,8 @@ class ConfigBuilder
 		
 		// modules routes
 		$this->_getAllModulesConfig('routes', $this->_routesConfig);
+
+		$this->_routesConfig = array_reverse($this->_routesConfig);
 		
 		return $this->_mergeInternalConfigs();
 	}
