@@ -554,13 +554,20 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 
 		foreach ($primary as $id)
 		{
-			$record = $this->link->recordLoad($id);
+            try
+            {
+                $record = $this->link->recordLoad($id);
 
-			if ($record !== false)
-			{
-				$record->parse();
-				$found[] = $this->_recordToMap($record, $id);
-			}
+                if ($record !== false)
+                {
+                    $record->parse();
+                    $found[] = $this->_recordToMap($record, $id);
+                }
+            }
+            catch(\Exception $e)
+            {
+                // log things
+            }
 		}
 
 		return $found;
@@ -579,22 +586,28 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 		}
 
 		$entities = $this->getComponent('orm.utils.Collection');
+        $data = false;
 
 		try
 		{
 			$data = $this->query('SELECT FROM ' . $entity . ' WHERE ' . $this->criteriaToString($criteria));
-			
-			foreach ($data as $record)
-			{
-				$record->parse();
-				$entities[] = $this->_recordToMap($record, $record->recordID);
-			}
 		}
 		catch (\Exception $e)
 		{
-			throw new \framework\orm\datasources\OrientDBDatasourceException('Unable to find all entities '
-					. $entity);
+			//throw new \framework\orm\datasources\OrientDBDatasourceException('Unable to find all entities '
+			//		. $entity, $e);
+            // log things
 		}
+
+        if($data !== false)
+        {
+            foreach ($data as $record)
+            {
+                $record->parse();
+                $entities[] = $this->_recordToMap($record, $record->recordID);
+            }
+        }
+
 
 		return $entities;
 	}
