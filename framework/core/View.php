@@ -183,6 +183,135 @@ class View extends \framework\core\FrameworkObject
 		self::setGlobal('title', $title);
 	}
 
+	public function addCss ($path, $priority = 50, $place = 'head')
+	{
+		$this->_setResource('css', $path, $priority, $place);
+		return $this;
+	}
+
+	public function addJs ($path, $priority = 50, $place = 'head')
+	{
+		$this->_setResource('js', $path, $priority, $place);
+		return $this;
+	}
+
+	protected function _setResource ($type, $path, $priority, $place)
+	{
+		$resources = self::getGlobal('resources');
+
+		if ($resources === null)
+		{
+			$resources = array(
+				'css' => array(),
+				'js' => array()
+			);
+		}
+
+		if (!isset($resources[$type][$place]))
+		{
+			$resources[$type][$place] = array();
+		}
+
+		if (!isset($resources[$type][$place][$priority]))
+		{
+			$resources[$type][$place][$priority] = array();
+		}
+
+		$resources[$type][$place][$priority][] = $path;
+
+		self::setGlobal('resources', $resources);
+	}
+
+	public function displayResources ($type, $place)
+	{
+		$resources = self::getGlobal('resources');
+
+		if (!isset($resources[$type][$place]))
+		{
+			$resources = array();
+		}
+		else
+		{
+			$resources = $resources[$type][$place];
+		}
+
+		\ksort($resources);
+
+		$sortedResources = array();
+
+		foreach ($resources as $res)
+		{
+			foreach ($res as $r)
+			{
+				array_push($sortedResources, $r);
+			}
+		}
+
+		switch ($type)
+		{
+			case 'css':
+				return $this->_displayCss($place, $sortedResources);
+				break;
+			case 'js':
+				return $this->_displayJs($place, $sortedResources);
+				break;
+			default:
+				return '';
+		}
+	}
+
+	protected function _displayCss ($place, $resources)
+	{
+		$css = '';
+
+		if ($place == 'style')
+		{
+			foreach ($resources as $res)
+			{
+				$css .= '<style>';
+				$css .= $res;
+				$css .= '</style>';
+			}
+		}
+		else
+		{
+			foreach ($resources as $res)
+			{
+				$css .= '<link src="';
+				$css .= $res;
+				$css .= '" type="text/css" />';
+			}
+		}
+
+		return $css;
+	}
+
+	protected function _displayJs ($place, $resources)
+	{
+		$js = '';
+
+		if ($place == 'inline')
+		{
+			foreach ($resources as $res)
+			{
+				$js .= '<script>';
+				$js .= $res;
+				$js .= '</script>';
+			}
+		}
+		else
+		{
+			foreach ($resources as $res)
+			{
+				$js .= '<script src="';
+				$js .= $res;
+				$js .= '"></script>';
+			}
+		}
+
+		return $js;
+	}
+
 	public function getHelper ()
 	{
 		return $this->getComponent(func_get_args());
