@@ -80,7 +80,7 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 	 * Regex pattern the IDs must match
 	 * @var string
 	 */
-	protected $pattern = '/^[^ \t\n\r]*$/';
+	protected $pattern = '/^[^\s\h\n\r]*$/';
 	
 	/**
 	 *
@@ -416,6 +416,8 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 			}
 		}
 
+        $this->_validateIdentifier($entity);
+
 		if (!\preg_match('#^([a-zA-Z0-9_\-]+, )+$#', $fields))
 		{
 			throw new \framework\orm\datasources\OrientDBDatasourceException('Incorrect field names list: ' . $fields);
@@ -580,10 +582,7 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 	 */
 	public function findAll ($entity, \framework\orm\utils\Criteria $criteria = NULL)
 	{
-		if (\strpos(' ', $entity) !== false)
-		{
-			throw new \framework\orm\datasources\exceptions\WrongEntityFormatException($entity);
-		}
+		$this->_validateIdentifier($entity);
 
 		$entities = $this->getComponent('orm.utils.Collection');
         $data = false;
@@ -820,5 +819,13 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 	{
 		$this->close();
 	}
+
+    protected function _validateIdentifier($identifier)
+    {
+        if(\strpos($identifier, ' ') !== false || !preg_match($this->pattern, $identifier))
+        {
+            throw new \framework\orm\datasources\exceptions\WrongEntityFormatException($identifier);
+        }
+    }
 
 }
