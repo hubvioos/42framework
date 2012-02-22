@@ -28,7 +28,7 @@ class Request extends \framework\core\FrameworkObject
 	const CLI_STATE = -50;
 	const FIRST_REQUEST = -100;
 
-	public function __construct (Array $params = array(), $state = self::DEFAULT_STATE)
+	public function __construct (\framework\Libs\Registry $params, $state = self::DEFAULT_STATE)
 	{
 		$this->_params = $params;
 		$this->_state = $state;
@@ -103,16 +103,19 @@ class Request extends \framework\core\FrameworkObject
 
 	public function get ($key, $default = null)
 	{
-		if (isset($this->_params['params'][$key]))
+		$value = $this->_params->get($key, true);
+
+		if ($value === null)
 		{
-			return $this->_params['params'][$key];
+			$value = $default;
 		}
-		return $default;
+
+		return $value;
 	}
 
 	public function set ($key, $value)
 	{
-		$this->_params['params'][$key] = $value;
+		$this->_params->set($key, $value);
 		return $this;
 	}
 }

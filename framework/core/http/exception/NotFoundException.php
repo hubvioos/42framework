@@ -23,7 +23,7 @@ class NotFoundException extends \Exception
 {	
 	public function __construct ($params = null)
 	{
-		$r = new \framework\core\Request(array('module' => 'errors', 'action' => 'error404', 'format' => 'html', 'params' => $params));
+		$r = new \framework\core\Request(new \framework\libs\Registry(array('module' => 'errors', 'action' => 'error404', 'method' => 'get', 'format' => 'html', 'params' => $params)));
 		$r->execute();
 	}
 

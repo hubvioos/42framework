@@ -105,7 +105,7 @@ abstract class FrameworkObject
 	
 	public function createRequest($params = array(), $state = null)
 	{
-		return $this->getComponent('request', $params, $state);
+		return $this->getComponent('request', $this->getComponent('registry', $params), $state);
 	}
 	
 	public function createView(Array $file, $vars = false, $format = null)

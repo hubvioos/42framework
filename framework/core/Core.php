@@ -65,14 +65,19 @@ class Core extends \framework\core\FrameworkObject
 		$request = $this->getComponent('httpRequest');
 		$response = $this->getComponent('httpResponse');
 
-		$params = array();
+		$params = array(
+			'module' => null,
+			'action' => null,
+			'method' => null,
+			'format' => null
+		);
 		$state = null;
 
 		if ($request->isCli())
 		{
 			$params = \modules\cli\CliUtils::extractParams();
 			$params['module'] = 'cli';
-			$params["format"] = 'html';
+			$params["format"] = 'cli';
 			$params["method"] = 'get';
 
 			$state = \framework\core\Request::CLI_STATE;
@@ -102,7 +107,8 @@ class Core extends \framework\core\FrameworkObject
 
 			$url = $request->getUrl();
 
-			$params = $this->getComponent('router')->match($request->getMethod(), $url);
+			$params = $this->getComponent('registry', $this->getComponent('router')->match($request->getMethod(), $url));
+			$params['post'] = $request->getFromPost();
 			$params["method"] = $request->getMethod();
 			$this->duplicateContentPolicy($url, $params);
 

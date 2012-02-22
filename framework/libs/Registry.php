@@ -26,8 +26,13 @@ class Registry extends \ArrayObject
 	 * This is recursive, i.e. every array inside $array will also be stored as an object
 	 * @param array $array The array that will be accessed as an object
 	 */
-	public function __construct(array $array = array())
+	public function __construct($array = array())
 	{
+		if ($array instanceof self)
+		{
+			$array = $array->toArray();
+		}
+
 		foreach($array as $key => $value)
 		{
 			if (\is_array($value))

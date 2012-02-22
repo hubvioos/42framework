@@ -142,6 +142,12 @@ $components = array(
 			return new \framework\libs\Event($args[0], $args[1]);
 		},
 		'isUnique' => false),
+	'registry' => array(
+		'callable' => function ($c, $args)
+		{
+			return new \framework\libs\Registry($args[0]);
+		},
+		'isUnique' => false),
 	'logger' => array(
 		'callable' => function ($c, $args)
 		{
