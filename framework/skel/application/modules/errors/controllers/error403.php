@@ -23,6 +23,6 @@ class error403 extends \modules\errors\generic
 	public function processAction ($request = null)
 	{
 		$this->getComponent('httpResponse')->setStatus(403)->setContent(
-				$this->createView(array('module' => 'errors', 'action' => 'error403'), array(), $request->getFormat()));
+				$this->createView(array('module' => 'errors', 'file' => 'error403'), array(), $request->getFormat()));
 	}
 }

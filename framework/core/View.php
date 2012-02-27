@@ -173,9 +173,15 @@ class View extends \framework\core\FrameworkObject
 		return $this->getConfig('siteUrl') . \urldecode($this->getComponent('router')->url($params, $routeName));
 	}
 
-	public function getBlock (Array $file, $params = array(), $format = null)
+	public function getBlock ($module, $file, $params = array(), $format = 'html', $alternativeView = null)
 	{
-		return $this->createView($file, $params, $format);
+		$arr = array(
+			'module' => $module,
+			'file' => $file,
+			'class' => $alternativeView
+		);
+
+		return $this->createView($arr, $params, $format);
 	}
 
 	public function setTitle ($title)

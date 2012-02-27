@@ -110,13 +110,13 @@ abstract class FrameworkObject
 	
 	public function createView(Array $file, $vars = false, $format = null)
 	{
-		if (isset($file["class"]))
+		if (isset($file["class"]) && $file['class'] !== null)
 		{
-			return $this->getComponent($file["class"], $file["module"], $file["action"], $vars, $format);
+			return $this->getComponent($file["class"], $file["module"], $file["file"], $vars, $format);
 		}
 		else
 		{
-			return $this->getComponent('view', $file["module"], $file["action"], $vars, $format);
+			return $this->getComponent('view', $file["module"], $file["file"], $vars, $format);
 		}
 	}
 	

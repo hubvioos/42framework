@@ -23,6 +23,6 @@ class error503 extends \modules\errors\generic
 	public function processAction ($request = null)
 	{
 		$this->getComponent('httpResponse')->setStatus(503)->setContent(
-				$this->createView(array('module' => 'errors', 'action' => 'error503'), array(), $request->getFormat()));
+				$this->createView(array('module' => 'errors', 'file' => 'error503'), array(), $request->getFormat()));
 	}
 }

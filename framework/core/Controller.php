@@ -178,7 +178,7 @@ abstract class Controller extends \framework\core\FrameworkObject
 						}
 						$file = array(
 							'module' => $this->_request->getModule(),
-							'action' => $this->_view
+							'file' => $this->_view
 						);
 						if ($this->_customClassView !== null)
 						{
