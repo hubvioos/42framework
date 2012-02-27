@@ -544,6 +544,12 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 			$relations = $model->{$this->_propertyGetter($name)}();
 			$saved = array();
 
+            // save only the first element
+            if($spec['relation'] == \framework\orm\models\IAttachableModel::RELATION_HAS_ONE && \count($relations) > 1)
+            {
+                $relations = $relations[0];
+            }
+
 			foreach ($this->_wrapInArray($relations) as $relation)
 			{
 				$saved[] = $relationMapper->save($relation);
@@ -809,6 +815,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 			}
 		}
 
+        // we only need to map the internal relations
 		if ($this->internalRelations !== NULL)
 		{
 			foreach ($this->internalRelations as $name => $spec)
