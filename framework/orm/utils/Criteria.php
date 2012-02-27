@@ -104,7 +104,8 @@ class Criteria
 	 */
 	public function criteria (\framework\orm\utils\Criteria $criteria, $association = self::ASSOCIATION_OR)
 	{
-		if ($association != self::ASSOCIATION_AND || $association != self::ASSOCIATION_OR || $association != self::ASSOCIATION_NOT)
+		if ($association != self::ASSOCIATION_AND && $association != self::ASSOCIATION_OR
+            && $association != self::ASSOCIATION_NOT)
 		{
 			throw new \framework\orm\utils\CriteriaException('Bad association type between criterias');
 		}
