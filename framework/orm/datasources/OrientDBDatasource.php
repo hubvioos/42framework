@@ -80,7 +80,7 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 	 * Regex pattern the IDs must match
 	 * @var string
 	 */
-	protected $pattern = '/^[^ \t\n\r]*$/';
+	protected $pattern = '/^[^\s\h\n\r]*$/';
 	
 	/**
 	 *
@@ -416,6 +416,8 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 			}
 		}
 
+        $this->_validateIdentifier($entity);
+
 		if (!\preg_match('#^([a-zA-Z0-9_\-]+, )+$#', $fields))
 		{
 			throw new \framework\orm\datasources\OrientDBDatasourceException('Incorrect field names list: ' . $fields);
@@ -554,13 +556,20 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 
 		foreach ($primary as $id)
 		{
-			$record = $this->link->recordLoad($id);
+            try
+            {
+                $record = $this->link->recordLoad($id);
 
-			if ($record !== false)
-			{
-				$record->parse();
-				$found[] = $this->_recordToMap($record, $id);
-			}
+                if ($record !== false)
+                {
+                    $record->parse();
+                    $found[] = $this->_recordToMap($record, $id);
+                }
+            }
+            catch(\Exception $e)
+            {
+                // log things
+            }
 		}
 
 		return $found;
@@ -573,28 +582,31 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 	 */
 	public function findAll ($entity, \framework\orm\utils\Criteria $criteria = NULL)
 	{
-		if (\strpos(' ', $entity) !== false)
-		{
-			throw new \framework\orm\datasources\exceptions\WrongEntityFormatException($entity);
-		}
+		$this->_validateIdentifier($entity);
 
 		$entities = $this->getComponent('orm.utils.Collection');
+        $data = false;
 
 		try
 		{
 			$data = $this->query('SELECT FROM ' . $entity . ' WHERE ' . $this->criteriaToString($criteria));
-			
-			foreach ($data as $record)
-			{
-				$record->parse();
-				$entities[] = $this->_recordToMap($record, $record->recordID);
-			}
 		}
 		catch (\Exception $e)
 		{
-			throw new \framework\orm\datasources\OrientDBDatasourceException('Unable to find all entities '
-					. $entity);
+			//throw new \framework\orm\datasources\OrientDBDatasourceException('Unable to find all entities '
+			//		. $entity, $e);
+            // log things
 		}
+
+        if($data !== false)
+        {
+            foreach ($data as $record)
+            {
+                $record->parse();
+                $entities[] = $this->_recordToMap($record, $record->recordID);
+            }
+        }
+
 
 		return $entities;
 	}
@@ -807,5 +819,13 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 	{
 		$this->close();
 	}
+
+    protected function _validateIdentifier($identifier)
+    {
+        if(\strpos($identifier, ' ') !== false || !preg_match($this->pattern, $identifier))
+        {
+            throw new \framework\orm\datasources\exceptions\WrongEntityFormatException($identifier);
+        }
+    }
 
 }
