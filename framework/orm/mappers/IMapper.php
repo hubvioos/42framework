@@ -41,6 +41,25 @@ interface IMapper
      */
     public function detach ($model);
 
+    /**
+     * @abstract
+     * @param $model
+     */
+    public function isAttached($model);
+
+    /**
+     * Get all the attached models.
+     * @abstract
+     */
+    public function getAttachedModels();
+
+    /**
+     * @abstract
+     * @param $id
+     */
+    public function getAttachedModel($id);
+
+
     /* Datasource manipulation */
 
     /**
@@ -84,6 +103,12 @@ interface IMapper
     /* Mapper manipulation */
 
     /**
+     * @abstract
+     * @param bool $fetch
+     */
+    public function fetchRelations($fetch = true);
+
+    /**
      * Customisable initialisation operations called at the end of the mapper's constructor.
      * @abstract
      */
@@ -102,10 +127,4 @@ interface IMapper
      * @abstract
      */
     public function getModelName ();
-
-    /**
-     * Get all the attached models.
-     * @abstract
-     */
-    public function getAttachedModels ();
 }
