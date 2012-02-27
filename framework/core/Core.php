@@ -149,7 +149,7 @@ class Core extends \framework\core\FrameworkObject
 
 		if ($this->viewGetGlobal('layout') !== false)
 		{
-			$this->viewSetGlobal('contentForLayout', $response->getContent());
+			$this->viewSetGlobal('contentForLayout', (string) $response->getContent());
 			$response->resetContent();
 
 			$response->setContent($this->createView(array('module' => $this->getConfig('defaultModule'), 'action' => $this->viewGetGlobal('layout'))));

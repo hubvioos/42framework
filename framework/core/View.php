@@ -266,12 +266,14 @@ class View extends \framework\core\FrameworkObject
 
 		if ($place == 'style')
 		{
+			$css .= '<style>';
+
 			foreach ($resources as $res)
 			{
-				$css .= '<style>';
 				$css .= $res;
-				$css .= '</style>';
 			}
+
+			$css .= '</style>';
 		}
 		else
 		{
@@ -292,12 +294,14 @@ class View extends \framework\core\FrameworkObject
 
 		if ($place == 'inline')
 		{
+			$js .= '<script>';
+
 			foreach ($resources as $res)
 			{
-				$js .= '<script>';
 				$js .= $res;
-				$js .= '</script>';
 			}
+
+			$js .= '</script>';
 		}
 		else
 		{
