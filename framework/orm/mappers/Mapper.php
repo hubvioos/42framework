@@ -115,6 +115,12 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	 */
 	protected $externalRelations = NULL;
 
+    /**
+     * The default behavior towards relations mapping
+     * @var bool
+     */
+    protected $fetchRelations = true;
+
 	/**
 	 * Constructor
 	 * @param \framework\orm\datasources\interfaces\IDatasource $datasource The datasource used to store the data.
@@ -260,7 +266,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 			{
 				$newModel = $this->_mapToModel($map);
 
-				if($this->externalRelations != NULL)
+				if($this->fetchRelations === true && $this->externalRelations != NULL)
 				{
 					$this->_findExternalRelations($newModel);
 				}
@@ -304,7 +310,13 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 			{
 				$model = $this->_mapToModel($map);
 				$id = (string) $model->getId();
-				
+
+                // find the external relations
+                if($this->fetchRelations === true && $this->externalRelations != NULL)
+                {
+                    $this->_findExternalRelations($model);
+                }
+
 				if($this->isAttached($id))
 				{
 					$model = $this->getAttachedModel($id);
@@ -480,6 +492,17 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 		return $this->datasource;
 	}
 
+    /**
+     * Defin the behavior towards relations mapping. This only applies on the relations finding. Saving operations
+     * are not impacted.
+     * @param bool $fetch
+     * @throws \framework\orm\mappers\MapperException
+     */
+    public function fetchRelations($fetch = true)
+    {
+        $this->fetchRelations = (bool) $fetch;
+    }
+
 	/**
 	 * Method that can be overriden by children classes and which is called at the end of the constructor.
 	 */
@@ -511,6 +534,34 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 			$model->{$this->_propertySetter($name)}($relations);
 		}
 	}
+
+    /**
+     * Find the internal relations of a model
+     * @param $model
+     * @param $map
+     */
+    protected function _findInternalRelations($model, $map)
+    {
+        foreach ($this->internalRelations as $name => $spec)
+        {
+            $setter = $this->_propertySetter($name);
+
+            if (\array_key_exists($spec['storageField'], $map))
+            {
+                $relationMapper = $this->getMapper($spec['type']);
+                $values = $map[$spec['storageField']]['value'];
+
+                if($spec['relation'] == \framework\orm\models\IAttachableModel::RELATION_HAS_ONE
+                    && \count($values) > 1)
+                {
+                    $values = $values[0];
+                }
+
+                $entities = $relationMapper->find($values);
+                $model->{$this->_propertySetter($name)}($entities);
+            }
+        }
+    }
 
 	/**
 	 * Delete a model 
@@ -687,92 +738,32 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 
 			if (\array_key_exists($spec['storageField'], $map) || \array_key_exists($name, $map))
 			{
-				if (\method_exists($model, $setter))
-				{
-					// if a particular type if specified, convert it to a PHP format
-					if ($spec['type'] !== \framework\orm\types\Type::UNKNOWN
-							&& !\in_array($spec['type'], $this->getComponent('orm.transparentTypes')))
-					{
-						$model->$setter($this->getComponent($spec['type'])->convertToPHP($map[$spec['storageField']]['value']));
-					}
-					// else, use the value as provided
-					else
-					{
-						$value = $map[$name]['value'];
-						
-						// convert numeric types into actual numeric values (int, float)
-						if(\in_array($spec['type'], $this->getComponent('orm.numericTypes')))
-						{
-							$value = $value + 0;
-						}
-						$model->$setter($value);
-					}
-				}
-				else
-				{
-					throw new \framework\orm\mappers\MapperException('Missing method ' . $setter
-							. ' in model ' . \get_class($model));
-				}
+			    // if a particular type if specified, convert it to a PHP format
+                if ($spec['type'] !== \framework\orm\types\Type::UNKNOWN
+                        && !\in_array($spec['type'], $this->getComponent('orm.transparentTypes')))
+                {
+                    $model->$setter($this->getComponent($spec['type'])
+                        ->convertToPHP($map[$spec['storageField']]['value']));
+                }
+                else
+                {
+                    //use the value as provided
+                    $value = $map[$name]['value'];
+
+                    // convert numeric types into actual numeric values (int, float)
+                    if(\in_array($spec['type'], $this->getComponent('orm.numericTypes')))
+                    {
+                        $value = $value + 0;
+                    }
+                    $model->$setter($value);
+                }
 			}
 		}
 
 		// delay the relations mapping because we might need the model's id
-		if ($this->internalRelations != NULL)
+		if ($this->fetchRelations === true && $this->internalRelations != NULL)
 		{
-			foreach ($this->internalRelations as $name => $spec)
-			{
-				$setter = $this->_propertySetter($name);
-
-				if (\array_key_exists($spec['storageField'], $map))
-				{
-					if (\method_exists($model, $setter))
-					{
-						$relationMapper = $this->getMapper($spec['type']);
-						$entities = NULL;
-
-						if ($spec['relation'] == \framework\orm\models\IAttachableModel::RELATION_HAS_ONE)
-						{
-							if ($spec['internal'])
-							{
-								$entities = $relationMapper->find($map[$spec['storageField']]['value']);
-							}
-							else
-							{
-								$criteria = $this->getComponent('orm.utils.Criteria');
-								$criteria->equals($spec['storageField'], $model->getId())->limit(1);
-								$entities = $relationMapper->findAll($criteria);
-
-								$entities = (\count($entities) == 0) ? NULL : $entities[0];
-							}
-						}
-						elseif ($spec['relation'] == \framework\orm\models\IAttachableModel::RELATION_HAS_MANY)
-						{
-							if ($spec['internal'])
-							{
-								$entities = $this->getComponent('orm.utils.Collection');
-
-								foreach ($map[$spec['storageField']]['value'] as $id)
-								{
-									$entities[] = $relationMapper->find($id);
-								}
-							}
-							else
-							{
-								$criteria = $this->getComponent('orm.utils.Criteria');
-								$criteria->equals($spec['storageField'], $model->getId());
-								$entities = $relationMapper->findAll($criteria);
-							}
-						}
-
-						$model->$setter($entities);
-					}
-					else
-					{
-						throw new \framework\orm\mappers\MapperException('Missing method ' . $setter
-								. ' in model ' . \get_class($model));
-					}
-				}
-			}
+            $this->_findInternalRelations($model, $map);
 		}
 
 		return $model;
@@ -822,38 +813,30 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 			{
 				$getter = $this->_propertyGetter($name);
 
-				if (\method_exists($model, $getter))
-				{
-					$relationMapper = $this->getMapper($spec['type']);
-					$relations = $model->$getter();
+                $relationMapper = $this->getMapper($spec['type']);
+                $relations = $model->$getter();
 
-					$map[$name]['storageField'] = $spec['storageField'];
-					$map[$name]['internal'] = $spec['internal'];
-					$map[$name]['relation'] = $spec['relation'];
-					$map[$name]['type'] = $relationMapper->getEntityIdentifier();
-					$map[$name]['value'] = array();
+                $map[$name]['storageField'] = $spec['storageField'];
+                $map[$name]['internal'] = $spec['internal'];
+                $map[$name]['relation'] = $spec['relation'];
+                $map[$name]['type'] = $relationMapper->getEntityIdentifier();
+                $map[$name]['value'] = array();
 
-					if ($relations === NULL)
-					{
-						$map[$name]['value'] = NULL;
-					}
-					elseif (\is_array($relations) || $relations instanceof \Traversable)
-					{
-						foreach ($relations as $relation)
-						{
-							$map[$name]['value'][] = $relationMapper->_modelToMap($relation);
-						}
-					}
-					else
-					{
-						$map[$name]['value'] = $relationMapper->_modelToMap($relations);
-					}
-				}
-				else
-				{
-					throw new \framework\orm\mappers\MapperException('Missing method ' . $getter
-							. ' in model ' . \get_class($model));
-				}
+                if ($relations === NULL)
+                {
+                    $map[$name]['value'] = NULL;
+                }
+                elseif (\is_array($relations) || $relations instanceof \Traversable)
+                {
+                    foreach ($relations as $relation)
+                    {
+                        $map[$name]['value'][] = $relationMapper->_modelToMap($relation);
+                    }
+                }
+                else
+                {
+                    $map[$name]['value'] = $relationMapper->_modelToMap($relations);
+                }
 			}
 		}
 
