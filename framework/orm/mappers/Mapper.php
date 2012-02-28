@@ -544,12 +544,10 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
     {
         foreach ($this->internalRelations as $name => $spec)
         {
-            $setter = $this->_propertySetter($name);
-
             if (\array_key_exists($spec['storageField'], $map))
             {
                 $relationMapper = $this->getMapper($spec['type']);
-                $values = $map[$spec['storageField']]['value'];
+                $values = $this->_wrapInArray($map[$spec['storageField']]['value']);
 
                 if($spec['relation'] == \framework\orm\models\IAttachableModel::RELATION_HAS_ONE
                     && \count($values) > 1)
