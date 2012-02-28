@@ -641,11 +641,10 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 	protected function _recordToMap (\OrientDBRecord $record, $id)
 	{
 		// get the array representing the data (quite dirty ATM...)
-		$map = (array) $record->data;
-		$map = \array_splice($map, 0, 1);
-		$map = \array_pop($map);
 
-		foreach ($map as $index => $value)
+		$map = array();
+
+		foreach ($record->data as $index => $value)
 		{
 			$map[$index] = array();
 
