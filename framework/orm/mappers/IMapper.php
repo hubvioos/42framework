@@ -59,6 +59,19 @@ interface IMapper
      */
     public function getAttachedModel($id);
 
+    /**
+     * @abstract
+     * @param \framework\orm\models\IAttachableModel $model
+     * @return \framework\orm\utils\Map
+     */
+    public function modelToMap(\framework\orm\models\IAttachableModel $model);
+
+    /**
+     * @abstract
+     * @param $map
+     * @return \framework\orm\models\IAttachableModel
+     */
+    public function mapToModel($map);
 
     /* Datasource manipulation */
 

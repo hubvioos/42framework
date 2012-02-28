@@ -121,6 +121,11 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
      */
     protected $fetchRelations = true;
 
+    /**
+     * @var \framework\orm\mappers\ModelWatcher
+     */
+    protected $watcher = NULL;
+
 	/**
 	 * Constructor
 	 * @param \framework\orm\datasources\interfaces\IDatasource $datasource The datasource used to store the data.
@@ -166,8 +171,10 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 				$this->nonRelations->removeProperty($name);
 			}
 		}
-		
-		$this->init();
+
+        $this->watcher = new \framework\orm\mappers\ModelWatcher($this->modelName, $this->fields, $this->getContainer());
+
+        $this->init();
 	}
 
     /**
@@ -264,7 +271,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 			
 			foreach ($data as $map)
 			{
-				$newModel = $this->_mapToModel($map);
+				$newModel = $this->mapToModel($map);
 
 				if($this->fetchRelations === true && $this->externalRelations != NULL)
 				{
@@ -308,7 +315,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 		{
 			foreach ($data as $map)
 			{
-				$model = $this->_mapToModel($map);
+				$model = $this->mapToModel($map);
 				$id = (string) $model->getId();
 
                 // find the external relations
@@ -628,7 +635,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 
 			foreach ($this->_wrapInArray($relations) as $relation)
 			{
-				$map = $relationMapper->_modelToMap($relation);
+				$map = $relationMapper->modelToMap($relation);
 				$map[$spec['storageField']] = array(
 					'value' => $model->getId(),
 					'relation' => $spec['relation'],
@@ -694,12 +701,12 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 		$id = false;
 		if ($mode == self::CREATE)
 		{
-			$id = $this->datasource->create($this->getEntityIdentifier(), $this->_modelToMap($model));
+			$id = $this->datasource->create($this->getEntityIdentifier(), $this->modelToMap($model));
 			$model->setId($id);
 		}
 		else
 		{
-			if ($this->datasource->update($model->getId(), $this->getEntityIdentifier(), $this->_modelToMap($model), NULL) == true)
+			if ($this->datasource->update($model->getId(), $this->getEntityIdentifier(), $this->modelToMap($model), NULL) == true)
 			{
 				$id = $model->getId();
 			}
@@ -724,7 +731,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	 * @param array|\framework\orm\utils\Map $map
 	 * @return \framework\orm\models\IAttachableModel
 	 */
-	protected function _mapToModel ($map)
+	protected function mapToModel ($map)
 	{
 		// get a new model's instance
 		$model = $this->getModel($this->getModelName());
@@ -772,7 +779,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	 * @param \framework\orm\models\IAttachableModel $model 
 	 * @return \framework\orm\utils\Map
 	 */
-	protected function _modelToMap (\framework\orm\models\IAttachableModel $model)
+	protected function modelToMap (\framework\orm\models\IAttachableModel $model)
 	{
 		$map = new \framework\orm\utils\Map();
 
@@ -828,12 +835,12 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
                 {
                     foreach ($relations as $relation)
                     {
-                        $map[$name]['value'][] = $relationMapper->_modelToMap($relation);
+                        $map[$name]['value'][] = $relationMapper->modelToMap($relation);
                     }
                 }
                 else
                 {
-                    $map[$name]['value'] = $relationMapper->_modelToMap($relations);
+                    $map[$name]['value'] = $relationMapper->modelToMap($relations);
                 }
 			}
 		}
