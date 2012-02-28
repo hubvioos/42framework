@@ -305,11 +305,11 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
 
         if($collection instanceof self)
         {
-            array_merge($this->storage, $collection->storage);
+            $this->storage = \array_merge($this->storage, $collection->storage);
         }
         else
         {
-            array_merge($this->storage, $collection);
+            $this->storage = \array_merge($this->storage, $collection);
         }
 
 		return $this;
