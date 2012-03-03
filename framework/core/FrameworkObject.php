@@ -172,12 +172,17 @@ abstract class FrameworkObject
 		
 		return $this;
 	}
-	
+
 	public function removePlugin ($name)
 	{
 		unset(self::$_container['plugin'][$name]);
 		return $this;
 	}
+
+    public function getLink ($routeName = null, $params = array())
+    {
+        return $this->getConfig('siteUrl') . \urldecode($this->getComponent('router')->url($params, $routeName));
+    }
 	
 	public function __call ($method, $arguments)
 	{

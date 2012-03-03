@@ -168,11 +168,6 @@ class View extends \framework\core\FrameworkObject
 		return $this->render();
 	}
 
-	public function getLink ($routeName = null, $params = array())
-	{
-		return $this->getConfig('siteUrl') . \urldecode($this->getComponent('router')->url($params, $routeName));
-	}
-
 	public function getBlock ($module, $file, $params = array(), $format = 'html', $alternativeView = null)
 	{
 		$arr = array(
