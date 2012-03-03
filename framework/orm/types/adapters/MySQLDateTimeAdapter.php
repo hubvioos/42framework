@@ -62,11 +62,11 @@ class MySQLDateTimeAdapter implements \framework\orm\types\adapters\IAdapter
 				
 				if(\preg_match('#^[0-9]{8}$#', $value))
 				{
-					return \DateTime::createFromFormat('Ymd');
+					return \DateTime::createFromFormat('Ymd', $value);
 				}
 				if(\preg_match('#^[0-9]{6}$#', $value))
 				{
-					return \DateTime::createFromFormat('ymd');
+					return \DateTime::createFromFormat('ymd', $value);
 				}
 			}
 			catch(\Exception $e)
