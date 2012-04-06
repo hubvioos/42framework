@@ -21,12 +21,12 @@
 namespace framework\orm\models;
 
 /**
- * Interface IAttachableModel
+ * Interface IModel
  * 
  * This interface must be implemented by every 
  * model that will be attached to a Mapper.
  */
-interface IAttachableModel
+interface IModel
 {
 
 	const RELATION_HAS_ONE = 1;

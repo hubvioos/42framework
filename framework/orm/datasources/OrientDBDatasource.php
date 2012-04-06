@@ -476,14 +476,14 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
                         {
                             if($data[$property]['internal'] == true)
                             {
-                                if($data[$property]['relation'] == \framework\orm\models\IAttachableModel::RELATION_HAS_ONE)
+                                if($data[$property]['relation'] == \framework\orm\models\IModel::RELATION_HAS_ONE)
                                 {
                                     //$dataValue = $this->tools->quoteString($dataValue['id']['value']);
                                     $dataValue = '#'.$dataValue['id']['value'];
                                     break;
                                 }
                                 elseif($data[$property]['relation'] ==
-                                    \framework\orm\models\IAttachableModel::RELATION_HAS_MANY)
+                                    \framework\orm\models\IModel::RELATION_HAS_MANY)
                                 {
                                     $dataValue = '[';
 

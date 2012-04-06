@@ -30,16 +30,9 @@ interface IMapper
 	/**
 	 * Attach a model to the mapper.
      * @abstract
-     * @param \framework\orm\models\IAttachableModel The model to attach.
+     * @param \framework\orm\models\IModel The model to attach.
      */
     public function attach ($object);
-
-    /**
-     * Detach a model from the mapper.
-     * @abstract
-     * @param mixed $model The model to detach or its id
-     */
-    public function detach ($model);
 
     /**
      * @abstract
@@ -66,25 +59,23 @@ interface IMapper
      * Retrieve a model from the datasource based on its id.
      * @abstract
      * @param int|string|array $id The models' id(s).
-     * @param bool $attach Attach the retrieved model(s) if found.
      */
-    public function find ($id, $attach = true);
+    public function find ($id);
 
     /**
      * Retrieve several models from the datasource.
      * @abstract
      * @param \framework\orm\utils\Criteria $criteria A set of constraints the results must match.
-     * @param bool $attach
      * @return \framework\orm\utils\Collection
      */
-    public function findAll (\framework\orm\utils\Criteria $criteria = null, $attach = true);
+    public function findAll (\framework\orm\utils\Criteria $criteria = null);
 
     /**
      * Save a model in the datasource.
      * @abstract
-     * @param \framework\orm\models\IAttachableModel The model to save.
+     * @param \framework\orm\models\IModel The model to save.
      */
-    public function save (\framework\orm\models\IAttachableModel $model);
+    public function save (\framework\orm\models\IModel $model);
 
     /**
      * Save all the models attached to the mapper.)
@@ -94,7 +85,7 @@ interface IMapper
 
     /**
      * Delete a model from the datasource.
-     * @param \framework\orm\utils\Criteria|\framework\orm\models\IAttachableModel $criteria
+     * @param \framework\orm\utils\Criteria|\framework\orm\models\IModel $criteria
      */
     public function delete ($criteria);
 

@@ -83,7 +83,7 @@ class Criteria
         {
             array_walk_recursive($params, function(&$item, $key)
             {
-                if($item instanceof \framework\orm\models\IAttachableModel)
+                if($item instanceof \framework\orm\models\IModel)
                 {
                     $item = $item->getId();
                 }

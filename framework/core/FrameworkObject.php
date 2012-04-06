@@ -71,7 +71,7 @@ abstract class FrameworkObject
 	/**
 	 * Get a model
 	 * @param string $model The model's name
-	 * @return \framework\orm\models\IAttachableModel
+	 * @return \framework\orm\models\IModel
 	 */
 	public function getModel($model)
 	{
