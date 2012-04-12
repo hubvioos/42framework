@@ -793,7 +793,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 			if (\array_key_exists($spec['storageField'], $map) || \array_key_exists($name, $map))
 			{
 			    // if a particular type if specified, convert it to a PHP format
-                if ($spec['type'] !== \framework\orm\types\Type::UNKNOWN
+                if ($map[$name]['value'] !== NULL && $spec['type'] !== \framework\orm\types\Type::UNKNOWN
                         && !\in_array($spec['type'], $this->getComponent('orm.transparentTypes')))
                 {
                     $model->$setter($this->getComponent($spec['type'])
@@ -840,16 +840,16 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 			// check if a getter is exists for the property
 			if (\method_exists($model, $getter))
 			{
-				// if a particular type is specified, convert the value to a datasource-friendly format
-				if ($spec['type'] !== \framework\orm\types\Type::UNKNOWN
+                $value = $model->$getter();
+                if ($value !== NULL && $spec['type'] !== \framework\orm\types\Type::UNKNOWN
 						&& !\in_array($spec['type'], $this->getComponent('orm.transparentTypes')))
 				{
-					$map[$name]['value'] = $this->getComponent($spec['type'])->convertToStorage($model->$getter());
+					$map[$name]['value'] = $this->getComponent($spec['type'])->convertToStorage($value);
 				}
 				// else use the value as provided
 				else
 				{
-					$map[$name]['value'] = $model->$getter();
+					$map[$name]['value'] = $value;
 				}
 
 				$map[$name]['storageField'] = $spec['storageField'];

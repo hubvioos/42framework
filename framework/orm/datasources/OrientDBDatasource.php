@@ -455,6 +455,12 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 						break;
 
 					default:
+                        if($dataValue === NULL)
+                        {
+                            $dataValue = 'NULL';
+                            break;
+                        }
+
 						if (\in_array($dataType, $this->getComponent('orm.numericTypes')))
 						{
 							break;
