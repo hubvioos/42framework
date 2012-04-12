@@ -741,7 +741,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 		$id = false;
 		if ($mode == self::CREATE)
 		{
-			$id = $this->datasource->create($this->getEntityIdentifier(), $this->tempMaps[$model->getId()]);
+			$id = $this->datasource->create($this->getEntityIdentifier(), $this->_modelToMap($model));
 			$model->setId($id);
 		}
 		else
