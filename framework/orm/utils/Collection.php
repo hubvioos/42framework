@@ -203,8 +203,8 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
 
     /**
      * The function used to provide the Collection->sort() method
-     * @param $a
-     * @param $b
+     * @param mixed $a
+     * @param mixed $b
      * @return int
      * @throws CollectionException
      */
@@ -323,4 +323,24 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
 	{
 		return \count($this->storage) == 0;
 	}
+
+    /**
+     * Get the first value of the Collection or a default value if the Collection is empty
+     * @param mixed $default A default value to return if there is no first element
+     * @return mixed
+     */
+    public function first($default = NULL)
+    {
+        return $this->isEmpty() ? $default : $this->storage[0];
+    }
+
+    /**
+     * Get the last element of the Collection or a default value if the Collection is empty
+     * @param mixed $default A default value to return if there is no last element
+     * @return mixed
+     */
+    public function last($default = NULL)
+    {
+        return $this->isEmpty() ? $default : $this->storage[$this->count() - 1];
+    }
 }

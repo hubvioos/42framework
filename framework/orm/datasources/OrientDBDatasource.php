@@ -455,6 +455,12 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 						break;
 
 					default:
+                        if($dataValue === NULL)
+                        {
+                            $dataValue = 'NULL';
+                            break;
+                        }
+
 						if (\in_array($dataType, $this->getComponent('orm.numericTypes')))
 						{
 							break;
@@ -476,14 +482,14 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
                         {
                             if($data[$property]['internal'] == true)
                             {
-                                if($data[$property]['relation'] == \framework\orm\models\IAttachableModel::RELATION_HAS_ONE)
+                                if($data[$property]['relation'] == \framework\orm\models\IModel::RELATION_HAS_ONE)
                                 {
                                     //$dataValue = $this->tools->quoteString($dataValue['id']['value']);
                                     $dataValue = '#'.$dataValue['id']['value'];
                                     break;
                                 }
                                 elseif($data[$property]['relation'] ==
-                                    \framework\orm\models\IAttachableModel::RELATION_HAS_MANY)
+                                    \framework\orm\models\IModel::RELATION_HAS_MANY)
                                 {
                                     $dataValue = '[';
 
@@ -640,8 +646,6 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 	
 	protected function _recordToMap (\OrientDBRecord $record, $id)
 	{
-		// get the array representing the data (quite dirty ATM...)
-
 		$map = array();
 
 		foreach ($record->data as $index => $value)

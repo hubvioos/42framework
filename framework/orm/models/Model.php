@@ -21,7 +21,7 @@
  * Class Model.
  * Base class that every model can extend. It extends the \framework\core\FrameworkObject class 
  * to provide access to convenient mthods like $this->getComponent(), $this->getConfig(), ... ; 
- * and also implements the \framework\orm\models\IAttachableModel interface so it can be
+ * and also implements the \framework\orm\models\IModel interface so it can be
  * managed by a \framework\orm\mappers\Mapper.
  *
  * @author mickael
@@ -29,7 +29,7 @@
 
 namespace framework\orm\models;
 
-abstract class Model implements \framework\orm\models\IAttachableModel
+abstract class Model implements \framework\orm\models\IModel
 {
 	protected $id;
 
