@@ -176,26 +176,31 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 
     /**
      * Attach a new object to the mapper.
-     * @param array|\Traversable|\framework\orm\models\IModel $models
+     * @param array|\Traversable|\framework\orm\models\IModel $model
      */
-	public function attach ($models)
+	public function attach ($model)
 	{
-        if($models instanceof \framework\orm\models\IModel)
+        if($model instanceof \framework\orm\models\IModel)
         {
-            if($models->getId() !== NULL)
+            if(!$this->isAttached($model))
             {
-                $this->attachedModels[(string) $models->getId()] = $models;
-            }
-            else
-            {
-                $this->attachedModels[] = $models;
+                if($model->getId() !== NULL)
+                {
+                    $this->attachedModels[(string) $model->getId()] = $model;
+                    // cache a map of the original model
+                    $this->originalMaps[(string) $model->getId()] = $this->_modelToMap($model);
+                }
+                else
+                {
+                    $this->attachedModels[] = $model;
+                }
             }
         }
-        if(\is_array($models) || $models instanceof \Traversable)
+        if(\is_array($model) || $model instanceof \Traversable)
         {
-            foreach($models as $model)
+            foreach($model as $_model)
             {
-                $this->attach($model);
+                $this->attach($_model);
             }
         }
 	}
@@ -248,9 +253,6 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 				$this->attach($newModel);
 
 				$found->add($newModel);
-
-                // cache a map of the original model
-                $this->originalMaps[$newModel->getId()] = $this->_modelToMap($newModel);
 			}
 
 		}
@@ -300,9 +302,6 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
                 }
 
 				$found->add($model);
-
-                // cache a map of the original model
-                $this->originalMaps[$model->getId()] = $this->_modelToMap($model);
 			}
 		}
 
@@ -370,7 +369,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 
         foreach($map as $name => $spec)
         {
-            $originalValue = $this->originalMaps[$model->getId()][$name]['value'];
+            $originalValue = $this->originalMaps[(string) $model->getId()][$name]['value'];
             $mapValue = $spec['value'];
 
             if(!isset($spec['relation']) || $spec['relation'] ==
@@ -782,12 +781,12 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
         // clear and update the cached maps
         if(\array_key_exists($model->getId(), $this->tempMaps))
         {
-            $this->originalMaps[$model->getId()] = $this->tempMaps[$model->getId()];
+            $this->originalMaps[(string) $model->getId()] = $this->tempMaps[$model->getId()];
             unset($this->tempMaps[$model->getId()]);
         }
         else
         {
-            $this->originalMaps[$model->getId()] = $this->_modelToMap($model);
+            $this->originalMaps[(string) $model->getId()] = $this->_modelToMap($model);
         }
 
 		return $model;
