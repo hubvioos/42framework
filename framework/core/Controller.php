@@ -165,13 +165,13 @@ abstract class Controller extends \framework\core\FrameworkObject
 					//Lauch After event
 					$this->raiseEvent($afterName);
 
+					if ($this->usesLayout == false)
+					{
+						$this->setLayout(false);
+					}
+
 					if ($this->usesView)
 					{
-						if ($this->usesLayout == false)
-						{
-							$this->setLayout(false);
-						}
-
 						if ($this->_view === null)
 						{
 							$this->setView($this->_request->getAction());
