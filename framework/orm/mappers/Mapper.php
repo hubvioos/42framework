@@ -363,50 +363,58 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
         if(!$this->isAttached($model))
         {
             $this->attach($model);
-            $this->_modelToMap($model, true);
             return true;
         }
 
         foreach($map as $name => $spec)
         {
-            $originalValue = $this->originalMaps[(string) $model->getId()][$name]['value'];
-            $mapValue = $spec['value'];
-
-            if(!isset($spec['relation']) || $spec['relation'] ==
-                \framework\orm\models\IModel::RELATION_HAS_ONE)
+            if(!$hasChanged)
             {
-                if($originalValue !== $mapValue)
+                $originalValue = $this->originalMaps[(string) $model->getId()][$name]['value'];
+                $mapValue = $spec['value'];
+
+                if(!isset($spec['relation']) || $spec['relation'] ==
+                    \framework\orm\models\IModel::RELATION_HAS_ONE)
                 {
-                    $hasChanged = true;
-                    break;
-                }
-            }
-            else
-            {
-                if(\is_array($originalValue) && \is_array($mapValue))
-                {
-                    $grepId = function($map) {
-                        return $map['id']['value'];
-                    };
-
-                    $originalIds = \array_map($grepId, $originalValue);
-                    $mapIds = \array_map($grepId, $mapValue);
-
-                    \sort($originalIds);
-                    \sort($mapIds);
-
-                    if($originalIds !== $mapIds)
+                    if($spec['relation'] == \framework\orm\models\IModel::RELATION_HAS_ONE)
+                    {
+                        if($originalValue instanceof \framework\orm\utils\Map
+                            && $mapValue instanceof \framework\orm\utils\Map)
+                        {
+                            $hasChanged = !($originalValue['id']['value'] == $mapValue['id']['value']);
+                        }
+                    }
+                    elseif($originalValue !== $mapValue)
                     {
                         $hasChanged = true;
                     }
                 }
                 else
                 {
-                    //something went wrong...
-                    $hasChanged = true;
+                    if(\is_array($originalValue) && \is_array($mapValue))
+                    {
+                        $grepId = function($map) {
+                            return $map['id']['value'];
+                        };
+
+                        $originalIds = \array_map($grepId, $originalValue);
+                        $mapIds = \array_map($grepId, $mapValue);
+
+                        \sort($originalIds);
+                        \sort($mapIds);
+
+                        if($originalIds !== $mapIds)
+                        {
+                            $hasChanged = true;
+                        }
+                    }
+                    else
+                    {
+                        //something went wrong...
+                        $hasChanged = true;
+                    }
                 }
             }
-
         }
 
         return $hasChanged;
