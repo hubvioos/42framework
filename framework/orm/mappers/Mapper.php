@@ -765,11 +765,14 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
         }
 
         // clear and update the cached maps
-        $this->originalMaps[$model->getId()] = $this->tempMaps[$model->getId()];
-
         if(\array_key_exists($model->getId(), $this->tempMaps))
         {
+            $this->originalMaps[$model->getId()] = $this->tempMaps[$model->getId()];
             unset($this->tempMaps[$model->getId()]);
+        }
+        else
+        {
+            $this->originalMaps[$model->getId()] = $this->_modelToMap($model);
         }
 
 		return $model;
