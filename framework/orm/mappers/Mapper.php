@@ -360,7 +360,14 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
     {
         $map = $this->_modelToMap($model, true);
         $hasChanged = false;
-        
+
+        if(!$this->isAttached($model))
+        {
+            $this->attach($model);
+            $this->_modelToMap($model, true);
+            return true;
+        }
+
         foreach($map as $name => $spec)
         {
             $originalValue = $this->originalMaps[$model->getId()][$name]['value'];
@@ -746,8 +753,16 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 		}
 		else
 		{
-			if ($this->datasource->update($model->getId(), $this->getEntityIdentifier(),
-                $this->tempMaps[$model->getId()], NULL) == true)
+            if(\array_key_exists($model->getId(), $this->tempMaps))
+            {
+                $map = $this->tempMaps[$model->getId()];
+            }
+            else
+            {
+                $map = $this->_modelToMap($model, true);
+            }
+
+			if ($this->datasource->update($model->getId(), $this->getEntityIdentifier(), $map, NULL) == true)
 			{
 				$id = $model->getId();
 			}
@@ -900,7 +915,10 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 
         if($cache === true)
         {
-            $this->_cacheMap($map, $model->getId());
+            if($model->getId() !== NULL)
+            {
+                $this->_cacheMap($map, $model->getId());
+            }
         }
 
 		return $map;
