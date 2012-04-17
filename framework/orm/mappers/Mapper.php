@@ -373,10 +373,15 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
                 $originalValue = $this->originalMaps[(string) $model->getId()][$name]['value'];
                 $mapValue = $spec['value'];
 
-                if(!isset($spec['relation']) && $originalValue !== $mapValue)
+                // no relation
+                if(!isset($spec['relation']))
                 {
-                    $hasChanged = true;
+                    if($originalValue !== $mapValue)
+                    {
+                        $hasChanged = true;
+                    }
                 }
+                // HAS_ONE relation
                 elseif($spec['relation'] == \framework\orm\models\IModel::RELATION_HAS_ONE)
                 {
                     if($originalValue instanceof \framework\orm\utils\Map
@@ -385,6 +390,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
                         $hasChanged = !($originalValue['id']['value'] == $mapValue['id']['value']);
                     }
                 }
+                // HAS_MANY relation
                 else
                 {
                     if(\is_array($originalValue) && \is_array($mapValue))
