@@ -690,7 +690,8 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 		{
 			if ($spec['storageField'] !== NULL)
 			{
-				if(\is_array($spec['value']) || $spec['value'] instanceof \Traversable)
+                // HAS_MANY relation
+				if(\is_array($spec['value']))
 				{
 					$data = array();
 					
@@ -701,6 +702,11 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 					
 					$record->data->$spec['storageField'] = $data;
 				}
+                // HAS_ONE relation
+                elseif($spec['value'] instanceof \Traversable)
+                {
+                    $record->data->$spec['storageField'] = new \OrientDBTypeLink($spec['value']['id']['value']);
+                }
 				else
 				{
 					$record->data->$spec['storageField'] = $spec['value'];
