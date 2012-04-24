@@ -29,13 +29,17 @@ class MapperException extends \Exception
  * Class Mapper
  * 
  * This class is the base class every mapper has to inherit in order to work properly.
- * It extends \framework\core\FrameworkObject so the common $this->getComponent() 
- * and $this->getConfig() are easily accessible
  */
-abstract class Mapper extends \framework\core\FrameworkObject implements \framework\orm\mappers\IMapper
+abstract class Mapper implements \framework\orm\mappers\IMapper
 {
 	const CREATE = 1;
 	const UPDATE = 2;
+
+    /**
+     * The ComponentContainer
+     * @var \framework\core\FrameworkObject
+     */
+    protected $container;
 
 	/**
 	 * Array containing the models attached to the mapper.
@@ -125,13 +129,16 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
      */
     protected $tempMaps = array();
 
-	/**
-	 * Constructor
-	 * @param \framework\orm\datasources\interfaces\IDatasource $datasource The datasource used to store the data.
-	 * @throws \framework\orm\mappers\MapperException 
-	 */
-	public function __construct (\framework\orm\datasources\interfaces\IDatasource $datasource)
+    /**
+     * Constructor
+     * @param \framework\core\FrameworkObject $container
+     * @param \framework\orm\datasources\interfaces\IDatasource $datasource The datasource used to store the data.
+     * @throws \framework\orm\mappers\MapperException
+     */
+	public function __construct (\framework\core\FrameworkObject $container,
+                                 \framework\orm\datasources\interfaces\IDatasource $datasource)
 	{
+        $this->container = $container;
 		$this->datasource = $datasource;
 
 		if (!isset($this->fields) || $this->fields === array() || $this->fields === NULL)
@@ -215,10 +222,10 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 		$alreadyFound = array();
 
         /** @var $attached \framework\orm\utils\Collection */
-		$attached = $this->getComponent('orm.utils.Collection');
+		$attached = $this->container->getComponent('orm.utils.Collection');
 
 		/** @var $found \framework\orm\utils\Collection */
-        $found = $this->getComponent('orm.utils.Collection');
+        $found = $this->container->getComponent('orm.utils.Collection');
 		$toFind = $this->_wrapInArray($toFind);
 		
 		$searchForUniqueModel = (\count($toFind) == 1);
@@ -278,7 +285,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	{
 		$data = $this->datasource->findAll($this->getEntityIdentifier(), $criteria);
 		/** @var $found \framework\orm\utils\Collection */
-        $found = $this->getComponent('orm.utils.Collection');
+        $found = $this->container->getComponent('orm.utils.Collection');
 
 		if (!$data->isEmpty())
 		{
@@ -316,10 +323,31 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	 */
 	public function findBy($property, $value)
 	{
-		$criteria = $this->datasource->getNativeCriteria();
-		$criteria->equals($this->fields[$property]['storageField'], $value);
-		
-		return $this->findAll($criteria);
+        $property = \lcfirst($property);
+        $name = '';
+
+        if(\array_key_exists($property, $this->fields))
+        {
+            $name = $this->fields[$property]['storageField'];
+        }
+        else
+        {
+            $property = \ucfirst($property);
+            if(\array_key_exists($property, $this->fields))
+            {
+                $name = $this->fields[$property]['storageField'];
+            }
+        }
+
+        if($name === '')
+        {
+            throw new MapperException('Property "'.$property.'" not found in model.');
+        }
+
+        $criteria = $this->datasource->getNativeCriteria();
+        $criteria->equals($name, $value);
+
+        return $this->findAll($criteria);
 	}
 	
 	/**
@@ -451,7 +479,10 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
         {
             if($this->_deleteModel($models->getId()))
             {
-                //$this->detach($models);
+                if($this->isAttached($models))
+                {
+                    unset($this->attachedModels[(string) $models->getId()]);
+                }
                 return true;
             }
 
@@ -461,7 +492,10 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
         {
             if($this->_deleteModel($models))
             {
-                //$this->detach($models);
+                if($this->isAttached($models))
+                {
+                    unset($this->attachedModels[(string) $models->getId()]);
+                }
                 return true;
             }
 
@@ -547,6 +581,15 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	}
 
     /**
+     * Get a new instance of the model this Mapper manages.
+     * @return \framework\orm\models\IModel
+     */
+    public function getModel()
+    {
+        return $this->container->getModel($this->getModelName());
+    }
+
+    /**
      * Defin the behavior towards relations mapping. This only applies on the relations finding. Saving operations
      * are not impacted.
      * @param bool $fetch
@@ -573,7 +616,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	{
 		foreach($this->externalRelations as $name => $spec)
 		{
-			$relationMapper = $this->getMapper($spec['type']);
+			$relationMapper = $this->container->getMapper($spec['type']);
 			$key = $relationMapper->getDatasource()->getNativeCriteria()->equals($spec['storageField'], $model->getId());
 			$relations = $relationMapper->findAll($key);
 
@@ -600,7 +643,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
         {
             if (\array_key_exists($spec['storageField'], $map))
             {
-                $relationMapper = $this->getMapper($spec['type']);
+                $relationMapper = $this->container->getMapper($spec['type']);
                 $values = $this->_wrapInArray($map[$spec['storageField']]['value']);
 
                 if($spec['relation'] == \framework\orm\models\IModel::RELATION_HAS_ONE
@@ -651,11 +694,11 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	{
 		foreach ($this->internalRelations as $name => $spec)
 		{
-			$relationMapper = $this->getMapper($spec['type']);
+			$relationMapper = $this->container->getMapper($spec['type']);
 			$relations = $model->{$this->_propertyGetter($name)}();
 
             /** @var $saved \framework\orm\utils\Collection */
-			$saved = $this->getComponent('orm.utils.Collection');
+			$saved = $this->container->getComponent('orm.utils.Collection');
 
             // save only the first element
             if($spec['relation'] == \framework\orm\models\IModel::RELATION_HAS_ONE && \count($relations) > 1)
@@ -686,7 +729,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	{
 		foreach ($this->externalRelations as $name => $spec)
 		{
-			$relationMapper = $this->getMapper($spec['type']);
+			$relationMapper = $this->container->getMapper($spec['type']);
 			$relations = $model->{$this->_propertyGetter($name)}();
 			$saved = array();
 
@@ -810,7 +853,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 	protected function _mapToModel ($map)
 	{
 		// get a new model's instance
-		$model = $this->getModel($this->getModelName());
+		$model = $this->getModel();
 
 		// set all of its properties
 		foreach ($this->nonRelations as $name => $spec)
@@ -821,9 +864,9 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 			{
 			    // if a particular type if specified, convert it to a PHP format
                 if ($map[$name]['value'] !== NULL && $spec['type'] !== \framework\orm\types\Type::UNKNOWN
-                        && !\in_array($spec['type'], $this->getComponent('orm.transparentTypes')))
+                        && !\in_array($spec['type'], $this->container->getComponent('orm.transparentTypes')))
                 {
-                    $model->$setter($this->getComponent($spec['type'])
+                    $model->$setter($this->container->getComponent($spec['type'])
                         ->convertToPHP($map[$spec['storageField']]['value']));
                 }
                 else
@@ -832,7 +875,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
                     $value = $map[$name]['value'];
 
                     // convert numeric types into actual numeric values (int, float)
-                    if(\in_array($spec['type'], $this->getComponent('orm.numericTypes')))
+                    if(\in_array($spec['type'], $this->container->getComponent('orm.numericTypes')))
                     {
                         $value = $value + 0;
                     }
@@ -869,9 +912,9 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 			{
                 $value = $model->$getter();
                 if ($value !== NULL && $spec['type'] !== \framework\orm\types\Type::UNKNOWN
-						&& !\in_array($spec['type'], $this->getComponent('orm.transparentTypes')))
+						&& !\in_array($spec['type'], $this->container->getComponent('orm.transparentTypes')))
 				{
-					$map[$name]['value'] = $this->getComponent($spec['type'])->convertToStorage($value);
+					$map[$name]['value'] = $this->container->getComponent($spec['type'])->convertToStorage($value);
 				}
 				// else use the value as provided
 				else
@@ -895,7 +938,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 			{
 				$getter = $this->_propertyGetter($name);
 
-                $relationMapper = $this->getMapper($spec['type']);
+                $relationMapper = $this->container->getMapper($spec['type']);
                 $relations = $model->$getter();
 
                 $map[$name]['storageField'] = $spec['storageField'];
@@ -955,10 +998,7 @@ abstract class Mapper extends \framework\core\FrameworkObject implements \framew
 		// findByFoo('bar')
 		if(\strpos($method, 'findBy') === 0 && \count($arguments) != 0)
 		{
-            /**
-             * @TODO: check in fieldlist + double check (if first letter uppercase in model)
-             */
-			return $this->findBy(\lcfirst(\substr($method, 6)), $arguments[0]);
+			return $this->findBy(\substr($method, 6), $arguments[0]);
 		}
 	}
 
