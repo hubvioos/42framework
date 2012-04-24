@@ -37,7 +37,7 @@ abstract class Mapper implements \framework\orm\mappers\IMapper
 
     /**
      * The ComponentContainer
-     * @var \framework\core\FrameworkObject
+     * @var \framework\libs\ComponentsContainer
      */
     protected $container;
 
@@ -131,11 +131,11 @@ abstract class Mapper implements \framework\orm\mappers\IMapper
 
     /**
      * Constructor
-     * @param \framework\core\FrameworkObject $container
+     * @param \framework\libs\ComponentsContainer $container
      * @param \framework\orm\datasources\interfaces\IDatasource $datasource The datasource used to store the data.
      * @throws \framework\orm\mappers\MapperException
      */
-	public function __construct (\framework\core\FrameworkObject $container,
+	public function __construct (\framework\libs\ComponentsContainer $container,
                                  \framework\orm\datasources\interfaces\IDatasource $datasource)
 	{
         $this->container = $container;
@@ -586,7 +586,17 @@ abstract class Mapper implements \framework\orm\mappers\IMapper
      */
     public function getModel()
     {
-        return $this->container->getModel($this->getModelName());
+        return $this->container->getComponent('model.'.$this->getModelName());
+    }
+
+    /**
+     * Get the Mapper that manages a Model class
+     * @param $modelName
+     * @return \framework\orm\mappers\Mapper
+     */
+    public function getMapper($modelName)
+    {
+        return $this->container->getComponent('mapper.'.$modelName);
     }
 
     /**
@@ -616,7 +626,7 @@ abstract class Mapper implements \framework\orm\mappers\IMapper
 	{
 		foreach($this->externalRelations as $name => $spec)
 		{
-			$relationMapper = $this->container->getMapper($spec['type']);
+			$relationMapper = $this->getMapper($spec['type']);
 			$key = $relationMapper->getDatasource()->getNativeCriteria()->equals($spec['storageField'], $model->getId());
 			$relations = $relationMapper->findAll($key);
 
@@ -643,7 +653,7 @@ abstract class Mapper implements \framework\orm\mappers\IMapper
         {
             if (\array_key_exists($spec['storageField'], $map))
             {
-                $relationMapper = $this->container->getMapper($spec['type']);
+                $relationMapper = $this->getMapper($spec['type']);
                 $values = $this->_wrapInArray($map[$spec['storageField']]['value']);
 
                 if($spec['relation'] == \framework\orm\models\IModel::RELATION_HAS_ONE
@@ -694,7 +704,7 @@ abstract class Mapper implements \framework\orm\mappers\IMapper
 	{
 		foreach ($this->internalRelations as $name => $spec)
 		{
-			$relationMapper = $this->container->getMapper($spec['type']);
+			$relationMapper = $this->getMapper($spec['type']);
 			$relations = $model->{$this->_propertyGetter($name)}();
 
             /** @var $saved \framework\orm\utils\Collection */
@@ -729,7 +739,7 @@ abstract class Mapper implements \framework\orm\mappers\IMapper
 	{
 		foreach ($this->externalRelations as $name => $spec)
 		{
-			$relationMapper = $this->container->getMapper($spec['type']);
+			$relationMapper = $this->getMapper($spec['type']);
 			$relations = $model->{$this->_propertyGetter($name)}();
 			$saved = array();
 
@@ -938,7 +948,7 @@ abstract class Mapper implements \framework\orm\mappers\IMapper
 			{
 				$getter = $this->_propertyGetter($name);
 
-                $relationMapper = $this->container->getMapper($spec['type']);
+                $relationMapper = $this->getMapper($spec['type']);
                 $relations = $model->$getter();
 
                 $map[$name]['storageField'] = $spec['storageField'];
