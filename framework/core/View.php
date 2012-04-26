@@ -264,7 +264,6 @@ class View extends \framework\core\FrameworkObject
 	protected function _displayCss ($place, $resources)
 	{
 		$css = '';
-
 		if ($place == 'style')
 		{
 			$css .= '<style>';
@@ -280,12 +279,11 @@ class View extends \framework\core\FrameworkObject
 		{
 			foreach ($resources as $res)
 			{
-				$css .= '<link src="';
+				$css .= '<link rel="stylesheet" type="text/css" href="';
 				$css .= $res;
-				$css .= '" type="text/css" />';
+				$css .= '"/>';
 			}
 		}
-
 		return $css;
 	}
 
