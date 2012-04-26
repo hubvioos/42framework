@@ -43,12 +43,13 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
 
     protected $property = '';
 
-    protected $order = self::SORT_ASC;
+    protected $order = '';
 
     protected $ignoreStringCase = true;
 
     protected $index = 0;
 
+    protected $sorted = false;
 
 	public function __construct ($array = array())
 	{
@@ -103,6 +104,11 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
         else
         {
             $this->storage[$offset] = $value;
+        }
+
+        if($this->sorted)
+        {
+            $this->sorted = false;
         }
     }
 
@@ -198,6 +204,12 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
     public function add($element)
     {
         $this->storage[] = $element;
+
+        if($this->sorted)
+        {
+            $this->sorted = false;
+        }
+
         return $this;
     }
 
@@ -276,7 +288,12 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
             throw new \framework\orm\utils\CollectionException('Wrong sort order <strong>'.$this->order.'</strong>');
         }
 
-        usort($this->storage, array($this, '_sortAlgorithm'));
+        if(!$this->isEmpty())
+        {
+            usort($this->storage, array($this, '_sortAlgorithm'));
+        }
+
+        $this->sorted = true;
 
         return $this;
     }
@@ -312,6 +329,11 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
             $this->storage = \array_merge($this->storage, $collection);
         }
 
+        if($this->sorted)
+        {
+            $this->sorted = false;
+        }
+
 		return $this;
 	}
 	
@@ -343,4 +365,23 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
     {
         return $this->isEmpty() ? $default : $this->storage[$this->count() - 1];
     }
+
+    /**
+     * Check if the Collection is sorted. This is reset to false anytime a new element is added to the Collection.
+     * @return bool
+     */
+    public function isSorted()
+    {
+        return $this->sorted;
+    }
+
+    /**
+     * Get the last used sorting order.
+     * @return string
+     */
+    public function getSortingOrder()
+    {
+        return $this->order;
+    }
+
 }
