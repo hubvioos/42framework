@@ -243,7 +243,7 @@ class MySQLDatasource extends \framework\core\FrameworkObject implements \framew
 	{
 		$this->_validateIdentifier($entity);
 
-		if($criteria != NULL)
+		if($criteria !== NULL)
 		{
 			$req = $this->link->prepare('SELECT * FROM '.$entity.' WHERE '.$this->criteriaToString($criteria));
 		}

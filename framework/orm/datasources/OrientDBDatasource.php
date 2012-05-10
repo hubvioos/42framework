@@ -595,7 +595,16 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 
 		try
 		{
-			$data = $this->query('SELECT FROM ' . $entity . ' WHERE ' . $this->criteriaToString($criteria));
+            if($criteria !== NULL)
+            {
+                $req = 'SELECT FROM ' . $entity;
+            }
+			else
+            {
+                $req = 'SELECT FROM ' . $entity . ' WHERE ' . $this->criteriaToString($criteria);
+            }
+
+            $data = $this->query($req);
 		}
 		catch (\Exception $e)
 		{
