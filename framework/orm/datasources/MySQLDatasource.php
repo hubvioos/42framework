@@ -234,7 +234,7 @@ class MySQLDatasource extends \framework\core\FrameworkObject implements \framew
 	}
 
 	/**
-     * Find all the entities matching a criteria. If the criteria is omited, retrieve all the entities.
+     * Find all the entities matching a criteria. If the criteria is omitted, retrieve all the entities.
 	 * @param string $entity
 	 * @param \framework\orm\utils\Criteria $criteria
 	 * @return array
@@ -271,7 +271,6 @@ class MySQLDatasource extends \framework\core\FrameworkObject implements \framew
                 $found->add($i);
 			}
 		}
-
 
 		return $found;
 	}
