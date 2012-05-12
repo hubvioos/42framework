@@ -73,10 +73,10 @@ interface IDatasource
 	public function getNativeCriteria();
 	
 	/**
-	 * Get the string representation of a Criteria
+	 * Get the datasource-friendly representation of a Criteria
 	 * @abstract
 	 * @param \framework\orm\utils\Criteria
 	 * @return string 
 	 */
-	public function criteriaToString(\framework\orm\utils\Criteria $criteria);
+	public function parseCriteria(\framework\orm\utils\Criteria $criteria);
 }

@@ -93,7 +93,7 @@ class MySQLDatasource extends \framework\core\FrameworkObject implements \framew
      * Get the connection
      * @return \PDO
      */
-	public function getConnection ()
+	public function getLink ()
 	{
 		return $this->link;
 	}
@@ -189,7 +189,7 @@ class MySQLDatasource extends \framework\core\FrameworkObject implements \framew
 		}
 		else
 		{
-			$req = $this->link->prepare('DELETE FROM '.$entity.' WHERE '.$this->criteriaToString($where));
+			$req = $this->link->prepare('DELETE FROM '.$entity.' WHERE '.$this->parseCriteria($where));
 		}
 
 		return $req->execute();
@@ -245,7 +245,7 @@ class MySQLDatasource extends \framework\core\FrameworkObject implements \framew
 
 		if($criteria !== NULL)
 		{
-			$req = $this->link->prepare('SELECT * FROM '.$entity.' WHERE '.$this->criteriaToString($criteria));
+			$req = $this->link->prepare('SELECT * FROM '.$entity.' WHERE '.$this->parseCriteria($criteria));
 		}
 		else
 		{
@@ -280,7 +280,7 @@ class MySQLDatasource extends \framework\core\FrameworkObject implements \framew
      * @param \framework\orm\utils\Criteria $criteria
      * @return string
      */
-    public function criteriaToString(\framework\orm\utils\Criteria $criteria)
+    public function parseCriteria(\framework\orm\utils\Criteria $criteria)
 	{
 		$string = '';
 
@@ -291,15 +291,15 @@ class MySQLDatasource extends \framework\core\FrameworkObject implements \framew
                 case \framework\orm\utils\Criteria::CRITERIA :
                     if ($params[1][0] == \framework\orm\utils\Criteria::ASSOCIATION_AND)
                     {
-						$string .= ' AND ' . $this->criteriaToString($params[1][1]);
+						$string .= ' AND ' . $this->parseCriteria($params[1][1]);
 					}
 					elseif ($params[1][0] == \framework\orm\utils\Criteria::ASSOCIATION_OR)
 					{
-						$string .= ' OR ' . $this->criteriaToString($params[1][1]);
+						$string .= ' OR ' . $this->parseCriteria($params[1][1]);
 					}
                     elseif ($params[1][0] == \framework\orm\utils\Criteria::ASSOCIATION_NOT)
                     {
-                        $string .= ' NOT ('.$this->criteriaToString($params[1][1]).')';
+                        $string .= ' NOT ('.$this->parseCriteria($params[1][1]).')';
                     }
                     break;
 

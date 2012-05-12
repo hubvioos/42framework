@@ -21,18 +21,20 @@ namespace framework\orm\datasources\interfaces;
 
 interface IDbDatasource
 {
-	/**
-	 * Execute a request.
-	 * @abstract
-	 * @return mixed
-	 */
+    /**
+     * Execute a request.
+     * @abstract
+     * @param $query
+     * @return mixed
+     */
 	public function exec ($query);
-	
-	/**
-	 * Execute a query to retrieve data.
-	 * @abstract
-	 * @return mixed
-	 */
+
+    /**
+     * Execute a query to retrieve data.
+     * @abstract
+     * @param $query
+     * @return mixed
+     */
 	public function query ($query);
 	
 }

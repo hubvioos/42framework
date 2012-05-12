@@ -21,7 +21,7 @@ namespace framework\orm\datasources\interfaces;
 
 interface IConnectionDatasource
 {
-	public function getConnection();
+	public function getLink();
 	
 	public function connect($database, $user = '', $password= '');
 	

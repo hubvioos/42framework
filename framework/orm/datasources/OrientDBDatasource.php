@@ -351,7 +351,7 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 	 * Get the connection (a.k.a the OrientDB instance)
 	 * @return \OrientDB
 	 */
-	public function getConnection ()
+	public function getLink ()
 	{
 		return $this->link;
 	}
@@ -601,7 +601,7 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
             }
 			else
             {
-                $req = 'SELECT FROM ' . $entity . ' WHERE ' . $this->criteriaToString($criteria);
+                $req = 'SELECT FROM ' . $entity . ' WHERE ' . $this->parseCriteria($criteria);
             }
 
             $data = $this->query($req);
@@ -742,7 +742,7 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 	 * @param \framework\orm\utils\Criteria $criteria
 	 * @return string 
 	 */
-	public function criteriaToString (\framework\orm\utils\Criteria $criteria)
+	public function parseCriteria (\framework\orm\utils\Criteria $criteria)
 	{
 		$string = '';
 		$constraints = $criteria->getConstraints();
@@ -754,15 +754,15 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 				case \framework\orm\utils\Criteria::CRITERIA :
 					if ($params[1][0] == \framework\orm\utils\Criteria::ASSOCIATION_AND)
 					{
-						$string .= ' AND ' . $this->criteriaToString($params[1][1]);
+						$string .= ' AND ' . $this->parseCriteria($params[1][1]);
 					}
 					elseif ($params[1][0] == \framework\orm\utils\Criteria::ASSOCIATION_OR)
 					{
-						$string .= ' OR ' . $this->criteriaToString($params[1][1]);
+						$string .= ' OR ' . $this->parseCriteria($params[1][1]);
 					}
                     elseif ($params[1][0] == \framework\orm\utils\Criteria::ASSOCIATION_NOT)
                     {
-                        $string .= ' NOT ' . $this->criteriaToString($params[1][1]);
+                        $string .= ' NOT ' . $this->parseCriteria($params[1][1]);
                     }
 					break;
 
