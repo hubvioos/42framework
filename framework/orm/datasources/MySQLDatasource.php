@@ -252,22 +252,23 @@ class MySQLDatasource extends \framework\core\FrameworkObject implements \framew
 			$req = $this->link->prepare('SELECT * FROM '.$entity);
 		}
 
-
+        /** @var $found \framework\orm\utils\Collection */
 		$found = $this->getComponent('orm.utils.Collection');
 
 		if($req->execute())
 		{
-			$i = 0;
 			while($result = $req->fetch(\PDO::FETCH_ASSOC))
 			{
+                $i = array();
+
 				foreach($result as $name => $value)
 				{
-					$found[$i][$name] = array(
+					$i[$name] = array(
 						'value' => $value
 					);
 				}
 
-				$i++;
+                $found->add($i);
 			}
 		}
 
