@@ -317,6 +317,23 @@ $components = array(
 		'isUnique' => false
 	),
 
+    'orm.utils.MongoDBCriteria' => array(
+        'callable' => function($c, $args)
+        {
+            if(\count($args) == 1)
+            {
+                return new \framework\orm\utils\MongoDBCriteria($args[0]);
+            }
+            if(\count($args) == 2)
+            {
+                return new \framework\orm\utils\MongoDBCriteria($args[0], $args[1]);
+            }
+
+            return new \framework\orm\utils\MongoDBCriteria();
+        },
+        'isUnique' => false
+    ),
+
 	/* ADAPTERS */
 	'OrientDBDateTimeAdapter' => array(
 		'callable' => function($c, $args)
