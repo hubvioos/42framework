@@ -872,17 +872,19 @@ abstract class Mapper implements \framework\orm\mappers\IMapper
 
 			if (\array_key_exists($spec['storageField'], $map) || \array_key_exists($name, $map))
 			{
+                $key = (\array_key_exists($spec['storageField'], $map)) ? $spec['storageField'] : $name;
+
 			    // if a particular type if specified, convert it to a PHP format
-                if ($map[$name]['value'] !== NULL && $spec['type'] !== \framework\orm\types\Type::UNKNOWN
+                if ($map[$key]['value'] !== NULL && $spec['type'] !== \framework\orm\types\Type::UNKNOWN
                         && !\in_array($spec['type'], $this->container->getComponent('orm.transparentTypes')))
                 {
                     $model->$setter($this->container->getComponent($spec['type'])
-                        ->convertToPHP($map[$spec['storageField']]['value']));
+                        ->convertToPHP($map[$key]['value']));
                 }
                 else
                 {
                     //use the value as provided
-                    $value = $map[$name]['value'];
+                    $value = $map[$key]['value'];
 
                     // convert numeric types into actual numeric values (int, float)
                     if(\in_array($spec['type'], $this->container->getComponent('orm.numericTypes')))
@@ -917,7 +919,7 @@ abstract class Mapper implements \framework\orm\mappers\IMapper
 		{
 			$getter = $this->_propertyGetter($name);
 
-			// check if a getter is exists for the property
+			// check if a getter exists for the property
 			if (\method_exists($model, $getter))
 			{
                 $value = $model->$getter();
