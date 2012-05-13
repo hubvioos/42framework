@@ -32,7 +32,7 @@ class MySQLDatasource extends \framework\core\FrameworkObject implements \framew
 	 * The PDO object used to perform requests
 	 * @var \PDO
 	 */
-	protected $link;
+	protected $connection;
 
 	/**
 	 * The hostname
@@ -93,9 +93,9 @@ class MySQLDatasource extends \framework\core\FrameworkObject implements \framew
      * Get the connection
      * @return \PDO
      */
-	public function getLink ()
+	public function getConnection ()
 	{
-		return $this->link;
+		return $this->connection;
 	}
 
     /**
@@ -112,10 +112,10 @@ class MySQLDatasource extends \framework\core\FrameworkObject implements \framew
 
 		try
 		{
-			$this->link = new \PDO('mysql:dbname=' . $database . ';host=' . $this->host
+			$this->connection = new \PDO('mysql:dbname=' . $database . ';host=' . $this->host
 					. ';port=' . $this->port, $this->user, $this->password, $driverOptions);
 
-			$this->link->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+			$this->connection->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
 			$this->active = $database;
 		}
@@ -132,7 +132,7 @@ class MySQLDatasource extends \framework\core\FrameworkObject implements \framew
 	 */
 	public function close ()
 	{
-		unset($this->link);
+		unset($this->connection);
 	}
 
     /**
@@ -145,7 +145,7 @@ class MySQLDatasource extends \framework\core\FrameworkObject implements \framew
 	{
         try
         {
-            return $this->link->exec($request);
+            return $this->connection->exec($request);
         }
         catch(\Exception $e)
         {
@@ -163,7 +163,7 @@ class MySQLDatasource extends \framework\core\FrameworkObject implements \framew
 	{
         try
         {
-            return $this->link->query($query);
+            return $this->connection->query($query);
         }
         catch(\Exception $e)
         {
@@ -184,12 +184,12 @@ class MySQLDatasource extends \framework\core\FrameworkObject implements \framew
 
 		if($where == NULL)
 		{
-			$req = $this->link->prepare('DELETE FROM '.$entity.' WHERE id = :id LIMIT 1');
+			$req = $this->connection->prepare('DELETE FROM '.$entity.' WHERE id = :id LIMIT 1');
 			$req->bindValue(':id', $id);
 		}
 		else
 		{
-			$req = $this->link->prepare('DELETE FROM '.$entity.' WHERE '.$this->parseCriteria($where));
+			$req = $this->connection->prepare('DELETE FROM '.$entity.' WHERE '.$this->parseCriteria($where));
 		}
 
 		return $req->execute();
@@ -209,7 +209,7 @@ class MySQLDatasource extends \framework\core\FrameworkObject implements \framew
 
 		$found = $this->getComponent('orm.utils.Collection');
 
-		$req = $this->link->prepare('SELECT * FROM '.$entity.' WHERE id = :id LIMIT 1');
+		$req = $this->connection->prepare('SELECT * FROM '.$entity.' WHERE id = :id LIMIT 1');
 		$req->bindParam(':id', $id);
 
 		$i = 0;
@@ -245,11 +245,11 @@ class MySQLDatasource extends \framework\core\FrameworkObject implements \framew
 
 		if($criteria !== NULL)
 		{
-			$req = $this->link->prepare('SELECT * FROM '.$entity.' WHERE '.$this->parseCriteria($criteria));
+			$req = $this->connection->prepare('SELECT * FROM '.$entity.' WHERE '.$this->parseCriteria($criteria));
 		}
 		else
 		{
-			$req = $this->link->prepare('SELECT * FROM '.$entity);
+			$req = $this->connection->prepare('SELECT * FROM '.$entity);
 		}
 
         /** @var $found \framework\orm\utils\Collection */
@@ -405,13 +405,13 @@ class MySQLDatasource extends \framework\core\FrameworkObject implements \framew
 		$params = \substr($params, 0, \strlen($params) - 2);
 		$fields = \substr($fields, 0, \strlen($fields) - 2);
 
-		$query = $this->link->prepare('INSERT INTO ' . $entity . '(' . $fields . ')' . ' VALUES(' . $params . ')');
+		$query = $this->connection->prepare('INSERT INTO ' . $entity . '(' . $fields . ')' . ' VALUES(' . $params . ')');
 
 		$this->_bindQueryValuesFromMap($query, $data);
 
 		if($query->execute())
 		{
-			return $this->link->lastInsertId();
+			return $this->connection->lastInsertId();
 		}
 
 		return false;
@@ -444,7 +444,7 @@ class MySQLDatasource extends \framework\core\FrameworkObject implements \framew
 
 		$idParameter = ':'.time();
 
-		$query = $this->link->prepare('UPDATE ' . $entity . ' SET ' . $fields . ' WHERE id = '.$idParameter);
+		$query = $this->connection->prepare('UPDATE ' . $entity . ' SET ' . $fields . ' WHERE id = '.$idParameter);
 
 		$query->bindValue($idParameter, $id);
 
@@ -469,7 +469,7 @@ class MySQLDatasource extends \framework\core\FrameworkObject implements \framew
      */
 	public function beginTransaction ()
 	{
-		return $this->link->beginTransaction();
+		return $this->connection->beginTransaction();
 	}
 
 	/**
@@ -478,7 +478,7 @@ class MySQLDatasource extends \framework\core\FrameworkObject implements \framew
      */
 	public function commit ()
 	{
-		return $this->link->commit();
+		return $this->connection->commit();
 	}
 
 	/**
@@ -487,7 +487,7 @@ class MySQLDatasource extends \framework\core\FrameworkObject implements \framew
      */
 	public function rollBack ()
 	{
-		return $this->link->rollBack();
+		return $this->connection->rollBack();
 	}
 
 	/**
@@ -575,7 +575,7 @@ class MySQLDatasource extends \framework\core\FrameworkObject implements \framew
 
 		if(!\array_key_exists($this->active.'.'.$table, $this->config))
 		{
-			$result = $this->link->prepare('DESCRIBE '.$table);
+			$result = $this->connection->prepare('DESCRIBE '.$table);
 			$result->execute();
 
 			$patterns = array('#\(.+\)#', '#\s.*#');

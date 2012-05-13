@@ -38,7 +38,7 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 	 * The connection to the database
 	 * @var \OrientDB
 	 */
-	protected $link = NULL;
+	protected $connection = NULL;
 
 	/**
 	 * The host
@@ -107,8 +107,8 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 
 		try
 		{
-			$this->link = new \OrientDB($this->host, $this->port);
-			$this->link->connect($this->user, $this->password);
+			$this->connection = new \OrientDB($this->host, $this->port);
+			$this->connection->connect($this->user, $this->password);
 		}
 		catch (\Exception $e)
 		{
@@ -127,18 +127,18 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 	 */
 	public function connect ($database, $user = '', $password = '')
 	{
-		if (!$this->link->isConnected())
+		if (!$this->connection->isConnected())
 		{
 			$message = 'No connection established, unable to select a database.';
 			throw new \framework\orm\datasources\OrientDBDatasourceException($message);
 		}
 
-		if ($this->link->DBExists($database))
+		if ($this->connection->DBExists($database))
 		{
-			$this->link->DBOpen($database, $user, $password);
+			$this->connection->DBOpen($database, $user, $password);
 			$this->active = $database;
 
-			$this->configuration = $this->link->configList();
+			$this->configuration = $this->connection->configList();
 		}
 		else
 		{
@@ -154,9 +154,9 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 	{
 		try
 		{
-			if ($this->link->isDBOpen())
+			if ($this->connection->isDBOpen())
 			{
-				$this->link->DBClose();
+				$this->connection->DBClose();
 			}
 
 			$this->active = '';
@@ -176,7 +176,7 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 	 */
 	public function databaseExists ($database)
 	{
-		return $this->link->DBExists($database);
+		return $this->connection->DBExists($database);
 	}
 
 	/**
@@ -193,7 +193,7 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 			throw new \framework\orm\datasources\OrientDBDatasourceException('Bad database type ' . $type);
 		}
 
-		return $this->link->DBCreate($name, $type);
+		return $this->connection->DBCreate($name, $type);
 	}
 
 	/**
@@ -210,7 +210,7 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 				$this->close();
 			}
 
-			return $this->link->DBDelete($database);
+			return $this->connection->DBDelete($database);
 		}
 
 		return true;
@@ -240,7 +240,7 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 	 */
 	public function setConfiguration ($key, $value)
 	{
-		if ($this->link->configSet($key, $value))
+		if ($this->connection->configSet($key, $value))
 		{
 			// update the cache
 			$this->configuration[$key] = $value;
@@ -261,7 +261,7 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 	 */
 	public function createCluster ($cluster, $type = \OrientDB::DATACLUSTER_TYPE_PHYSICAL)
 	{
-		if ($this->link->isConnected())
+		if ($this->connection->isConnected())
 		{
 			if ($type != \OrientDB::DATACLUSTER_TYPE_LOGICAL && $type != \OrientDB::DATACLUSTER_TYPE_MEMORY
 					&& $type != \OrientDB::DATACLUSTER_TYPE_PHYSICAL)
@@ -270,7 +270,7 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 			}
 			else
 			{
-				return $this->link->dataclusterAdd($cluster, $type);
+				return $this->connection->dataclusterAdd($cluster, $type);
 			}
 		}
 		else
@@ -287,9 +287,9 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 	 */
 	public function deleteCluster ($clusterID)
 	{
-		if ($this->link->isConnected())
+		if ($this->connection->isConnected())
 		{
-			return $this->link->dataclusterRemove($clusterID);
+			return $this->connection->dataclusterRemove($clusterID);
 		}
 		else
 		{
@@ -337,7 +337,7 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 				$query .= ' CLUSTER ' . $clusterID;
 			}
 
-			return $this->link->query($query);
+			return $this->connection->query($query);
 		}
 		else
 		{
@@ -351,9 +351,9 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 	 * Get the connection (a.k.a the OrientDB instance)
 	 * @return \OrientDB
 	 */
-	public function getLink ()
+	public function getConnection ()
 	{
-		return $this->link;
+		return $this->connection;
 	}
 
 	/**
@@ -366,7 +366,7 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 	{
 		try
 		{
-			return $this->link->query($query);
+			return $this->connection->query($query);
 		}
 		catch (\Exception $e)
 		{
@@ -383,7 +383,7 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 	{
         try
         {
-            return $this->link->select($query);
+            return $this->connection->select($query);
         }
         catch(\Exception $e)
         {
@@ -525,7 +525,7 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 
 			$req = 'INSERT INTO ' . $entity . '(' . $fields . ')' . ' VALUES (' . $values . ')';
 
-			$response = $this->link->query($req);
+			$response = $this->connection->query($req);
 
 			if ($response instanceof \OrientDBRecord)
 			{
@@ -546,7 +546,7 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 	 */
 	public function delete ($id, $entity, \framework\orm\utils\Criteria $where = NULL)
 	{
-		return $this->link->recordDelete($id);
+		return $this->connection->recordDelete($id);
 	}
 
 	/**
@@ -564,7 +564,7 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 		{
             try
             {
-                $record = $this->link->recordLoad($id);
+                $record = $this->connection->recordLoad($id);
 
                 if ($record !== false)
                 {
@@ -640,7 +640,7 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 		$record = $this->_mapToRecord($data);
 
 		// return true on success
-		return ($this->link->recordUpdate($id, $record) !== -1);
+		return ($this->connection->recordUpdate($id, $record) !== -1);
 	}
 
 	/**
