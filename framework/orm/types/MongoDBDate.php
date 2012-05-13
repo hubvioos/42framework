@@ -21,12 +21,12 @@
 namespace framework\orm\types;
 
 /**
- * Description of OrientDBBoolean
+ * Description of MongoDBDate
  *
  * @author mickael
  */
-class OrientDBBoolean extends \framework\orm\types\Type
+class MongoDBDate extends \framework\orm\types\Type
 {
-	const TYPE_IDENTIFIER = 'OrientDBBoolean';
+	const TYPE_IDENTIFIER = 'MongoDBDate';
 }
 

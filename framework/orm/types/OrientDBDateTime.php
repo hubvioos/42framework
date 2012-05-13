@@ -28,6 +28,5 @@ namespace framework\orm\types;
 class OrientDBDateTime extends \framework\orm\types\Type
 {
 	const TYPE_IDENTIFIER = 'OrientDBDateTime';
-	
 }
 

@@ -345,6 +345,13 @@ $components = array(
 		},
 		'isUnique' => true
 	),
+    'MongoDBDateAdapter' => array(
+        'callable' => function($c, $args)
+        {
+            return new \framework\orm\types\adapters\MongoDBDateAdapter();
+        },
+        'isUnique' => true
+    ),
 	/* TYPES */
 	'OrientDBDateTime' => array(
 		'callable' => function($c, $args)
@@ -388,6 +395,14 @@ $components = array(
 		},
 		'isUnique' => true
 	),
+
+    'MongoDBDate' => array(
+        'callable' => function($c, $args)
+        {
+            return new \framework\orm\types\MongoDBDate($c->getComponent('MongoDBDateAdapter'));
+        },
+        'isUnique' => true
+    ),
 				
 	'orm.utils.DatasourceTools' => array(
 		'callable' => function($c, $args)
