@@ -18,6 +18,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+//TODO: add 'read-only' attribute in fields definition
+
 namespace framework\orm\mappers;
 
 class MapperException extends \Exception
