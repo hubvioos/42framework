@@ -1,5 +1,7 @@
 <?php
 
+/** @var $c \framework\libs\ComponentsContainer */
+
 $components = array(
 	/**
 	 * Core
@@ -8,21 +10,18 @@ $components = array(
 	'core' => array(
 		'callable' => function ($c, $args)
 		{
-			/* @var $c ComponentsContainer */
 			return new \framework\core\Core($c);
 		},
 		'isUnique' => true),
 	'httpRequest' => array(
 		'callable' => function ($c, $args)
 		{
-			/* @var $c ApplicationContainer */
 			return new \framework\core\http\Request($c->getHistory());
 		},
 		'isUnique' => true),
 	'httpResponse' => array(
 		'callable' => function ($c, $args)
 		{
-			/* @var $c ApplicationContainer */
 			return new \framework\core\http\Response();
 		},
 		'isUnique' => true),
@@ -81,7 +80,6 @@ $components = array(
 	'eventManager' => array(
 		'callable' => function ($c, $args)
 		{
-			/* @var $c ApplicationContainer */
 			return new \framework\core\EventManager($c['events']);
 		},
 		'isUnique' => true),
@@ -104,14 +102,12 @@ $components = array(
 	'history' => array(
 		'callable' => function ($c, $args)
 		{
-			/* @var $c ApplicationContainer */
 			return new \framework\core\http\History('_history', $c['historySize']);
 		},
 		'isUnique' => true),
 	'route' => array(
 		'callable' => function ($c, $args)
 		{
-			/* @var $c ApplicationContainer */
 			// return new \framework\libs\Route($c->_config['routes']->toArray());
 			return new \framework\libs\Route($c);
 		},
@@ -119,14 +115,12 @@ $components = array(
 	'router' => array(
 		'callable' => function ($c, $args)
 		{
-			/* @var $c ApplicationContainer */
 			return new \framework\libs\router\Router();
 		},
 		'isUnique' => true),
 	'message' => array(
 		'callable' => function ($c, $args)
 		{
-			/* @var $c ComponentsContainer */
 			return new \framework\libs\Message('_flash');
 		},
 		'isUnique' => true),
