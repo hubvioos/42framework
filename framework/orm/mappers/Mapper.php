@@ -527,6 +527,11 @@ abstract class Mapper implements \framework\orm\mappers\IMapper
 	 */
 	public final function isAttached ($model)
 	{
+        if($model === NULL)
+        {
+            return false;
+        }
+        
 		if(\is_scalar($model))
 		{
 			return (\array_key_exists((string) $model, $this->attachedModels)
@@ -727,7 +732,7 @@ abstract class Mapper implements \framework\orm\mappers\IMapper
 			{
 				$saved = $saved->first();
 			}
-			
+
 			$model->{$this->_propertySetter($name)}($saved);
 		}
 	}
@@ -817,6 +822,8 @@ abstract class Mapper implements \framework\orm\mappers\IMapper
 		}
 		else
 		{
+            // TODO: did we really need this ?
+            /*
             if(\array_key_exists($model->getId(), $this->tempMaps))
             {
                 $map = $this->tempMaps[$model->getId()];
@@ -825,6 +832,9 @@ abstract class Mapper implements \framework\orm\mappers\IMapper
             {
                 $map = $this->_modelToMap($model, true);
             }
+            */
+
+            $map = $this->_modelToMap($model, true);
 
 			if ($this->datasource->update($model->getId(), $this->getEntityIdentifier(), $map, NULL) == true)
 			{
