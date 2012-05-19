@@ -23,7 +23,11 @@ namespace framework\orm\types\adapters;
 
 class AdapterException extends \Exception
 {
-	
+    public function __construct ($message = '', \Exception $previous = NULL)
+    {
+        parent::__construct ($message, NULL, $previous);
+    }
+
 }
 
 
@@ -39,9 +43,3 @@ interface IAdapter
 	public function convertToStorage($value);
 	
 }
-
-
-
-
-
-?>

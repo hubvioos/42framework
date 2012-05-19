@@ -20,7 +20,8 @@
 
 namespace framework\orm\datasources;
 
-class MongoDBDatasource implements \framework\orm\datasources\interfaces\IDatasource,
+class MongoDBDatasource extends \framework\core\FrameworkObject implements
+    \framework\orm\datasources\interfaces\IDatasource,
     \framework\orm\datasources\interfaces\IConnectionDatasource,
     \framework\orm\datasources\interfaces\IDbDatasource
 {
@@ -124,12 +125,37 @@ class MongoDBDatasource implements \framework\orm\datasources\interfaces\IDataso
     /**
      * @param string|int $id
      * @param string $entity
-     * @param \framework\orm\utils\Criteria $where
+     * @param \framework\orm\utils\Criteria $criteria
      * @return boolean
      */
-    public function delete ($id, $entity, \framework\orm\utils\Criteria $where = NULL)
+    public function delete ($id, $entity, \framework\orm\utils\Criteria $criteria = NULL)
     {
-        // TODO: Implement delete() method.
+        if($criteria === NULL)
+        {
+            try
+            {
+                $this->link->{$entity}->remove(array('_id' => new \MongoId($id)));
+                return true;
+            }
+            catch(\Exception $e)
+            {
+                throw new \framework\orm\datasources\exceptions\DatasourceException('Unable to remove document with
+                _id='.$id.'from collection '.$entity);
+            }
+        }
+        else
+        {
+            try
+            {
+                $this->link->{$entity}->remove($this->parseCriteria($criteria), array('justOne' => true));
+                return true;
+            }
+            catch(\Exception $e)
+            {
+                throw new \framework\orm\datasources\exceptions\DatasourceException('Unable to remove documents from
+                '.$entity.' matching your criteria');
+            }
+        }
     }
 
     /**
@@ -140,11 +166,18 @@ class MongoDBDatasource implements \framework\orm\datasources\interfaces\IDataso
     public function find (array $primary, $entity)
     {
         /** @var $found \framework\orm\utils\Collection */
-        $found = $this->getComponent('orm.utils.collection');
+        $found = $this->getComponent('orm.utils.Collection');
+        /** @var $collection \MongoCollection */
+        $collection = $this->link->{$entity};
 
         foreach($primary as $id)
         {
-            $found->add($this->link->{$entity}->findOne(new \MongoId($id)));
+            $doc = $collection->findOne(array('_id' => new \MongoId($id)));
+
+            if($doc !== NULL)
+            {
+                $found->add($this->_documentToMap($doc));
+            }
         }
 
         return $found;
@@ -157,7 +190,31 @@ class MongoDBDatasource implements \framework\orm\datasources\interfaces\IDataso
      */
     public function findAll ($entity, \framework\orm\utils\Criteria $criteria = NULL)
     {
-        // TODO: Implement findAll() method.
+        /** @var $found \framework\orm\utils\Collection */
+        $found = $this->getComponent('orm.utils.Collection');
+
+        if($criteria === NULL)
+        {
+            foreach($this->link->{$entity}->find () as $doc)
+            {
+                if($doc !== NULL)
+                {
+                    $found->add($this->_documentToMap($doc));
+                }
+            }
+        }
+        else
+        {
+            foreach($this->link->{$entity}->find($this->parseCriteria($criteria)) as $doc)
+            {
+                if($doc !== NULL)
+                {
+                    $found->add($this->_documentToMap($doc));
+                }
+            }
+        }
+
+        return $found;
     }
 
     /**
@@ -234,6 +291,24 @@ class MongoDBDatasource implements \framework\orm\datasources\interfaces\IDataso
     }
 
 
+    protected function _documentToMap($doc)
+    {
+        $map = $this->getComponent('orm.utils.Map');
+
+        foreach($doc as $name => $value)
+        {
+            if($name !== '_id')
+            {
+                $map[$name] = array(
+                    'value' => $value
+                );
+            }
+        }
+
+        $map['id'] = array('value' => $doc['_id'].'');
+
+        return $map;
+    }
 
     /**
      * @param array|string $id An ID (primary key or RecordID) or array of IDs
@@ -244,7 +319,18 @@ class MongoDBDatasource implements \framework\orm\datasources\interfaces\IDataso
      */
     public function update ($id, $entity, $data, \framework\orm\utils\Criteria $where = NULL)
     {
-        // TODO: Implement update() method.
+        $doc = $this->_mapToDocument($data);
+
+        try
+        {
+            $this->link->{$entity}->update(array('_id' => new \MongoId($id)), $doc);
+            return true;
+        }
+        catch(\Exception $e)
+        {
+            // TODO log things!
+            return false;
+        }
     }
 
     /**
@@ -252,17 +338,112 @@ class MongoDBDatasource implements \framework\orm\datasources\interfaces\IDataso
      */
     public function getNativeCriteria ()
     {
-        // TODO: Implement getNativeCriteria() method.
+        return $this->getComponent('orm.utils.MongoDBCriteria');
     }
 
     /**
      * Get the string representation of a Criteria
      * @param \framework\orm\utils\Criteria
-     * @return string
+     * @return array
      */
     public function parseCriteria (\framework\orm\utils\Criteria $criteria)
     {
-        // TODO: Implement parseCriteria() method.
+        $c = array();
+        $constraints = $criteria->getConstraints();
+
+        foreach($constraints as $constraint)
+        {
+            $elem = NULL;
+            $field = NULL;
+            switch($constraint[0])
+            {
+                case \framework\orm\utils\Criteria::CRITERIA:
+                    if($constraint[1][0] == \framework\orm\utils\MongoDBCriteria::ASSOCIATION_NOT)
+                    {
+                        $not = $this->parseCriteria($constraint[1][1]);
+                        list($key) = \array_keys($not);
+                        $field = $key;
+                        $elem = array('$not' => $not[$key]);
+                    }
+                    elseif($constraint[1][0] == \framework\orm\utils\MongoDBCriteria::ASSOCIATION_AND)
+                    {
+
+                    }
+                    elseif($constraint[1][0] == \framework\orm\utils\MongoDBCriteria::ASSOCIATION_OR)
+                    {
+
+                    }
+                    break;
+                case \framework\orm\utils\Criteria::EQUALS:
+                    $elem = $constraint[1][1];
+                    break;
+                case \framework\orm\utils\Criteria::NOT_EQUALS:
+                    $elem = array('$ne' => $constraint[1][1]);
+                    break;
+                case \framework\orm\utils\Criteria::LESS_THAN:
+                    $elem = array('$lt' => $constraint[1][1]);
+                    break;
+                case \framework\orm\utils\Criteria::LESS_THAN_OR_EQUAL:
+                    $elem = array('$lte' => $constraint[1][1]);
+                    break;
+                case \framework\orm\utils\Criteria::GREATER_THAN:
+                    $elem = array('$gt' => $constraint[1][1]);
+                    break;
+                case \framework\orm\utils\Criteria::GREATER_THAN_OR_EQUAL:
+                    $elem = array('$gte' => $constraint[1][1]);
+                    break;
+                case \framework\orm\utils\Criteria::IN:
+                    $elem = array('$in' => $constraint[1][1]);
+                    break;
+                case \framework\orm\utils\Criteria::NOT_IN:
+                    $elem = array('$nin' => $constraint[1][1]);
+                    break;
+                case \framework\orm\utils\Criteria::IS_NULL:
+                    $field = $constraint[1];
+                    $elem = array('$type' => 10);
+                    break;
+                case \framework\orm\utils\Criteria::IS_NOT_NULL:
+                    $elem = array('$not' => array('$type' => 10));
+                    break;
+                case \framework\orm\utils\MongoDBCriteria::ALL:
+                    $elem = array('$all' => $constraint[1][1]);
+                    break;
+                case \framework\orm\utils\MongoDBCriteria::MODULO:
+                    $elem = array('$mod' => $constraint[1][1]);
+                    break;
+                case \framework\orm\utils\MongoDBCriteria::EXISTS:
+                    $elem = array('$exists' => $constraint[1][1]);
+                    break;
+                case \framework\orm\utils\MongoDBCriteria::TYPE:
+                    $elem = array('$type' => $constraint[1][1]);
+                    break;
+                case \framework\orm\utils\MongoDBCriteria::LIKE:
+                    $elem = array('$regex' => $constraint[1][1]);
+                    break;
+                case \framework\orm\utils\MongoDBCriteria::SIZE:
+                    $elem = array('$size' => $constraint[1][1]);
+                    break;
+            }
+
+            if($elem !== NULL)
+            {
+                if($field === NULL)
+                {
+                    $field = $constraint[1][0];
+                }
+
+                if(isset($c[$field]))
+                {
+                    $c[$field] = \array_merge($c[$field], $elem);
+                }
+                else
+                {
+                    $c[$field] = $elem;
+                }
+            }
+        }
+
+        return $c;
     }
 
     /**

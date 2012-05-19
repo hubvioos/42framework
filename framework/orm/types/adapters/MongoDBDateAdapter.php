@@ -45,7 +45,7 @@ class MongoDBDateAdapter implements \framework\orm\types\adapters\IAdapter
             {
                 if($value instanceof \MongoDate)
                 {
-                    return new \DateTime(\substr($value+'', \strpos($value+'', ' ')));
+                    return \DateTime::createFromFormat('U', $value->sec);
                 }
 
                 if(\preg_match("#^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}$#", $value))
@@ -73,7 +73,7 @@ class MongoDBDateAdapter implements \framework\orm\types\adapters\IAdapter
             }
             catch(\Exception $e)
             {
-                throw new \framework\orm\types\adapters\AdapterException('Invalid value '.$value);
+                throw new \framework\orm\types\adapters\AdapterException('Invalid value '.$value, $e);
             }
         }
 

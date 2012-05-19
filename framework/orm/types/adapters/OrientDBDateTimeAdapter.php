@@ -42,6 +42,13 @@ class OrientDBDateTimeAdapter implements \framework\orm\types\adapters\IAdapter
 		{
 			return $value;
 		}
+        elseif(\is_string($value))
+        {
+            if(\preg_match("#^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}:[0-9]*$#", $value))
+            {
+                return \DateTime::createFromFormat(self::ORIENTDB_DATE_FORMAT, $value);
+            }
+        }
 		else
 		{
 			try
@@ -74,7 +81,7 @@ class OrientDBDateTimeAdapter implements \framework\orm\types\adapters\IAdapter
 				return \date(self::ORIENTDB_DATE_FORMAT, $value);
 			}
 				
-			if(\is_string($value) && \preg_match("#^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}:[0-9]{3}$#", $value))
+			if(\is_string($value) && \preg_match("#^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}:[0-9]*$#", $value))
 			{
 				return $value;
 			}

@@ -21,10 +21,96 @@ namespace framework\orm\utils;
 
 class MongoDBCriteria extends Criteria
 {
-    const MATCHES = 'matches';
+    const ALL = 'all';
 
-    public function matches ($field, $regex)
+    const MODULO = 'modulo';
+
+    const EXISTS = 'exists';
+
+    const TYPE = 'type';
+
+    const SIZE = 'size';
+
+    /**
+     * @var array
+     */
+    protected $types = array(
+        'double' => 1,
+        'string' => 2,
+        'object' => 3,
+        'array' => 4,
+        'binary' => 5,
+        'id' => 7,
+        'boolean' => 8,
+        'date' => 9,
+        'null' => 10,
+        'regex' => 11,
+        'js' => 13,
+        'symbol' => 14,
+        'scoped_js' => 15,
+        'int32' => 16,
+        'timestamp' => 17,
+        'int64' => 18,
+        'min-key' => 255,
+        'max-key' => 127
+    );
+
+    public function like ($field, $regex)
     {
-        return $this->_addConstraint(self::MATCHES, array($field, $regex));
+        //TODO escape regex and check options
+        return $this->_addConstraint(self::LIKE, array($field, $regex));
+    }
+
+    public function all($field, array $values)
+    {
+        return $this->_addConstraint(self::ALL, array($field, $values));
+    }
+
+    public function mod($field, $divisor, $remainder = 0)
+    {
+        if(!\is_numeric($divisor) || !\is_numeric($remainder))
+        {
+            throw new CriteriaException('MODULO operator expects numeric values.');
+        }
+
+        return $this->_addConstraint(self::MODULO, array($field, array(\intval($divisor), \intval($remainder))));
+    }
+
+    public function exists($field, $exists = true)
+    {
+        return $this->_addConstraint(self::EXISTS, array($field, (bool) $exists));
+    }
+
+    public function type($field, $type)
+    {
+        if(\is_numeric($type) && \in_array($type, $this->types))
+        {
+            return $this->_addConstraint(self::TYPE, array($field, $type));
+        }
+        elseif(\is_string($type) && \in_array($type, \array_keys($this->types)))
+        {
+            return $this->_addConstraint(self::TYPE, array($field, $this->types[$type]));
+        }
+
+        throw new CriteriaException('Wrong type <strong>'.$type.'</strong>.');
+    }
+
+    /**
+     * @return array
+     */
+    public function getAvailableTypes()
+    {
+        return $this->types;
+    }
+
+    public function size ($field, $size)
+    {
+        if(!\is_numeric($size))
+        {
+            throw new CriteriaException('SIZE operator expects a numeric value.');
+        }
+
+        return $this->_addConstraint(self::SIZE, array($field, \intval($size)));
+
     }
 }
