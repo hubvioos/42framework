@@ -135,10 +135,12 @@ abstract class Mapper implements \framework\orm\mappers\IMapper
      * Constructor
      * @param \framework\libs\ComponentsContainer $container
      * @param \framework\orm\datasources\interfaces\IDatasource $datasource The datasource used to store the data.
-     * @throws \framework\orm\mappers\MapperException
+     * @param array $additionalParams
+     * @throws MapperException
      */
 	public function __construct (\framework\libs\ComponentsContainer $container,
-                                 \framework\orm\datasources\interfaces\IDatasource $datasource)
+                                 \framework\orm\datasources\interfaces\IDatasource $datasource,
+                                 $additionalParams = array())
 	{
         $this->container = $container;
 		$this->datasource = $datasource;
@@ -180,7 +182,7 @@ abstract class Mapper implements \framework\orm\mappers\IMapper
 			}
 		}
 		
-		$this->init();
+		$this->init($additionalParams);
 	}
 
     /**
@@ -617,10 +619,11 @@ abstract class Mapper implements \framework\orm\mappers\IMapper
         $this->fetchRelations = (bool) $fetch;
     }
 
-	/**
-	 * Method that can be overriden by children classes and which is called at the end of the constructor.
-	 */
-	public function init ()
+    /**
+     * Method that can be overriden by children classes and which is called at the end of the constructor.
+     * @param array $params
+     */
+	public function init (array $params = array())
 	{
 		
 	}

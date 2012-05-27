@@ -102,8 +102,10 @@ interface IMapper
     /**
      * Customisable initialisation operations called at the end of the mapper's constructor.
      * @abstract
+     * @param $params
+     * @return
      */
-    public function init ();
+    public function init (array $params = array());
 
     /**
      * Get the identifier of the entity where the models are stored in the datasource.
