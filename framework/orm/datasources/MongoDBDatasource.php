@@ -375,7 +375,7 @@ class MongoDBDatasource extends \framework\core\FrameworkObject implements
                     }
                     break;
                 case \framework\orm\utils\Criteria::EQUALS:
-                    $elem = $constraint[1][1].'';
+                    $elem = $constraint[1][1];
                     break;
                 case \framework\orm\utils\Criteria::NOT_EQUALS:
                     $elem = array('$ne' => $constraint[1][1]);
