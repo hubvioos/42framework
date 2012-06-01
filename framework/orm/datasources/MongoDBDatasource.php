@@ -231,7 +231,7 @@ class MongoDBDatasource extends \framework\core\FrameworkObject implements
 
         try
         {
-            $this->link->{$entity}->insert($document);
+            $this->link->{$entity}->insert($document, array('safe' => true));
 
             return $document['_id'].'';
         }
@@ -323,7 +323,7 @@ class MongoDBDatasource extends \framework\core\FrameworkObject implements
 
         try
         {
-            $this->link->{$entity}->update(array('_id' => new \MongoId($id)), $doc);
+            $this->link->{$entity}->update(array('_id' => new \MongoId($id)), $doc, array('safe' => true));
             return true;
         }
         catch(\Exception $e)
@@ -343,8 +343,8 @@ class MongoDBDatasource extends \framework\core\FrameworkObject implements
 
     /**
      * Get the string representation of a Criteria
-     * @param \framework\orm\utils\Criteria
-     * @return array
+     * @param \framework\orm\utils\Criteria $criteria
+     * @return array|string
      */
     public function parseCriteria (\framework\orm\utils\Criteria $criteria)
     {
@@ -375,7 +375,7 @@ class MongoDBDatasource extends \framework\core\FrameworkObject implements
                     }
                     break;
                 case \framework\orm\utils\Criteria::EQUALS:
-                    $elem = $constraint[1][1];
+                    $elem = $constraint[1][1].'';
                     break;
                 case \framework\orm\utils\Criteria::NOT_EQUALS:
                     $elem = array('$ne' => $constraint[1][1]);
