@@ -78,17 +78,6 @@ class MongoDBDatasource extends \framework\core\FrameworkObject implements
     {
         $this->host = $host;
         $this->port = $port;
-
-        try
-        {
-            $this->connection = new \Mongo('mongodb://'.$this->host.':'.$this->port);
-        }
-        catch(\Exception $e)
-        {
-            throw new \framework\orm\datasources\exceptions\ConnectionException($this->host.':'.$this->port,
-                \framework\orm\datasources\exceptions\ConnectionException::HOST, $e);
-        }
-
     }
 
     public function getConnection ()
@@ -100,13 +89,20 @@ class MongoDBDatasource extends \framework\core\FrameworkObject implements
     {
         try
         {
-            $this->link = $this->connection->selectDB($database);
-
             if($user !== '' && $password !== '')
             {
-                $this->link->authenticate($user, $password);
+                $this->user = $user;
+                $this->password = $password;
+
+                $this->connection = new \Mongo('mongodb://'.$this->user.':'.$this->password
+                    .'@'.$this->host.':'.$this->port);
+            }
+            else
+            {
+                $this->connection = new \Mongo('mongodb://'.$this->host.':'.$this->port);
             }
 
+            $this->link = $this->connection->selectDB($database);
             $this->active = $database;
         }
         catch(\Exception $e)
