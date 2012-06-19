@@ -384,4 +384,14 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
         return $this->order;
     }
 
+    /**
+     * Reverse the collection
+     * @return Collection
+     */
+    public function reverse()
+    {
+        $this->storage = \array_reverse($this->storage, false);
+        return $this;
+    }
+
 }
