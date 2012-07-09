@@ -208,6 +208,7 @@ abstract class Controller extends \framework\core\FrameworkObject
 		$this->_request->set('module', $module);
 		$this->_request->set('action', $action);
 		$this->setResponse($this->_request->execute());
+        $this->usesView = false;
 	}
 
 	/**
