@@ -595,7 +595,7 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 
 		try
 		{
-            if($criteria !== NULL)
+            if($criteria === NULL)
             {
                 $req = 'SELECT FROM ' . $entity;
             }
