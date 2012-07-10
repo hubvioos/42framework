@@ -216,7 +216,55 @@ abstract class Mapper implements \framework\orm\mappers\IMapper
         }
 	}
 
-	/**
+    /**
+     * Send a request directly to the datasource
+     * @param string $req
+     * @return \framework\orm\utils\Collection
+     */
+    public function exec ($req)
+    {
+        if($this->datasource instanceof \framework\orm\datasources\interfaces\IDbDatasource)
+        {
+            /** @var $found \framework\orm\utils\Collection */
+            $found = $this->container->getComponent('orm.utils.Collection');
+            /** @var $data \framework\orm\utils\Collection */
+            $data = $this->datasource->exec($req);
+
+            if(!$data->isEmpty())
+            {
+                foreach ($data as $map)
+                {
+                    $model = $this->_mapToModel($map);
+                    $id = (string) $model->getId();
+
+                    if($this->isAttached($id))
+                    {
+                        $model = $this->getAttachedModel($id);
+                    }
+                    else
+                    {
+                        if($this->fetchRelations === true && $this->externalRelations != NULL)
+                        {
+                            $this->_findExternalRelations($model);
+                        }
+
+                        $this->attach($model);
+                    }
+
+                    $found->add($model);
+                }
+            }
+
+            return $found;
+        }
+        else
+        {
+            throw new MapperException('The datasource associated to this mapper doesn\'t support requests.');
+        }
+    }
+
+
+    /**
 	 * Retrieve a model from the datasource based on its id.
 	 * @param mixed $toFind An array of IDs or a unique ID.
 	 * @return \framework\orm\models\IModel|\framework\orm\utils\Collection
@@ -255,13 +303,22 @@ abstract class Mapper implements \framework\orm\mappers\IMapper
 			foreach ($data as $map)
 			{
 				$newModel = $this->_mapToModel($map);
+                $id = (string) $newModel->getId();
 
-				if($this->fetchRelations === true && $this->externalRelations != NULL)
-				{
-					$this->_findExternalRelations($newModel);
-				}
+                if($this->isAttached($id))
+                {
+                    $newModel = $this->getAttachedModel($id);
+                }
+                else
+                {
+                    if($this->fetchRelations === true && $this->externalRelations != NULL)
+                    {
+                        $this->_findExternalRelations($newModel);
+                    }
 
-				$this->attach($newModel);
+                    $this->attach($newModel);
+                }
+
 
 				$found->add($newModel);
 			}

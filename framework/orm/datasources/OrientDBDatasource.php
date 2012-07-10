@@ -360,13 +360,22 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 	 * Execute a request and return the result.
 	 * @throws \framework\orm\datasources\exceptions\RequestException
 	 * @param string $query 
-	 * @return mixed
+	 * @return \framework\orm\utils\Collection
 	 */
 	public function exec ($query)
 	{
 		try
 		{
-			return $this->connection->query($query);
+			$records = $this->connection->query($query);
+            $data = $this->getComponent('orm.utils.Collection');
+
+            foreach($records as $record)
+            {
+                $record->parse();
+                $data[] = $this->_recordToMap($record, $record->recordID);
+            }
+
+            return $data;
 		}
 		catch (\Exception $e)
 		{

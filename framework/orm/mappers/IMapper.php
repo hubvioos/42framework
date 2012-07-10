@@ -56,6 +56,14 @@ interface IMapper
     /* Datasource manipulation */
 
     /**
+     * Send a request directly to the datasource
+     * @abstract
+     * @param string $req
+     * @return mixed
+     */
+    public function exec($req);
+
+    /**
      * Retrieve a model from the datasource based on its id.
      * @abstract
      * @param int|string|array $id The models' id(s).
