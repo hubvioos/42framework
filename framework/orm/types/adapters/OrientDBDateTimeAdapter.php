@@ -25,7 +25,7 @@ namespace framework\orm\types\adapters;
  *
  * @author mickael
  */
-class OrientDBDateTimeAdapter implements \framework\orm\types\adapters\IAdapter
+class OrientDBDateTimeAdapter extends GenericDateAdapter
 {
 	
 	const ORIENTDB_DATE_FORMAT = 'Y-m-d H:i:s:u';
@@ -35,50 +35,18 @@ class OrientDBDateTimeAdapter implements \framework\orm\types\adapters\IAdapter
 		
 	}
 
-	
-	public function convertToPHP ($value)
-	{
-		if($value instanceof \DateTime)
-		{
-			return $value;
-		}
-        elseif(\is_string($value))
-        {
-            if(\preg_match("#^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}:[0-9]*$#", $value))
-            {
-                return \DateTime::createFromFormat(self::ORIENTDB_DATE_FORMAT, $value);
-            }
-        }
-		else
-		{
-			try
-			{
-				$date = new \DateTime();
-				$date->setTimestamp($value);
-				
-				return $date;
-			}
-			catch(\Exception $e)
-			{
-				throw new \framework\orm\types\adapters\AdapterException('Invalid timestamp.');
-			}
-		}
-		
-		throw new \framework\orm\types\adapters\AdapterException('Unable to convert value to PHP type.');
-	
-	}
-
 	public function convertToStorage ($value)
 	{
 		if($value instanceof \DateTime)
 		{
+            /** @var $value \DateTime */
 			return $value->format(self::ORIENTDB_DATE_FORMAT);
 		}
 		else
 		{
 			if(\is_numeric($value) && \strlen($value) == 9)
 			{
-				return \date(self::ORIENTDB_DATE_FORMAT, $value);
+				return \DateTime::createFromFormat(self::ORIENTDB_DATE_FORMAT, $value);
 			}
 				
 			if(\is_string($value) && \preg_match("#^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}:[0-9]*$#", $value))
@@ -90,9 +58,5 @@ class OrientDBDateTimeAdapter implements \framework\orm\types\adapters\IAdapter
 		throw new \framework\orm\types\adapters\AdapterException('Unable to convert value to OrientDBDateTime.');
 	}
 
-	
-	
-	
-	
 }
 

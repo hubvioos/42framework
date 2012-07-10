@@ -25,7 +25,7 @@ namespace framework\orm\types\adapters;
  *
  * @author mickael
  */
-class MySQLDateTimeAdapter implements \framework\orm\types\adapters\IAdapter
+class MySQLDateTimeAdapter extends GenericDateAdapter
 {
 	
 	const MYSQL_DATETIME_FORMAT = 'Y-m-d H:i:s';
@@ -35,54 +35,11 @@ class MySQLDateTimeAdapter implements \framework\orm\types\adapters\IAdapter
 		
 	}
 
-	
-	public function convertToPHP ($value)
-	{
-		if($value instanceof \DateTime)
-		{
-			return $value;
-		}
-		else
-		{
-			try
-			{
-				if(\preg_match("#^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}$#", $value))
-				{
-					return \DateTime::createFromFormat(self::MYSQL_DATETIME_FORMAT, $value);
-				}
-				
-				if(\preg_match('#^[0-9]{14}$#', $value))
-				{
-					return \DateTime::createFromFormat('YmdHis', $value);
-				}
-				if(\preg_match('#^[0-9]{12}$#', $value))
-				{
-					return \DateTime::createFromFormat('ymdHis', $value);
-				}
-				
-				if(\preg_match('#^[0-9]{8}$#', $value))
-				{
-					return \DateTime::createFromFormat('Ymd', $value);
-				}
-				if(\preg_match('#^[0-9]{6}$#', $value))
-				{
-					return \DateTime::createFromFormat('ymd', $value);
-				}
-			}
-			catch(\Exception $e)
-			{
-				throw new \framework\orm\types\adapters\AdapterException('Invalid value '.$value);
-			}
-		}
-		
-		throw new \framework\orm\types\adapters\AdapterException('Unable to convert value to PHP type.');
-	
-	}
-
 	public function convertToStorage ($value)
 	{
 		if($value instanceof \DateTime)
 		{
+            /** @var $value\DateTime */
 			return $value->format(self::MYSQL_DATETIME_FORMAT);
 		}
 		else
@@ -99,12 +56,8 @@ class MySQLDateTimeAdapter implements \framework\orm\types\adapters\IAdapter
 			}
 		}
 		
-		throw new \framework\orm\types\adapters\AdapterException('Unable to convert value to OrientDBDateTime.');
+		throw new \framework\orm\types\adapters\AdapterException('Unable to convert value to MySQLDateTime.');
 	}
 
-	
-	
-	
-	
 }
 

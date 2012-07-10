@@ -25,7 +25,7 @@ namespace framework\orm\types\adapters;
  *
  * @author mickael
  */
-class MongoDBDateAdapter implements \framework\orm\types\adapters\IAdapter
+class MongoDBDateAdapter extends GenericDateAdapter
 {
     public function __construct ()
     {
@@ -35,50 +35,14 @@ class MongoDBDateAdapter implements \framework\orm\types\adapters\IAdapter
 
     public function convertToPHP ($value)
     {
-        if($value instanceof \DateTime)
+        if($value instanceof \MongoDate)
         {
-            return $value;
+            return \DateTime::createFromFormat('U', $value->sec);
         }
         else
         {
-            try
-            {
-                if($value instanceof \MongoDate)
-                {
-                    return \DateTime::createFromFormat('U', $value->sec);
-                }
-
-                if(\preg_match("#^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}$#", $value))
-                {
-                    return \DateTime::createFromFormat('Y-m-d H:i:s', $value);
-                }
-
-                if(\preg_match('#^[0-9]{14}$#', $value))
-                {
-                    return \DateTime::createFromFormat('YmdHis', $value);
-                }
-                if(\preg_match('#^[0-9]{12}$#', $value))
-                {
-                    return \DateTime::createFromFormat('ymdHis', $value);
-                }
-
-                if(\preg_match('#^[0-9]{8}$#', $value))
-                {
-                    return \DateTime::createFromFormat('Ymd', $value);
-                }
-                if(\preg_match('#^[0-9]{6}$#', $value))
-                {
-                    return \DateTime::createFromFormat('ymd', $value);
-                }
-            }
-            catch(\Exception $e)
-            {
-                throw new \framework\orm\types\adapters\AdapterException('Invalid value '.$value, $e);
-            }
+            return parent::convertToPHP($value);
         }
-
-        throw new \framework\orm\types\adapters\AdapterException('Unable to convert value to PHP type.');
-
     }
 
     public function convertToStorage ($value)
