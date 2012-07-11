@@ -51,15 +51,19 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
 
     protected $sorted = false;
 
-	public function __construct ($array = array())
+	public function __construct ($object = array())
 	{
-		if(\count($array) > 0)
+		if(is_array($object) || $object instanceof \Traversable)
 		{
-			foreach ($array as $element)
+			foreach ($object as $element)
 			{
-				$this->storage[] = $element;
+				$this->add($element);
 			}
 		}
+        else
+        {
+            $this->add($object);
+        }
 	}
 
     /**
