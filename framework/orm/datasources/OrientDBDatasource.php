@@ -369,10 +369,13 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 			$records = $this->connection->query($query);
             $data = $this->getComponent('orm.utils.Collection');
 
-            foreach($records as $record)
+            if($records)
             {
-                $record->parse();
-                $data[] = $this->_recordToMap($record, $record->recordID);
+                foreach($records as $record)
+                {
+                    $record->parse();
+                    $data[] = $this->_recordToMap($record, $record->recordID);
+                }
             }
 
             return $data;
