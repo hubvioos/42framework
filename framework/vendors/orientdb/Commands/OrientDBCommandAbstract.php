@@ -44,9 +44,9 @@ abstract class OrientDBCommandAbstract
 
     const DATACLUSTER_DATARANGE = 13;
 
-    // const DATASEGMENT_ADD = 20;
+    const DATASEGMENT_ADD = 20;
 
-    // const DATASEGMENT_REMOVE = 21;
+    const DATASEGMENT_REMOVE = 21;
 
     const RECORD_LOAD = 30;
 
@@ -60,18 +60,6 @@ abstract class OrientDBCommandAbstract
 
     const COMMAND = 41;
 
-    const INDEX_LOOKUP = 50;
-
-    const INDEX_PUT = 51;
-
-    const INDEX_REMOVE = 52;
-
-    const INDEX_SIZE = 53;
-
-    const INDEX_KEYS = 54;
-
-    // const INDEX_QUERY = 55;
-
     const TX_COMMIT = 60;
 
     const CONFIG_GET = 70;
@@ -80,12 +68,16 @@ abstract class OrientDBCommandAbstract
 
     const CONFIG_LIST = 72;
 
+    // const DB_RELOAD = 73;
+
+    const DB_LIST = 74;
+
     const STATUS_SUCCESS = 0x00;
 
     const STATUS_ERROR = 0x01;
 
     /**
-     * Inscanse of OrientDBSocket
+     * Instance of OrientDBSocket
      * @var OrientDBSocket
      */
     private $socket;
@@ -97,7 +89,7 @@ abstract class OrientDBCommandAbstract
     public $opType;
 
     /**
-     * Attributes
+     * Attributes list
      * @var array
      */
     protected $attribs;
@@ -115,13 +107,13 @@ abstract class OrientDBCommandAbstract
     protected $currentTransactionID;
 
     /**
-     * Request Status, Success or Error
-     * @var unknown_type
+     * Request Status, OrientDBCommandAbstract::STATUS_SUCCESS or OrientDBCommandAbstract::STATUS_ERROR
+     * @var string
      */
     protected $requestStatus;
 
     /**
-     * Request bytes tranferred to server
+     * Request bytes transferred to server
      * @var string
      */
     protected $requestBytes;
@@ -133,13 +125,13 @@ abstract class OrientDBCommandAbstract
     protected $debug;
 
     /**
-     * Link to OrientDB instanse
+     * Link to OrientDB instance
      * @var OrientDB
      */
     protected $parent;
 
     /**
-     * Consturct new instance
+     * Construct new instance
      * @param OrientDB $parent
      */
     public function __construct($parent)
@@ -172,6 +164,8 @@ abstract class OrientDBCommandAbstract
 
     /**
      * Execute command by sending data to server, receive initial reply
+     * @throws null|OrientDBException
+     * @throws OrientDBException
      * @return mixed
      */
     public function execute()
@@ -330,7 +324,7 @@ abstract class OrientDBCommandAbstract
 
     /**
      * Read entire record from socket
-     * @return bool|OrientDBTypeLink|OrientDBRecord
+     * @return boolean|OrientDBTypeLink|OrientDBRecord
      */
     protected function readRecord()
     {
@@ -486,6 +480,7 @@ abstract class OrientDBCommandAbstract
      * @static
      * @param $hi int Hi bytes of long
      * @param $low int Low bytes of long
+     * @throws OrientDBException
      * @return int|string
      */
     public static function unpackI64($hi, $low)

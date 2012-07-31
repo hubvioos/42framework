@@ -19,22 +19,25 @@
  * @method void commit() Not yet implemented
  * @method array configList() Return list of server config options
  * @method string configGet(string $optionName) Get value of an option
- * @method bool configSet(string $optionName, string $optionValue) Set value for config option
- * @method bool connect(string $userName, string $password) Connect to OrientDB server
+ * @method boolean configSet(string $optionName, string $optionValue) Set value for config option
+ * @method boolean connect(string $userName, string $password) Connect to OrientDB server
  * @method int count(string $clusterName)  Count elements in cluster
  * @method int dataclusterAdd(string $clusterName, string $clusterType) Add a datacluster to DB
- * @method bool dataclusterRemove(int $clusterID) Remove datacluster from DB
+ * @method boolean dataclusterRemove(int $clusterID) Remove datacluster from DB
  * @method int dataclusterCount(array $clusterIDs) Count elements in clusters
  * @method array dataclusterDatarange(int $clusterID) Return datarange for datacluster
+ * @method int datasegmentAdd(string $name, string $location) Not yet implemented. Create new datasegment
+ * @method boolean datasegmentDelete(string $name) Not yet implemented. Drop datasegment by name.
  * @method array DBOpen(string $dbName, string $userName, string $password) Open OrientDB database
  * @method void DBClose() Closes currently opened DB
- * @method bool DBCreate(string $dbName, string $dbType) Create new database
- * @method bool DBDelete(string $dbName) Delete DB
- * @method bool DBExists(string $dbName) Check if DB exists
+ * @method boolean DBCreate(string $dbName, string $dbType) Create new database
+ * @method boolean DBDelete(string $dbName) Delete DB
+ * @method boolean DBExists(string $dbName) Check if DB exists
+ * @method array DBList() Return DB list
  * @method mixed query(string $query) Execute general style query, for SELECT query see select() method
- * @method int recordCreate(int $clusterID, string $recordContent, string $recordType  = OrientDB::RECORD_TYPE_DOCUMENT) Create a new record
- * @method bool recordDelete(string $recordID, int $recordVersion = -1) Delete a record
- * @method OrientDBRecord recordLoad(string $recordID, string $fetchPlan = null) Load a record
+ * @method int recordCreate(int $clusterID, string $recordContent, string $recordType = OrientDB::RECORD_TYPE_DOCUMENT) Create a new record
+ * @method boolean recordDelete(string $recordID, int $recordVersion = -1) Delete a record
+ * @method OrientDBRecord recordLoad() recordLoad(string $recordID, string $fetchPlan = null) Load a record
  * @method int recordUpdate(string $recordID, string $recordContent, int $recordVersion = -1, string $recordType = OrientDB::RECORD_TYPE_DOCUMENT) Update a record
  * @method mixed select(string $query) Execute sync-style select query
  * @method mixed selectAsync(string $query, string $fetchplan = null) Execute async-style select query with optional fetchplan
@@ -71,7 +74,7 @@ class OrientDB
      * Client protocol version
      * @var int
      */
-    public $clientVersion = 7;
+    public $clientVersion = 12;
 
     /**
      * Server's protocol version.
@@ -112,7 +115,7 @@ class OrientDB
 
     const DRIVER_NAME = 'OrientDB-PHP';
 
-    const DRIVER_VERSION = 'beta-0.4.4';
+    const DRIVER_VERSION = 'beta-0.4.6';
 
     /**
      * Record type Bytes
@@ -172,12 +175,6 @@ class OrientDB
     const COMMAND_SELECT_ASYNC = 3;
 
     /**
-     * Datacluster type logical
-     * @var string
-     */
-    const DATACLUSTER_TYPE_LOGICAL = 'LOGICAL';
-
-    /**
      * Datacluster type physical (disk)
      * @var string
      */
@@ -194,12 +191,11 @@ class OrientDB
      * @var array
      */
     public static $clusterTypes = array(
-        self::DATACLUSTER_TYPE_LOGICAL,
         self::DATACLUSTER_TYPE_PHYSICAL,
         self::DATACLUSTER_TYPE_MEMORY);
 
     /**
-     * Assotiative list of cached records, if any
+     * Associative list of cached records, if any
      * @var array
      */
     public $cachedRecords = array();
@@ -215,7 +211,8 @@ class OrientDB
         OrientDBCommandAbstract::DB_EXIST,
         OrientDBCommandAbstract::CONFIG_GET,
         OrientDBCommandAbstract::CONFIG_SET,
-        OrientDBCommandAbstract::CONFIG_LIST);
+        OrientDBCommandAbstract::CONFIG_LIST,
+        OrientDBCommandAbstract::DB_LIST);
 
     /**
      * List of commands, requires to be DBOpen()ed first
@@ -227,19 +224,14 @@ class OrientDB
         OrientDBCommandAbstract::DATACLUSTER_REMOVE,
         OrientDBCommandAbstract::DATACLUSTER_COUNT,
         OrientDBCommandAbstract::DATACLUSTER_DATARANGE,
-        //OrientDBCommandAbstract::DATASEGMENT_ADD,
-        //OrientDBCommandAbstract::DATASEGMENT_REMOVE,
+        OrientDBCommandAbstract::DATASEGMENT_ADD,
+        OrientDBCommandAbstract::DATASEGMENT_REMOVE,
         OrientDBCommandAbstract::RECORD_LOAD,
         OrientDBCommandAbstract::RECORD_CREATE,
         OrientDBCommandAbstract::RECORD_UPDATE,
         OrientDBCommandAbstract::RECORD_DELETE,
         OrientDBCommandAbstract::COUNT,
         OrientDBCommandAbstract::COMMAND,
-        OrientDBCommandAbstract::INDEX_LOOKUP,
-        OrientDBCommandAbstract::INDEX_PUT,
-        OrientDBCommandAbstract::INDEX_REMOVE,
-        OrientDBCommandAbstract::INDEX_SIZE,
-        OrientDBCommandAbstract::INDEX_KEYS,
         OrientDBCommandAbstract::TX_COMMIT);
 
     /**
@@ -260,7 +252,9 @@ class OrientDB
      */
     public function __destruct()
     {
-        unset($this->socket);
+        if ($this->isDBOpen()) {
+            $this->DBClose();
+        }
     }
 
     /**
@@ -285,12 +279,16 @@ class OrientDB
      * Main magic method
      * @param string $name
      * @param array $arguments
+     * @throws OrientDBWrongCommandException
      * @return mixed
      */
     public function __call($name, $arguments)
     {
         $className = 'OrientDBCommand' . ucfirst($name);
         if (class_exists($className)) {
+            /**
+             * @var OrientDBCommandAbstract
+             */
             $command = new $className($this);
             $this->canExecute($command);
             call_user_func_array(array(
@@ -313,14 +311,13 @@ class OrientDB
             }
             return $data;
         } else {
-            throw new OrientDBWrongCommandException('Command ' . $className . ' currenty not implemented');
+            throw new OrientDBWrongCommandException('Command ' . $className . ' currently not implemented');
         }
-
     }
 
     /**
      * Check if command's requirements are met
-     * @param int $command Command type
+     * @param OrientDBCommandAbstract $command Command instance
      * @throws OrientDBWrongCommandException
      * @see OrientDBCommandAbstract
      */
@@ -328,7 +325,7 @@ class OrientDB
     {
 
         if (!$this->active) {
-            throw new OrientDBWrongCommandException('DBClose was executed. No interaction posibble.');
+            throw new OrientDBWrongCommandException('DBClose was executed. No interaction is possible.');
         }
         if (in_array($command->opType, $this->getCommandsRequiresConnect()) && !$this->isConnected()) {
             throw new OrientDBWrongCommandException('Not connected to server');
@@ -424,7 +421,7 @@ class OrientDB
     }
 
     /**
-     * Return sessinID for DB queries
+     * Return sessionID for DB queries
      * @return int
      */
     public function getSessionIDDB()
@@ -482,43 +479,3 @@ class OrientDBWrongParamsException extends OrientDBException
 class OrientDBDeSerializeException extends OrientDBException
 {
 }
-
-/*
-if (!function_exists('OrientDB_autoload')) {
- */
-    /**
-     *
-     * Default autoload function for OrientDB-PHP
-     * @package OrientDB-PHP
-     * @param string $className
-     */
-/*    function OrientDB_autoload($className)
-    {
-        $prefix = 'OrientDB';
-        if (strpos($className, $prefix) === 0) {
-            $classTokens = substr($className, strlen($prefix));
-            preg_match_all('/[A-Z]+[^A-Z]+/', $classTokens, $classTokens);
-            $classToken = reset($classTokens[0]);
-
-            switch ($classToken) {
-                case 'Command':
-                    $fileName = 'Commands/' . $className . '.php';
-                break;
-                case 'Type':
-                    $fileName = 'OrientDBDataTypes.php';
-                break;
-                default:
-                    $fileName = $className . '.php';
-                break;
-            }
-            $fullName = dirname(__FILE__) . '/' . $fileName;
-            if (file_exists($fullName)) {
-                require_once $fullName;
-            }
-        }
-    }
-
-    spl_autoload_register('OrientDB_autoload');
-}
- * 
- */

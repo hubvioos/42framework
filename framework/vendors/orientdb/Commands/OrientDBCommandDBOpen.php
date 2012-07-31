@@ -46,6 +46,8 @@ class OrientDBCommandDBOpen extends OrientDBCommandAbstract
         $this->addString('');
         // Add DB name
         $this->addString($this->attribs[0]);
+        // Add DB type. Since rc9. Right now only document is supported
+        $this->addString('document');
         // Add login
         $this->addString($this->attribs[1]);
         // Add password
@@ -67,13 +69,16 @@ class OrientDBCommandDBOpen extends OrientDBCommandAbstract
 
         $clusters = array();
         for ($i = 0; $i < $numClusters; $i++) {
-            $cluster = $clusters[] = new stdClass();
+            $cluster = new stdClass();
             $this->debugCommand('cluster_name');
             $cluster->name = $this->readString();
             $this->debugCommand('clusterID');
             $cluster->id = $this->readShort();
             $this->debugCommand('cluster_type');
             $cluster->type = $this->readString();
+            $this->debugCommand('cluster_datasegment_id');
+            $cluster->datasegmentid = $this->readShort();
+            $clusters[] = $cluster;
         }
         $this->debugCommand('config_bytes');
         $config = $this->readBytes();
