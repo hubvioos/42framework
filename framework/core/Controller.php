@@ -28,10 +28,10 @@ class ControllerException extends \Exception
 class ControllerDependencyException extends \Exception
 {
 	
-	protected static $_SATISFIED = '<span style="color:green; font-weight:bold;">SATISFIED</span>';
-	protected static $_MISSING = '<span style="color:red; font-weight:bold;">UNSATISFIED (not installed)</span>';
-	protected static $_UNSATISFIED = '<span style="color:red; font-weight:bold;">UNSATISFIED (version %f installed)</span>';
-	protected static $_SCHRODINGER = '<span style="color:orange; font-weight:bold;">UNABLE TO CHECK THE VERSION NUMBER</span>';
+	const SATISFIED = '<span style="color:green; font-weight:bold;">SATISFIED</span>';
+	const MISSING = '<span style="color:red; font-weight:bold;">UNSATISFIED (not installed)</span>';
+	const UNSATISFIED = '<span style="color:red; font-weight:bold;">UNSATISFIED (version %f installed)</span>';
+	const SCHRODINGER = '<span style="color:orange; font-weight:bold;">UNABLE TO CHECK THE VERSION NUMBER</span>';
 
 		
 	/**
@@ -56,19 +56,19 @@ class ControllerDependencyException extends \Exception
 			
 			if(!isset($modulesConfig[$dependency]))
 			{
-				$this->message .= self::$_MISSING;
+				$this->message .= ControllerDependencyException::MISSING;
 			}
 			else if(!isset($modulesConfig[$dependency]['version']))
 			{
-				$this->message .= self::$_SCHRODINGER;
+				$this->message .= ControllerDependencyException::SCHRODINGER;
 			}
 			else if($modulesConfig[$dependency]['version'] < $version)
 			{
-				$this->message .= sprintf(self::$_UNSATISFIED, $modulesConfig[$dependency]['version']);
+				$this->message .= sprintf(ControllerDependencyException::UNSATISFIED, $modulesConfig[$dependency]['version']);
 			}
 			else if($modulesConfig[$dependency]['version'] >= $version)
 			{
-				$this->message .= self::$_SATISFIED;
+				$this->message .= ControllerDependencyException::SATISFIED;
 			}
 			
 			$this->message .= '</li>';
@@ -99,7 +99,7 @@ abstract class Controller extends \framework\core\FrameworkObject
 	/**
 	 * Contains the current request
 	 *
-	 * @var Framework\Request
+	 * @var Request
 	 */
 	protected $_request = null;
 
@@ -119,7 +119,10 @@ abstract class Controller extends \framework\core\FrameworkObject
 	/**
 	 * Executes the action corresponding to the current request
 	 *
-	 * @param framework\core\Request $request
+	 * @param \framework\core\Request $request
+	 * @param \framework\core\Response $response
+     *
+	 * @return \framework\core\Response
 	 */
 	public function execute (Request &$request, Response &$response)
 	{
@@ -274,7 +277,7 @@ abstract class Controller extends \framework\core\FrameworkObject
 	/**
 	 * Filter executed before the action
 	 *
-	 * @param Framework\Request $request
+	 * @param Request $request
 	 * @return mixed (boolean or Framework\Response)
 	 */
 	protected function _before ()
@@ -285,7 +288,7 @@ abstract class Controller extends \framework\core\FrameworkObject
 	/**
 	 * Filter executed after the action
 	 *
-	 * @param Framework\Request $request
+	 * @param Request $request
 	 * @param mixed $actionResponse
 	 * @return mixed
 	 */
