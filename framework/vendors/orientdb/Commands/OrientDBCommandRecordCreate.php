@@ -37,7 +37,16 @@ class OrientDBCommandRecordCreate extends OrientDBCommandAbstract
      */
     protected $recordContent;
 
+    /**
+     * Mode. 0 = synchronous (default mode waits for the answer) 1 = asynchronous (don't need an answer)
+     * @var int
+     */
     protected $mode = 0x00;
+
+    /**
+     * @var int
+     */
+    protected $datasegmentID = 0;
 
     public function __construct($parent)
     {
@@ -51,6 +60,8 @@ class OrientDBCommandRecordCreate extends OrientDBCommandAbstract
         if (count($this->attribs) > 3 || count($this->attribs) < 2) {
             throw new OrientDBWrongParamsException('This command requires cluster ID, record content and, optionally, record Type');
         }
+        // Add datasegment ID
+        $this->addInt($this->datasegmentID);
         // Process clusterID
         $this->clusterID = (int) $this->attribs[0];
         // Add ClusterID
@@ -65,10 +76,11 @@ class OrientDBCommandRecordCreate extends OrientDBCommandAbstract
             if (in_array($this->attribs[2], OrientDB::$recordTypes)) {
                 $this->recordType = $this->attribs[2];
             } else {
-                throw new OrientDBWrongParamsException('Incorrect record Type: ' . $this->attribs[2] . '. Awaliable types is: ' . implode(', ', OrientDB::$recordTypes));
+                throw new OrientDBWrongParamsException('Incorrect record Type: ' . $this->attribs[2] . '. Available types is: ' . implode(', ', OrientDB::$recordTypes));
             }
         }
         $this->addByte($this->recordType);
+        // Synchronous mode
         $this->addByte(chr($this->mode));
     }
 
@@ -81,11 +93,13 @@ class OrientDBCommandRecordCreate extends OrientDBCommandAbstract
     {
         $this->debugCommand('record_pos');
         $position = $this->readLong();
+        $this->debugCommand('record_version');
+        $version = $this->readInt();
 
         if ($this->recordContent instanceof OrientDBRecord) {
             $this->recordContent->recordPos = $position;
             $this->recordContent->clusterID = $this->clusterID;
-            $this->recordContent->version = 0;
+            $this->recordContent->version = $version;
         }
 
         return $position;

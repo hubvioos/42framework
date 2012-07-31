@@ -237,6 +237,7 @@ class OrientDBData implements Countable, Iterator
     /**
      * Link to parent record
      * @param $record OrientDBRecord|null
+     * @throws OrientDBException
      */
     public function __construct($record = null)
     {
@@ -249,10 +250,13 @@ class OrientDBData implements Countable, Iterator
         }
     }
 
-    public function __get($name)
+    public function &__get($name)
     {
         $this->isParsed();
-        return $this->data[$name];
+        if (array_key_exists($name, $this->data)) {
+            return $this->data[$name];
+        }
+        trigger_error('Undefined index: ' . $name, E_USER_NOTICE);
     }
 
     public function __set($name, $value)
@@ -318,7 +322,7 @@ class OrientDBData implements Countable, Iterator
     /**
      * Return the key of the current element
      * @link http://php.net/manual/en/iterator.key.php
-     * @return scalar scalar on success, integer
+     * @return integer scalar on success
      * 0 on failure.
      */
     public function key()

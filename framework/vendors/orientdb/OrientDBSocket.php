@@ -41,7 +41,7 @@ class OrientDBSocket
      * @param int $port
      * @param int $timeout
      * @param int $bufferLen
-     * @throws Exception
+     * @throws OrientDBConnectException
      */
     public function __construct($host, $port, $timeout = 30, $bufferLen = 16384)
     {
@@ -68,6 +68,7 @@ class OrientDBSocket
     /**
      * Read bytes from socket
      * @param int $length Bytes to read
+     * @return string
      */
     public function read($length = null)
     {
