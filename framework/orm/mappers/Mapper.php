@@ -771,29 +771,33 @@ abstract class Mapper implements \framework\orm\mappers\IMapper
 	{
 		foreach ($this->internalRelations as $name => $spec)
 		{
-			$relationMapper = $this->getMapper($spec['type']);
 			$relations = $model->{$this->_propertyGetter($name)}();
 
-            /** @var $saved \framework\orm\utils\Collection */
-			$saved = $this->container->getComponent('orm.utils.Collection');
-
-            // save only the first element
-            if($spec['relation'] == \framework\orm\models\IModel::RELATION_HAS_ONE && \count($relations) > 1)
-            {
-                $relations = $relations[0];
-            }
-
-			foreach ($this->_wrapInArray($relations) as $relation)
+			if ($relations !== null)
 			{
-				$saved->add($relationMapper->save($relation));
-			}
-			
-			if($spec['relation'] == \framework\orm\models\IModel::RELATION_HAS_ONE && \count($saved) > 0)
-			{
-				$saved = $saved->first();
-			}
+				$relationMapper = $this->getMapper($spec['type']);
 
-			$model->{$this->_propertySetter($name)}($saved);
+				/** @var $saved \framework\orm\utils\Collection */
+				$saved = $this->container->getComponent('orm.utils.Collection');
+
+				// save only the first element
+				if($spec['relation'] == \framework\orm\models\IModel::RELATION_HAS_ONE && \count($relations) > 1)
+				{
+					$relations = $relations[0];
+				}
+
+				foreach ($this->_wrapInArray($relations) as $relation)
+				{
+					$saved->add($relationMapper->save($relation));
+				}
+
+				if($spec['relation'] == \framework\orm\models\IModel::RELATION_HAS_ONE && \count($saved) > 0)
+				{
+					$saved = $saved->first();
+				}
+
+				$model->{$this->_propertySetter($name)}($saved);
+			}
 		}
 	}
 	
@@ -806,47 +810,50 @@ abstract class Mapper implements \framework\orm\mappers\IMapper
 	{
 		foreach ($this->externalRelations as $name => $spec)
 		{
-			$relationMapper = $this->getMapper($spec['type']);
 			$relations = $model->{$this->_propertyGetter($name)}();
-			$saved = array();
 
-			foreach ($this->_wrapInArray($relations) as $relation)
+			if ($relations !== null)
 			{
-				$map = $relationMapper->_modelToMap($relation);
-				$map[$spec['storageField']] = array(
-					'value' => $model->getId(),
-					'relation' => $spec['relation'],
-					'type' => \framework\orm\types\Type::RELATION_KEY,
-					'storageField' => $spec['storageField']
-				);
+				$relationMapper = $this->getMapper($spec['type']);
+				$saved = array();
 
-				if ($map['id']['value'] == NULL)
+				foreach ($this->_wrapInArray($relations) as $relation)
 				{
-					$id = $relationMapper->getDatasource()->create($relationMapper->getEntityIdentifier(), $map);
-					$relation->setId($id);
-				}
-				else
-				{
-					$id = $relationMapper->getDatasource()->update($map['id']['value'], 
-							$relationMapper->getEntityIdentifier(), $map);
+					$map = $relationMapper->_modelToMap($relation);
+					$map[$spec['storageField']] = array(
+						'value' => $model->getId(),
+						'relation' => $spec['relation'],
+						'type' => \framework\orm\types\Type::RELATION_KEY,
+						'storageField' => $spec['storageField']
+					);
+
+					if ($map['id']['value'] == NULL)
+					{
+						$id = $relationMapper->getDatasource()->create($relationMapper->getEntityIdentifier(), $map);
+						$relation->setId($id);
+					}
+					else
+					{
+						$id = $relationMapper->getDatasource()->update($map['id']['value'],
+								$relationMapper->getEntityIdentifier(), $map);
+					}
+
+					if ($id === false)
+					{
+						throw new \framework\orm\mappers\MapperException('Unable to save relation of type '
+								. $relationMapper->getModelName() . ' for ' . $this->getModelName()
+								. ' model with id: ' . $model->getId());
+					}
+					$saved[] = $relation;
 				}
 
-				if ($id === false)
+				if($spec['relation'] == \framework\orm\models\IModel::RELATION_HAS_ONE && \count($saved) > 0)
 				{
-					throw new \framework\orm\mappers\MapperException('Unable to save relation of type '
-							. $relationMapper->getModelName() . ' for ' . $this->getModelName()
-							. ' model with id: ' . $model->getId());
+					$saved = $saved[0];
 				}
-				$saved[] = $relation;
+
+				$model->{$this->_propertySetter($name)}($saved);
 			}
-				
-			if($spec['relation'] == \framework\orm\models\IModel::RELATION_HAS_ONE && \count($saved) > 0)
-			{
-				$saved = $saved[0];
-			}
-
-			$model->{$this->_propertySetter($name)}($saved);
-
 		}
 	}
 	
