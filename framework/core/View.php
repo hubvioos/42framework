@@ -237,7 +237,6 @@ class View extends \framework\core\FrameworkObject
 		}
 
 		\ksort($resources);
-
 		$sortedResources = array();
 
 		foreach ($resources as $res)
