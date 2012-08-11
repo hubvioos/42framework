@@ -128,8 +128,9 @@ class OrientDBTypeDate
         if (substr($time, -1, 1) === 't') {
             $time = substr($time, 0, -1);
         }
-        if ((string) (int) $time === (string) $time) {
-            $this->timestamp = (int) $time;
+
+        if ((string) (float) $time === (string) $time) {
+            $this->timestamp = (float) $time;
         }
     }
 
