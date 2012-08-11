@@ -130,7 +130,7 @@ class OrientDBTypeDate
         }
 
         if ((string) (float) $time === (string) $time) {
-            $this->timestamp = (float) $time;
+            $this->timestamp = (float) $time / 1000;
         }
     }
 
