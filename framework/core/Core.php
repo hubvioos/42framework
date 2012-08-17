@@ -41,7 +41,10 @@ class Core extends \framework\core\FrameworkObject
 	{
 		$this->getComponent('errorHandler');
 
-		$this->getComponent('session')->init();
+		if (!$this->getComponent('httpRequest')->isCli())
+		{
+			$this->getComponent('session')->init();
+		}
 
 		$this->getComponent('router')->init($this->getConfig('routes', true));
 		
