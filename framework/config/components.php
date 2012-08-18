@@ -177,6 +177,12 @@ $components = array(
 			return new \framework\helpers\HtmlHelper();
 		},
 		'isUnique' => false),
+	'mustache'  => array(
+		'callable' => function ($c, $args)
+		{
+			return new \Mustache_Engine();
+		},
+		'isUnique' => false),
 	'testevent' => array(
 		'callable' => function ($c, $args)
 		{
