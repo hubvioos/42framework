@@ -183,6 +183,22 @@ $components = array(
 			return new \Mustache_Engine();
 		},
 		'isUnique' => false),
+	'swiftmailer'  => array(
+		'callable' => function ($c, $args)
+		{
+			require_once \FRAMEWORK_DIR.\DIRECTORY_SEPARATOR.'vendors'.\DIRECTORY_SEPARATOR.'SwiftMailer'.\DIRECTORY_SEPARATOR.'lib'.\DIRECTORY_SEPARATOR.'swift_init.php';
+
+			return \Swift_Mailer::newInstance(\Swift_SendmailTransport::newInstance());
+		},
+		'isUnique' => true),
+	'swiftmailer.message'  => array(
+		'callable' => function ($c, $args)
+		{
+			require_once \FRAMEWORK_DIR . \DIRECTORY_SEPARATOR . 'vendors' .\DIRECTORY_SEPARATOR . 'SwiftMailer' . \DIRECTORY_SEPARATOR . 'lib' . \DIRECTORY_SEPARATOR . 'swift_init.php';
+
+			return \Swift_Message::newInstance();
+		},
+		'isUnique' => false),
 	'testevent' => array(
 		'callable' => function ($c, $args)
 		{
