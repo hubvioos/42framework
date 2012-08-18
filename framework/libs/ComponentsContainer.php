@@ -41,8 +41,12 @@ class ComponentsContainer extends \framework\libs\Registry
 	 */
 	protected $_accessCounter = array();
 
+	protected $_originalConfig = array();
+
 	public function __construct (array $config)
 	{
+		$this->_originalConfig = $config;
+
 		parent::__construct($config);
 		
 		foreach ($this['components'] as $key => $component)
@@ -153,6 +157,11 @@ class ComponentsContainer extends \framework\libs\Registry
 		{
 			return 0;
 		}
+	}
+
+	public function getOriginalConfig()
+	{
+		return $this->_originalConfig;
 	}
 	
 }
