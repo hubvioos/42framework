@@ -41,7 +41,7 @@ class Core extends \framework\core\FrameworkObject
 	{
 		$this->getComponent('errorHandler');
 
-		if (!$this->getComponent('httpRequest')->isCli())
+		if ((\PHP_SAPI !== 'cli') ? true : false)
 		{
 			$this->getComponent('session')->init();
 		}

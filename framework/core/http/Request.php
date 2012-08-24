@@ -69,6 +69,11 @@ class Request extends \framework\core\FrameworkObject
 	{
 		$previous = $this->_history->getPrevious();
 
+		if ($previous['url'] == $this->getUrl(true))
+		{
+			$previous = $this->_history->get(1);
+		}
+
 		if ($previous !== null && isset($previous[$var]))
 		{
 			return $previous[$var];
