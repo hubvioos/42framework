@@ -398,4 +398,36 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
         return $this;
     }
 
+    /**
+     * Find an element in the collection based on the value of one of its properties.
+     * @param $key string The property name. Can be a method name if $method param is set to true or an array index if the $method param is set to false.
+     * @param $value mixed The value againt which the tests are made
+     * @param bool $method Set to true if the $key param is a method name.
+     * @return mixed|null
+     */
+    public function find($key, $value, $method = true)
+    {
+        if($method === true)
+        {
+            foreach($this->storage as $object)
+            {
+                if($object->{$key}() === $value)
+                {
+                    return $object;
+                }
+            }
+        }
+        else
+        {
+            foreach($this->storage as $object)
+            {
+                if($object[$key] === $value)
+                {
+                    return $object;
+                }
+            }
+        }
+
+        return NULL;
+    }
 }
