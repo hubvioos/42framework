@@ -407,27 +407,78 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
      */
     public function find($key, $value, $method = true)
     {
+        $result = $this->_search($key, $value, $method);
+        return $result['object'];
+    }
+
+    /**
+     * Same as the find method but also removes the element from the collection if found.
+     * @param $key
+     * @param $value
+     * @param bool $method
+     */
+    public function findAndRemove($key, $value, $method = true)
+    {
+        $result = $this->_search($key, $value, $method);
+
+        if($result['index'] !== NULL)
+        {
+            unset($this->storage[$result['index']]);
+        }
+
+        return $result['object'];
+    }
+
+    /**
+     * @TODO : array_filter ????
+     * @param $key
+     * @param $value
+     * @param bool $method
+     * @return array
+     */
+    protected function _search($key, $value, $method = true)
+    {
+        $found = false;
+        $result = NULL;
+        $index = NULL;
+
         if($method === true)
         {
-            foreach($this->storage as $object)
+            // use a do/while loop to stop when found
+            do
             {
-                if($object->{$key}() === $value)
+                $object = current($this->storage);
+                if(!$found && $object->{$key}() === $value)
                 {
-                    return $object;
+                    $found = true;
+                    $index = key($this->storage);
+                    $result = $object;
                 }
             }
+            while(!$found && next($this->storage) !== false);
         }
         else
         {
-            foreach($this->storage as $object)
+            // use a do/while loop to stop when found
+            do
             {
-                if($object[$key] === $value)
+                $object = current($this->storage);
+                if(!$found && $object[$key] === $value)
                 {
-                    return $object;
+                    $found = true;
+                    $index = key($this->storage);
+                    $result = $object;
                 }
             }
+            while(!$found && next($this->storage) !== false);
         }
 
-        return NULL;
+        reset($this->storage);
+        $this->rewind();
+
+        // prevent gaps in the array indexes
+        $this->storage = array_values($this->storage);
+
+        return array('index' => $index, 'object' => $result);
     }
 }
