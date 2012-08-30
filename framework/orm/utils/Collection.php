@@ -408,6 +408,13 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
     public function find($key, $value, $method = true)
     {
         $result = $this->_search($key, $value, $method);
+
+        // prevent gaps in the array indexes
+        $this->storage = array_values($this->storage);
+
+        reset($this->storage);
+        $this->rewind();
+
         return $result['object'];
     }
 
@@ -425,6 +432,12 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
         {
             unset($this->storage[$result['index']]);
         }
+
+        // prevent gaps in the array indexes
+        $this->storage = array_values($this->storage);
+
+        reset($this->storage);
+        $this->rewind();
 
         return $result['object'];
     }
@@ -448,7 +461,7 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
             do
             {
                 $object = current($this->storage);
-                if(!$found && $object->{$key}() === $value)
+                if(!$found && is_callable(array($object, $key)) && $object->{$key}() === $value)
                 {
                     $found = true;
                     $index = key($this->storage);
@@ -463,7 +476,18 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
             do
             {
                 $object = current($this->storage);
-                if(!$found && $object[$key] === $value)
+                $val = ($value == NULL ? '' : NULL);
+
+                try
+                {
+                    $val = $object[$key];
+                }
+                catch(\Exception $e)
+                {
+
+                }
+
+                if(!$found && $val === $value)
                 {
                     $found = true;
                     $index = key($this->storage);
@@ -472,12 +496,6 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
             }
             while(!$found && next($this->storage) !== false);
         }
-
-        reset($this->storage);
-        $this->rewind();
-
-        // prevent gaps in the array indexes
-        $this->storage = array_values($this->storage);
 
         return array('index' => $index, 'object' => $result);
     }
