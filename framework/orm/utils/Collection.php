@@ -443,6 +443,23 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
     }
 
     /**
+     * @param callable $callback
+     * @throws \InvalidArgumentException
+     * @return Collection
+     */
+    public function filter($callback)
+    {
+        if(!is_callable($callback))
+        {
+            throw new \InvalidArgumentException('$callback must be a callable.');
+        }
+
+        $results = \array_filter($this->storage, $callback);
+
+        return new self($results);
+    }
+
+    /**
      * @TODO : array_filter ????
      * @param $key
      * @param $value
