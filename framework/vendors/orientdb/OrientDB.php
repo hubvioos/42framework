@@ -37,7 +37,7 @@
  * @method mixed query(string $query) Execute general style query, for SELECT query see select() method
  * @method int recordCreate(int $clusterID, string $recordContent, string $recordType = OrientDB::RECORD_TYPE_DOCUMENT) Create a new record
  * @method boolean recordDelete(string $recordID, int $recordVersion = -1) Delete a record
- * @method OrientDBRecord recordLoad() recordLoad(string $recordID, string $fetchPlan = null) Load a record
+ * @method OrientDBRecord recordLoad(string $recordID, string $fetchPlan = null) Load a record
  * @method int recordUpdate(string $recordID, string $recordContent, int $recordVersion = -1, string $recordType = OrientDB::RECORD_TYPE_DOCUMENT) Update a record
  * @method mixed select(string $query) Execute sync-style select query
  * @method mixed selectAsync(string $query, string $fetchplan = null) Execute async-style select query with optional fetchplan
