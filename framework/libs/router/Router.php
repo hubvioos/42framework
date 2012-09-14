@@ -262,20 +262,19 @@ class Router
 			return $routeUrl;
 		}
 
-
 		$routeDefaults = $route->defaults();
 		$routeParams = \array_merge($routeDefaults, $route->namedParams());
 		$optionalParams = $route->optionalParams();
 
-		// Match all params on route that do not have defaults
+        // Match all params on route that do not have defaults
 		$matchedParams = $routeDefaults; // Begin with defaults
-		foreach (\array_merge($matchedParams, $params) as $key => $value)
+		foreach (\array_merge($matchedParams, $params, $route->optionalParamDefaults()) as $key => $value)
 		{
 			// Optional params
 			if (isset($optionalParams[$key]))
 			{
 				// If no given value, or given value is the same as default, set value to empty
-				if ((isset($routeDefaults[$key]) && !isset($params[$key])))
+				if ((!isset($routeDefaults[$key]) && !isset($params[$key])))
 				{
 					$matchedParams[$key] = '';
 				}
@@ -304,7 +303,7 @@ class Router
 		{
 			if (!isset($matchedParams[$paramName]))
 			{
-				throw new \UnexpectedValueException("Error creating URL for route '" . $routeName . "': Required route parameter '" . $paramName . "' has not been supplied.");
+                throw new \UnexpectedValueException("Error creating URL for route '" . $routeName . "': Required route parameter '" . $paramName . "' has not been supplied.");
 			}
 			$routeUrl = \str_replace($paramPlaceholder, \urlencode($matchedParams[$paramName]), $routeUrl);
 		}
