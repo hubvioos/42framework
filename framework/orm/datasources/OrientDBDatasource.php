@@ -669,6 +669,8 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 	{
 		$map = array();
 
+        $map['id']['value'] = $id;
+
 		foreach ($record->data as $index => $value)
 		{
 			$map[$index] = array();
@@ -699,7 +701,6 @@ class OrientDBDatasource extends \framework\core\FrameworkObject implements \fra
 			}
 		}
 
-		$map['id']['value'] = $id;
 		return $map;
 	}
 
