@@ -552,11 +552,11 @@ class Inflector {
  * @access public
  * @link http://book.cakephp.org/view/1479/Class-methods
  */
-	public static function slug($string, $replacement = '_', $map = array()) {
+	public static function slug($string, $replacement = '-', $map = array()) {
 
 		if (is_array($replacement)) {
 			$map = $replacement;
-			$replacement = '_';
+			$replacement = '-';
 		}
 		$quotedReplacement = preg_quote($replacement, '/');
 
